@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Lab — Computer Vision for Students</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0814;--card:#160f24;--border:#ffffff0f;
+  --a1:#c77dff;--a2:#48bfe3;--a3:#f72585;--a4:#ffd166;--a5:#06d6a0;--a6:#ff9a3c;
+  --text:#f4eeff;--muted:#6a4a8a;--radius:16px;
+  --mono:'Space Mono',monospace;--sans:'Outfit',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(#c77dff05 1px,transparent 1px),linear-gradient(90deg,#c77dff05 1px,transparent 1px);
+  background-size:42px 42px}
+.blob{position:fixed;border-radius:50%;filter:blur(110px);opacity:.11;pointer-events:none;z-index:0;animation:bf 14s ease-in-out infinite alternate}
+.b1{width:620px;height:620px;background:var(--a1);top:-200px;left:-180px}
+.b2{width:500px;height:500px;background:var(--a2);bottom:-150px;right:-150px;animation-delay:4s}
+.b3{width:380px;height:380px;background:var(--a3);top:40%;left:28%;animation-delay:8s}
+@keyframes bf{from{transform:translate(0,0) scale(1)}to{transform:translate(42px,30px) scale(1.09)}}
+
+.wrap{position:relative;z-index:5;max-width:1020px;margin:0 auto;padding:0 20px 90px}
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-family:var(--mono);font-size:.7rem;text-decoration:none;padding:8px 0;transition:color .2s;position:relative;z-index:5;margin:0 20px}
+.back-link:hover{color:var(--a1)}
+
+/* HERO */
+.hero{text-align:center;padding:76px 20px 46px;position:relative;z-index:5}
+.hero-chip{display:inline-flex;align-items:center;gap:8px;background:#c77dff1a;border:1px solid #c77dff33;color:var(--a1);font-family:var(--mono);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:20px}
+.hero h1{font-size:clamp(2.5rem,7vw,4.6rem);font-weight:800;line-height:1.06;letter-spacing:-1px;background:linear-gradient(135deg,#f4eeff 0%,var(--a1) 40%,var(--a2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:1.06rem;margin:16px auto 32px;max-width:560px;line-height:1.78}
+.hero-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--a1),var(--a2));color:#0d0814;font-family:var(--sans);font-size:1rem;font-weight:700;padding:clamp(11px,2.5vw,14px) clamp(20px,5vw,36px);border-radius:100px;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 0 40px #c77dff44}
+.hero-btn:hover{transform:translateY(-3px);box-shadow:0 0 70px #c77dff66}
+.hero-btn svg{transition:transform .2s}.hero-btn:hover svg{transform:translateX(4px)}
+
+/* STATS */
+.stats{display:flex;justify-content:center;gap:44px;flex-wrap:wrap;margin:0 0 54px}
+.stat{text-align:center}
+.stat-num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.73rem;color:var(--muted);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+
+.section-label{font-family:var(--mono);font-size:.66rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.section-label::before{content:'';width:24px;height:1px;background:var(--muted)}
+
+/* PHASE CARD */
+.phase-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin-bottom:16px;transition:border-color .25s,box-shadow .25s;cursor:pointer}
+.phase-card:hover{border-color:var(--ac,var(--a1));box-shadow:0 0 28px var(--gl,#c77dff16)}
+.phase-header{display:flex;align-items:center;gap:18px;padding:24px 28px;user-select:none}
+.phase-num{font-family:var(--mono);font-size:.7rem;color:var(--ac,var(--a1));background:var(--acbg,#c77dff1a);border:1px solid var(--ac,var(--a1));padding:4px 10px;border-radius:6px;flex-shrink:0}
+.phase-icon{font-size:1.9rem;flex-shrink:0}
+.phase-title{font-size:1.2rem;font-weight:700}
+.phase-subtitle{font-size:.84rem;color:var(--muted);margin-top:3px}
+.phase-chevron{margin-left:auto;color:var(--muted);transition:transform .3s}
+.phase-card.open .phase-chevron{transform:rotate(180deg)}
+.phase-body{display:none;border-top:1px solid var(--border)}
+.phase-card.open .phase-body{display:block;animation:sopen .32s ease}
+@keyframes sopen{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.phase-inner{padding:28px}
+
+/* CONCEPT GRID */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px;margin-bottom:24px}
+@media(max-width:620px){.concept-grid{grid-template-columns:1fr}}
+.concept-box{background:#080514;border:1px solid var(--border);border-radius:12px;padding:17px}
+.cb-title{font-family:var(--mono);font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--ac,var(--a1));margin-bottom:8px}
+.concept-box p{color:#9070b8;font-size:.87rem;line-height:1.72}
+
+/* SUB TABS */
+.sub-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.sub-tab{background:#080514;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted)}
+.sub-tab:hover{border-color:var(--ac,var(--a1));color:var(--text)}
+.sub-tab.active{background:var(--ac,var(--a1));color:#0d0814;border-color:transparent}
+.sub-content{display:none}
+.sub-content.active{display:block;animation:fin .28s ease}
+@keyframes fin{from{opacity:0}to{opacity:1}}
+
+/* EXPLAIN */
+.explain-block{background:#080514;border-radius:12px;border:1px solid var(--border);padding:20px;margin-bottom:16px}
+.explain-block h3{font-size:1.05rem;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.explain-block p{color:#9070b8;font-size:.89rem;line-height:1.76}
+.explain-block ul{margin:10px 0 0 18px;color:#9070b8;font-size:.89rem;line-height:1.9}
+.tag{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:1px;padding:2px 10px;border-radius:100px;margin-left:6px;text-transform:uppercase}
+
+/* EXPERIMENT */
+.experiment{background:linear-gradient(135deg,#0f0820,#080514);border:1px solid #c77dff1e;border-radius:16px;padding:24px;margin-top:16px}
+.exp-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.exp-badge{background:linear-gradient(135deg,var(--a1),var(--a2));color:#0d0814;font-family:var(--mono);font-size:.6rem;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:100px;font-weight:700}
+.exp-title{font-size:1.03rem;font-weight:700}
+.exp-desc{color:var(--muted);font-size:.84rem;margin-top:2px}
+
+/* CONTROLS */
+.control-row{display:flex;align-items:center;gap:14px;margin:10px 0;flex-wrap:wrap}
+.control-label{font-family:var(--mono);font-size:.68rem;color:var(--muted);min-width:0}
+.control-value{font-family:var(--mono);font-size:.76rem;color:var(--a1);min-width:0}
+input[type=range]{flex:1;min-width:120px;accent-color:var(--a1);cursor:pointer}
+select,input[type=text]{background:#080514;border:1px solid #ffffff16;color:var(--text);font-family:var(--mono);font-size:.78rem;padding:8px 13px;border-radius:8px;cursor:pointer;outline:none}
+select:focus,input:focus{border-color:var(--a1)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;padding:10px 20px;border-radius:8px;font-family:var(--sans);font-weight:700;font-size:.84rem;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn-p{background:linear-gradient(135deg,var(--a1),#7c3aed);color:#fff}
+.btn-b{background:linear-gradient(135deg,var(--a2),#0284c7);color:#0d0814}
+.btn-g{background:linear-gradient(135deg,var(--a5),#059669);color:#0d0814}
+.btn-y{background:linear-gradient(135deg,var(--a4),#d97706);color:#0d0814}
+.btn-r{background:linear-gradient(135deg,var(--a3),#be185d);color:#fff}
+.btn-o{background:linear-gradient(135deg,var(--a6),#c2410c);color:#fff}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* RESULT */
+.result-box{background:#050310;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-top:12px;font-family:var(--mono);font-size:.82rem;min-height:48px;transition:border-color .3s}
+.result-box.good{border-color:var(--a5)}
+.result-box.warn{border-color:var(--a6)}
+.result-box.info{border-color:var(--a1)}
+.result-box.err{border-color:var(--a3)}
+.r-label{font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.r-value{font-size:.93rem;font-weight:700;line-height:1.5}
+
+/* CODE */
+.code-panel{background:#03020e;border:1px solid #c77dff16;border-radius:12px;overflow:hidden;margin-top:16px}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#080514;border-bottom:1px solid #ffffff08}
+.code-dots{display:flex;gap:6px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.code-lang{font-family:var(--mono);font-size:.64rem;color:var(--muted);letter-spacing:1px}
+pre.code{margin:0;padding:18px;font-family:var(--mono);font-size:.77rem;line-height:1.76;overflow-x:auto;color:#cdd6f4;white-space:pre}
+.kw{color:#cba6f7}.fn{color:#89b4fa}.str{color:#a6e3a1}.cm{color:#2a1545;font-style:italic}.nb{color:#fab387}.op{color:#89dceb}
+
+/* CANVAS */
+canvas{border-radius:10px;display:block}
+.canvas-wrap{background:#03020e;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;margin:12px 0}
+
+/* PROGRESS BAR */
+.prog-wrap{background:#080514;border-radius:100px;height:10px;overflow:hidden;border:1px solid #ffffff08;margin:5px 0}
+.prog-bar{height:100%;border-radius:100px;transition:width .55s ease}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:22px 0}
+
+/* STEPPER */
+.stepper{display:flex;gap:0;margin:16px 0;overflow:hidden;border-radius:10px}
+.step{flex:1;padding:8px 10px;text-align:center;font-size:.73rem;font-weight:600;background:#080514;color:var(--muted);border-right:1px solid var(--border);transition:all .3s}
+.step:last-child{border-right:none}
+.step.done{background:#180a2a;color:var(--a1)}
+.step.active{background:#0a1828;color:var(--a2)}
+
+/* DETECTION BOX LEGEND */
+.det-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.det-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.7rem;padding:4px 12px;border-radius:100px;border:1px solid}
+
+/* FOOTER */
+footer{position:relative;z-index:5;text-align:center;padding:30px 20px;color:var(--muted);font-size:.8rem}
+.toast{position:fixed;bottom:26px;right:26px;background:var(--card);border:1px solid var(--a1);color:var(--a1);font-family:var(--mono);font-size:.74rem;padding:10px 17px;border-radius:10px;z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES
+   Targets ≤600px (most phones)
+══════════════════════════════════ */
+@media(max-width:600px){
+  /* Hero */
+  .hero{padding:48px 16px 32px}
+  .hero h1{font-size:clamp(1.9rem,9vw,3rem);letter-spacing:-.5px}
+  .hero p{font-size:.95rem}
+  .hero-btn{padding:12px 24px;font-size:.9rem}
+
+  /* Stats row */
+  .stats{gap:24px}
+  .stat-num{font-size:1.5rem}
+
+  /* Wrap padding */
+  .wrap{padding:0 14px 60px}
+
+  /* Phase card header */
+  .phase-header{padding:18px 16px;gap:12px}
+  .phase-icon{font-size:1.5rem}
+  .phase-title{font-size:1rem}
+  .phase-subtitle{font-size:.76rem}
+  .phase-inner{padding:16px}
+
+  /* Concept grid → 1 col */
+  .concept-grid{grid-template-columns:1fr !important}
+
+  /* Sub tabs wrap */
+  .sub-tabs{gap:6px}
+  .sub-tab{padding:7px 12px;font-size:.78rem}
+
+  /* Experiment padding */
+  .experiment{padding:16px}
+  .exp-title{font-size:.96rem}
+  .exp-desc{font-size:.78rem}
+
+  /* Control rows: stack vertically */
+  .control-row{flex-direction:column;align-items:flex-start;gap:6px}
+  .control-label{min-width:0 !important;width:100%}
+  .control-value{min-width:0 !important}
+  input[type=range]{width:100%}
+  select{width:100%;font-size:.8rem}
+
+  /* Button rows */
+  .btn-row{gap:8px}
+  .btn{padding:9px 16px;font-size:.8rem}
+
+  /* Result boxes */
+  .result-box{padding:12px 14px}
+  .r-value{font-size:.86rem}
+
+  /* Code panels */
+  pre.code{font-size:.7rem;padding:14px;line-height:1.6}
+  .code-header{padding:8px 12px}
+  .code-lang{font-size:.6rem}
+
+  /* Canvas: always full width */
+  canvas{width:100% !important;height:auto !important}
+  .canvas-wrap{padding:10px}
+
+  /* Stepper: smaller text */
+  .stepper{border-radius:8px}
+  .step{padding:7px 5px;font-size:.65rem}
+
+  /* Epoch / trans tables */
+  .epoch-table td,.epoch-table th{padding:5px 8px;font-size:.7rem}
+  .trans-table td,.trans-table th{padding:5px 8px;font-size:.78rem}
+
+  /* AI Explorer specific */
+  .cards-grid{grid-template-columns:1fr !important}
+  .scene-wrap{grid-template-columns:1fr !important}
+  .sub-grid{grid-template-columns:1fr 1fr !important}
+  .card-btn{padding:18px 16px 14px}
+  .panel{padding:18px 16px}
+  header{padding:40px 16px 16px}
+  header h1{font-size:clamp(1.9rem,9vw,3rem)}
+  main{padding:14px 14px 60px}
+  .section-title{margin-top:32px}
+  .diagram-block{padding:12px 8px}
+  .diagram-block svg{min-width:0}
+
+  /* DL / RL dual-canvas grids → single col */
+  div[style*="grid-template-columns:1fr 1fr"]{
+    display:flex !important;flex-direction:column !important;gap:10px !important
+  }
+
+  /* Face recognition two-panel */
+  .fr-grid{grid-template-columns:1fr !important}
+
+  /* Back link */
+  .back-link{margin:0 14px;font-size:.64rem}
+
+  /* NER text */
+  .ner-text{font-size:.88rem;line-height:2}
+
+  /* Chips */
+  .chip{font-size:.68rem;padding:3px 8px}
+
+  /* Confusion matrix */
+  .matrix{transform:scale(0.85);transform-origin:left top}
+  .mx-cell{width:66px;height:44px}
+
+  /* Blob: reduce size so they don't dominate */
+  .blob{opacity:.07}
+}
+
+@media(max-width:400px){
+  .hero h1{font-size:1.7rem}
+  .phase-title{font-size:.93rem}
+  .phase-num{font-size:.62rem;padding:3px 7px}
+  pre.code{font-size:.64rem}
+  .sub-grid{grid-template-columns:1fr !important}
+}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<a class="back-link" href="ai_explorer.html">← Back to AI Explorer</a>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-chip">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="4"/></svg>
+    Computer Vision Lab
+  </div>
+  <h1>Computer<br>Vision</h1>
+  <p>Learn how machines see, interpret and understand images and video — through pixel-level experiments, live canvas demos and real Python code.</p>
+  <button class="hero-btn" onclick="startLearning()">
+    Open Your Eyes
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<div class="wrap" id="main-content" style="display:none">
+  <div class="stats">
+    <div class="stat"><div class="stat-num">7</div><div class="stat-label">CV Topics</div></div>
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">Live Labs</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Pixels to explore</div></div>
+  </div>
+  <div class="section-label">Learning Modules</div>
+
+  <!-- ═══════════════════════════════════
+       01  WHAT IS COMPUTER VISION
+  ═══════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#c77dff;--acbg:#c77dff1a;--gl:#c77dff16" onclick="togglePhase('ph1',event)">
+    <div class="phase-header">
+      <span class="phase-num">01</span><span class="phase-icon">👁️</span>
+      <div><div class="phase-title">What is Computer Vision?</div>
+           <div class="phase-subtitle">Teaching machines to see, interpret and reason about visual information</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph1" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="concept-grid">
+        <div class="concept-box" style="border-left:3px solid var(--a1)">
+          <div class="cb-title">What Machines See</div>
+          <p>A computer sees an image as a <strong>grid of numbers</strong> — each pixel is one or three values (0-255) representing brightness or RGB colour. CV teaches algorithms to extract meaning from these grids.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a2)">
+          <div class="cb-title">The CV Pipeline</div>
+          <p>Image → Preprocess → Feature Extract (<abbr title="Convolutional Neural Network">CNN</abbr> filters) → Classify / Detect / Segment → Output. Each stage transforms raw pixels into higher-level understanding.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a3)">
+          <div class="cb-title">Core Tasks</div>
+          <p>Classification (what is this?), Detection (where are things?), Segmentation (which pixel belongs where?), Face Recognition, Pose Estimation, Depth Estimation.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a4)">
+          <div class="cb-title">Real-World Uses</div>
+          <p>Self-driving cars, medical imaging (tumour detection), face unlock, quality control in factories, satellite image analysis, augmented reality, sports analytics.</p>
+        </div>
+      </div>
+      <div class="explain-block" style="text-align:center">
+        <div class="cb-title" style="margin-bottom:14px">The Computer Vision Pipeline</div>
+        <svg viewBox="0 0 720 90" style="max-width:100%;display:block;margin:0 auto" font-family="Outfit,sans-serif" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="ha" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#c77dff77"/></marker></defs>
+          <rect x="4"   y="22" width="108" height="46" rx="9" fill="#160f24" stroke="#c77dff" stroke-width="1.5"/>
+          <text x="58"  y="42" text-anchor="middle" fill="#c77dff" font-size="11" font-weight="700">📷 Raw Image</text>
+          <text x="58"  y="58" text-anchor="middle" fill="#6a4a8a" font-size="9">pixels: H×W×3</text>
+          <line x1="112" y1="45" x2="130" y2="45" stroke="#c77dff66" stroke-width="1.5" marker-end="url(#ha)"/>
+          <rect x="130" y="22" width="108" height="46" rx="9" fill="#160f24" stroke="#48bfe3" stroke-width="1.5"/>
+          <text x="184" y="42" text-anchor="middle" fill="#48bfe3" font-size="11" font-weight="700">🔧 Preprocess</text>
+          <text x="184" y="58" text-anchor="middle" fill="#6a4a8a" font-size="9">resize, normalise</text>
+          <line x1="238" y1="45" x2="256" y2="45" stroke="#c77dff66" stroke-width="1.5" marker-end="url(#ha)"/>
+          <rect x="256" y="22" width="118" height="46" rx="9" fill="#160f24" stroke="#f72585" stroke-width="1.5"/>
+          <text x="315" y="42" text-anchor="middle" fill="#f72585" font-size="11" font-weight="700">🔍 CNN Extract</text>
+          <text x="315" y="58" text-anchor="middle" fill="#6a4a8a" font-size="9">edges→shapes→objects</text>
+          <line x1="374" y1="45" x2="392" y2="45" stroke="#c77dff66" stroke-width="1.5" marker-end="url(#ha)"/>
+          <rect x="392" y="22" width="108" height="46" rx="9" fill="#160f24" stroke="#ffd166" stroke-width="1.5"/>
+          <text x="446" y="42" text-anchor="middle" fill="#ffd166" font-size="11" font-weight="700">🧠 Classify</text>
+          <text x="446" y="58" text-anchor="middle" fill="#6a4a8a" font-size="9">softmax scores</text>
+          <line x1="500" y1="45" x2="518" y2="45" stroke="#c77dff66" stroke-width="1.5" marker-end="url(#ha)"/>
+          <rect x="518" y="22" width="196" height="46" rx="9" fill="#160f24" stroke="#06d6a0" stroke-width="1.5"/>
+          <text x="616" y="42" text-anchor="middle" fill="#06d6a0" font-size="11" font-weight="700">🎯 Output</text>
+          <text x="616" y="58" text-anchor="middle" fill="#6a4a8a" font-size="9">label / bbox / mask / keypoint</text>
+        </svg>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       02  IMAGE BASICS & PIXELS
+  ═══════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#c77dff;--acbg:#c77dff1a;--gl:#c77dff16" onclick="togglePhase('ph2',event)">
+    <div class="phase-header">
+      <span class="phase-num">02</span><span class="phase-icon">🎨</span>
+      <div><div class="phase-title">Image Basics & Pixels</div>
+           <div class="phase-subtitle">How digital images are stored — RGB channels, grayscale, and colour spaces</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph2" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🎨 Pixels & Colour Spaces <span class="tag" style="background:#c77dff22;color:#c77dff">Foundation</span></h3>
+        <p>Every digital image is a rectangular grid of <strong>pixels</strong>. Each pixel stores colour as three values: Red, Green, Blue (0-255). CV algorithms often convert images to other colour spaces — grayscale (1 channel), HSV (hue-saturation-value), or LAB — because different tasks benefit from different representations.</p>
+        <ul>
+          <li><strong>Grayscale:</strong> 1 channel — brightness only. Simplifies many algorithms</li>
+          <li><strong>HSV:</strong> Separates colour (hue) from intensity — great for colour-based segmentation</li>
+          <li><strong>Normalisation:</strong> Scale pixel values to [0,1] or [-1,1] before feeding to neural networks</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#c77dff" onclick="switchSub('pix','channel',this)">🎨 Channel Explorer</button>
+        <button class="sub-tab" style="--ac:#c77dff" onclick="switchSub('pix','transform',this)">🔧 Image Transforms</button>
+      </div>
+
+      <!-- CHANNEL EXPLORER -->
+      <div class="sub-content active" id="pix-channel">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">RGB Channel Decomposer</div>
+                 <div class="exp-desc">Paint pixels on the canvas then split into Red, Green and Blue channels</div></div>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Draw Color</span>
+            <input type="color" id="pix-color" value="#c77dff" style="width:48px;height:34px;border-radius:8px;border:1px solid #ffffff22;cursor:pointer;background:transparent">
+            <span class="control-label" style="margin-left:12px">Brush Size</span>
+            <input type="range" id="pix-brush" min="4" max="30" value="14"><span class="control-value" id="pix-brushv">14</span>
+          </div>
+          <div class="btn-row"><button class="btn btn-p" onclick="splitChannels()">🎨 Split Channels</button><button class="btn btn-b" onclick="clearPixCanvas()">↺ Clear</button></div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px">
+            <div><div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-bottom:5px">DRAW HERE</div>
+              <canvas id="pix-main" width="260" height="200" style="max-width:100%;cursor:crosshair;border:1px solid #c77dff33;border-radius:10px"></canvas></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px">
+              <div><div style="font-family:var(--mono);font-size:.64rem;color:#f72585;margin-bottom:4px">RED</div><canvas id="pix-r" width="124" height="96" style="max-width:100%;border:1px solid #f7258533;border-radius:8px"></canvas></div>
+              <div><div style="font-family:var(--mono);font-size:.64rem;color:#06d6a0;margin-bottom:4px">GREEN</div><canvas id="pix-g" width="124" height="96" style="max-width:100%;border:1px solid #06d6a033;border-radius:8px"></canvas></div>
+              <div><div style="font-family:var(--mono);font-size:.64rem;color:#48bfe3;margin-bottom:4px">BLUE</div><canvas id="pix-b" width="124" height="96" style="max-width:100%;border:1px solid #48bfe333;border-radius:8px"></canvas></div>
+              <div><div style="font-family:var(--mono);font-size:.64rem;color:#aaa;margin-bottom:4px">GRAY</div><canvas id="pix-gray" width="124" height="96" style="max-width:100%;border:1px solid #ffffff22;border-radius:8px"></canvas></div>
+            </div>
+          </div>
+          <div class="result-box info" id="pix-result"><div class="r-label">Pixel Stats</div><div class="r-value" id="pix-stats">Draw on the canvas to see pixel channel values</div></div>
+          <div class="code-panel">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Image Channels with OpenCV</span></div>
+<pre class="code"><span class="kw">import</span> cv2
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># Load image</span>
+img = cv2.<span class="fn">imread</span>(<span class="str">'image.jpg'</span>)
+img_rgb = cv2.<span class="fn">cvtColor</span>(img, cv2.COLOR_BGR2RGB)
+
+<span class="cm"># Split into channels</span>
+r, g, b = cv2.<span class="fn">split</span>(img_rgb)
+
+<span class="cm"># Show each channel</span>
+fig, axes = plt.<span class="fn">subplots</span>(<span class="nb">1</span>, <span class="nb">4</span>, figsize=(<span class="nb">16</span>, <span class="nb">4</span>))
+axes[<span class="nb">0</span>].<span class="fn">imshow</span>(img_rgb);      axes[<span class="nb">0</span>].<span class="fn">set_title</span>(<span class="str">'Original'</span>)
+axes[<span class="nb">1</span>].<span class="fn">imshow</span>(r, cmap=<span class="str">'Reds'</span>);  axes[<span class="nb">1</span>].<span class="fn">set_title</span>(<span class="str">'Red'</span>)
+axes[<span class="nb">2</span>].<span class="fn">imshow</span>(g, cmap=<span class="str">'Greens'</span>);axes[<span class="nb">2</span>].<span class="fn">set_title</span>(<span class="str">'Green'</span>)
+axes[<span class="nb">3</span>].<span class="fn">imshow</span>(b, cmap=<span class="str">'Blues'</span>); axes[<span class="nb">3</span>].<span class="fn">set_title</span>(<span class="str">'Blue'</span>)
+
+<span class="cm"># Convert to grayscale</span>
+gray = cv2.<span class="fn">cvtColor</span>(img, cv2.COLOR_BGR2GRAY)
+<span class="cm"># grayscale = 0.299*R + 0.587*G + 0.114*B</span>
+
+<span class="cm"># Normalise for neural network input</span>
+img_norm = img_rgb / <span class="nb">255.0</span>   <span class="cm"># [0, 1] range</span>
+<span class="fn">print</span>(<span class="str">f"Shape: {img.shape}"</span>)   <span class="cm"># (H, W, 3)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMAGE TRANSFORMS -->
+      <div class="sub-content" id="pix-transform">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Image Transformation Lab</div>
+                 <div class="exp-desc">Apply classic CV preprocessing transformations to a generated test image</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Transform</span>
+            <select id="xform-type" onchange="runTransform()">
+              <option value="original">Original</option>
+              <option value="grayscale">Grayscale</option>
+              <option value="threshold">Threshold (Binary)</option>
+              <option value="blur">Gaussian Blur</option>
+              <option value="sharpen">Sharpen</option>
+              <option value="edge">Edge Detection (Sobel)</option>
+              <option value="invert">Invert / Negate</option>
+              <option value="equalize">Histogram Equalise</option>
+            </select>
+          </div>
+          <div class="control-row"><span class="control-label">Intensity</span>
+            <input type="range" id="xform-int" min="1" max="10" value="5" oninput="document.getElementById('xform-intv').innerText=this.value;runTransform()"><span class="control-value" id="xform-intv">5</span>
+          </div>
+          <canvas id="xform-canvas" width="580" style="max-width:100%" height="240" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+          <div class="result-box info" id="xform-result"><div class="r-label">Transform Applied</div><div class="r-value" id="xform-desc">—</div></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       03  IMAGE CLASSIFICATION
+  ═══════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#48bfe3;--acbg:#48bfe31a;--gl:#48bfe316" onclick="togglePhase('ph3',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#48bfe3;background:#48bfe31a;border-color:#48bfe3">03</span><span class="phase-icon">🔎</span>
+      <div><div class="phase-title">Image Classification</div>
+           <div class="phase-subtitle">Assigning a label to an entire image — the "what is this?" task</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph3" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🔎 Image Classification <span class="tag" style="background:#48bfe322;color:#48bfe3">CNN — Convolutional Neural Network</span></h3>
+        <p>Classification assigns a single label to an entire image. A <strong>CNN (Convolutional Neural Network)</strong> passes the image through convolutional layers to extract features, then a fully connected layer outputs probabilities for each class via <strong>softmax</strong>. The class with highest probability is the prediction.</p>
+        <ul>
+          <li><strong>AlexNet (2012):</strong> First deep CNN to win ImageNet — sparked the DL revolution</li>
+          <li><strong>VGG / ResNet:</strong> Deeper networks with skip connections to avoid vanishing gradients</li>
+          <li><strong>Transfer Learning:</strong> Start from ImageNet weights, fine-tune on your data</li>
+          <li><strong>ImageNet:</strong> 1000-class benchmark — 1.2M training images</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#48bfe3" onclick="switchSub('clf','sim',this)">🐾 Animal Classifier</button>
+        <button class="sub-tab" style="--ac:#48bfe3" onclick="switchSub('clf','cnn',this)">🧩 CNN Feature Maps</button>
+      </div>
+
+      <!-- ANIMAL CLASSIFIER -->
+      <div class="sub-content active" id="clf-sim">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">CNN Animal Classifier</div>
+                 <div class="exp-desc">Tune visual features — watch the softmax probabilities shift across 5 animal classes</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Fur/Feathers</span><input type="range" id="cl-fur" min="0" max="10" value="8" oninput="runClassifier()"><span class="control-value" id="cl-furv">8</span></div>
+          <div class="control-row"><span class="control-label">Has Wings</span><select id="cl-wings" onchange="runClassifier()"><option value="0">No</option><option value="1">Yes</option></select></div>
+          <div class="control-row"><span class="control-label">Body Size</span><input type="range" id="cl-size" min="1" max="10" value="3" oninput="runClassifier()"><span class="control-value" id="cl-sizev">3</span></div>
+          <div class="control-row"><span class="control-label">Pointed Ears</span><input type="range" id="cl-ear" min="0" max="10" value="9" oninput="runClassifier()"><span class="control-value" id="cl-earv">9</span></div>
+          <div class="control-row"><span class="control-label">Scales</span><input type="range" id="cl-scale" min="0" max="10" value="0" oninput="runClassifier()"><span class="control-value" id="cl-scalev">0</span></div>
+          <div id="clf-probs" style="margin-top:16px"></div>
+          <canvas id="clf-canvas" width="580" style="max-width:100%" height="100" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+          <div class="result-box good" id="clf-result"><div class="r-label">Top Prediction</div><div class="r-value" id="clf-val">—</div></div>
+          <div class="code-panel">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — CNN Image Classifier (Keras/TensorFlow)</span></div>
+<pre class="code"><span class="kw">from</span> tensorflow.keras.applications <span class="kw">import</span> ResNet50
+<span class="kw">from</span> tensorflow.keras.applications.resnet50 <span class="kw">import</span> preprocess_input, decode_predictions
+<span class="kw">from</span> tensorflow.keras.preprocessing <span class="kw">import</span> image
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Load pre-trained ResNet50 (ImageNet weights)</span>
+model = <span class="fn">ResNet50</span>(weights=<span class="str">'imagenet'</span>)
+
+<span class="cm"># Load and preprocess your image</span>
+img = image.<span class="fn">load_img</span>(<span class="str">'cat.jpg'</span>, target_size=(<span class="nb">224</span>, <span class="nb">224</span>))
+x   = image.<span class="fn">img_to_array</span>(img)
+x   = np.<span class="fn">expand_dims</span>(x, axis=<span class="nb">0</span>)    <span class="cm"># shape: (1, 224, 224, 3)</span>
+x   = <span class="fn">preprocess_input</span>(x)            <span class="cm"># normalise for ResNet</span>
+
+<span class="cm"># Predict (outputs 1000-class probabilities)</span>
+preds = model.<span class="fn">predict</span>(x)
+top5  = <span class="fn">decode_predictions</span>(preds, top=<span class="nb">5</span>)[<span class="nb">0</span>]
+
+<span class="kw">for</span> rank, (id_, name, prob) <span class="kw">in</span> <span class="fn">enumerate</span>(top5, <span class="nb">1</span>):
+    <span class="fn">print</span>(<span class="str">f"{rank}. {name:20} {prob:.2%}"</span>)
+<span class="cm"># 1. tabby_cat           94.72%</span>
+<span class="cm"># 2. Egyptian_cat         3.81%</span>
+
+<span class="cm"># Transfer learning: fine-tune on your own classes</span>
+<span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, models
+base = <span class="fn">ResNet50</span>(weights=<span class="str">'imagenet'</span>, include_top=<span class="nb">False</span>)
+base.trainable = <span class="nb">False</span>  <span class="cm"># freeze backbone</span>
+model = models.<span class="fn">Sequential</span>([base, layers.<span class="fn">GlobalAveragePooling2D</span>(),
+    layers.<span class="fn">Dense</span>(<span class="nb">5</span>, activation=<span class="str">'softmax'</span>)])  <span class="cm"># 5 custom classes</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- CNN FEATURE MAPS -->
+      <div class="sub-content" id="clf-cnn">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">CNN Layer Feature Map Visualiser</div>
+                 <div class="exp-desc">Watch how each CNN layer transforms a simple shape — edges → patterns → high-level features</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Input Shape</span>
+            <select id="feat-shape" onchange="runFeatureMaps()">
+              <option value="circle">Circle</option><option value="triangle">Triangle</option>
+              <option value="cross">Plus / Cross</option><option value="checkerboard">Checkerboard</option>
+            </select>
+          </div>
+          <div class="control-row"><span class="control-label">CNN Layer</span>
+            <select id="feat-layer" onchange="runFeatureMaps()">
+              <option value="0">Layer 1 — Edge Detection</option>
+              <option value="1">Layer 2 — Corners & Curves</option>
+              <option value="2">Layer 3 — Shapes</option>
+              <option value="3">Layer 4 — Object Parts</option>
+            </select>
+          </div>
+          <canvas id="feat-canvas" width="580" style="max-width:100%" height="260" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+          <div class="result-box info" id="feat-result"><div class="r-label">Layer Description</div><div class="r-value" id="feat-desc">—</div></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       04  OBJECT DETECTION
+  ═══════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#f72585;--acbg:#f725851a;--gl:#f7258516" onclick="togglePhase('ph4',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#f72585;background:#f725851a;border-color:#f72585">04</span><span class="phase-icon">📦</span>
+      <div><div class="phase-title">Object Detection</div>
+           <div class="phase-subtitle">Finding AND locating multiple objects in an image with bounding boxes</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph4" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>📦 Object Detection <span class="tag" style="background:#f7258522;color:#f72585">Localization</span></h3>
+        <p>Detection goes beyond classification — it must answer <strong>where</strong> each object is, not just <em>what</em>. The output is a set of bounding boxes + class labels + confidence scores.</p>
+        <ul>
+          <li><strong>YOLO (You Only Look Once):</strong> Single-pass detector — extremely fast, real-time</li>
+          <li><strong>Faster R-CNN:</strong> Region proposal network + classifier — very accurate</li>
+          <li><strong>IoU (Intersection over Union):</strong> Measures overlap between predicted and ground-truth box</li>
+          <li><strong>NMS (Non-Max Suppression):</strong> Removes duplicate detections for the same object</li>
+          <li><strong>mAP:</strong> Mean Average Precision — the standard detection benchmark metric</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#f72585" onclick="switchSub('det','scene',this)">🚗 Scene Detector</button>
+        <button class="sub-tab" style="--ac:#f72585" onclick="switchSub('det','iou',this)">📐 IoU Calculator</button>
+      </div>
+
+      <!-- SCENE DETECTOR -->
+      <div class="sub-content active" id="det-scene">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">YOLO-Style Scene Detector</div>
+                 <div class="exp-desc">Choose a scene type — watch bounding boxes appear with confidence scores</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Scene</span>
+            <select id="det-scene" onchange="runDetection()">
+              <option value="street">Street Scene</option><option value="indoor">Indoor Room</option>
+              <option value="medical">Medical Scan</option><option value="aerial">Aerial / Drone</option>
+            </select>
+          </div>
+          <div class="control-row"><span class="control-label">Confidence Threshold</span>
+            <input type="range" id="det-conf" min="20" max="90" value="50" oninput="document.getElementById('det-confv').innerText=this.value+'%';runDetection()">
+            <span class="control-value" id="det-confv">50%</span>
+          </div>
+          <div class="btn-row"><button class="btn btn-r" onclick="runDetection()">📦 Detect Objects</button></div>
+          <canvas id="det-canvas" width="580" style="max-width:100%" height="300" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+          <div class="det-legend" id="det-legend"></div>
+          <div class="result-box info" id="det-result"><div class="r-label">Detections</div><div class="r-value" id="det-val">Select a scene and click Detect</div></div>
+          <div class="code-panel">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Object Detection with YOLOv8</span></div>
+<pre class="code"><span class="kw">from</span> ultralytics <span class="kw">import</span> YOLO
+<span class="kw">import</span> cv2
+
+<span class="cm"># Load pre-trained YOLOv8 nano model</span>
+model = <span class="fn">YOLO</span>(<span class="str">'yolov8n.pt'</span>)
+
+<span class="cm"># Detect objects in an image</span>
+results = model(<span class="str">'street.jpg'</span>, conf=<span class="nb">0.5</span>)
+
+<span class="cm"># Parse results</span>
+<span class="kw">for</span> r <span class="kw">in</span> results:
+    boxes = r.boxes
+    <span class="kw">for</span> box <span class="kw">in</span> boxes:
+        x1, y1, x2, y2 = box.xyxy[<span class="nb">0</span>].<span class="fn">tolist</span>()
+        cls_id  = <span class="fn">int</span>(box.cls[<span class="nb">0</span>])
+        conf    = <span class="fn">float</span>(box.conf[<span class="nb">0</span>])
+        name    = model.names[cls_id]
+        <span class="fn">print</span>(<span class="str">f"{name}: {conf:.0%}  [{x1:.0f},{y1:.0f},{x2:.0f},{y2:.0f}]"</span>)
+
+<span class="cm"># Draw and save annotated image</span>
+annotated = results[<span class="nb">0</span>].<span class="fn">plot</span>()
+cv2.<span class="fn">imwrite</span>(<span class="str">'annotated.jpg'</span>, annotated)
+
+<span class="cm"># Real-time webcam detection</span>
+cap = cv2.<span class="fn">VideoCapture</span>(<span class="nb">0</span>)
+<span class="kw">while</span> cap.<span class="fn">isOpened</span>():
+    ret, frame = cap.<span class="fn">read</span>()
+    results    = model(frame)
+    cv2.<span class="fn">imshow</span>(<span class="str">'YOLO'</span>, results[<span class="nb">0</span>].<span class="fn">plot</span>())</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- IoU CALCULATOR -->
+      <div class="sub-content" id="det-iou">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">IoU (Intersection over Union) Calculator</div>
+                 <div class="exp-desc">Drag the predicted box sliders — see how IoU measures detection quality</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Pred Box X</span><input type="range" id="iou-x" min="40" max="280" value="120" oninput="runIoU()"><span class="control-value" id="iou-xv">120</span></div>
+          <div class="control-row"><span class="control-label">Pred Box Y</span><input type="range" id="iou-y" min="40" max="180" value="80" oninput="runIoU()"><span class="control-value" id="iou-yv">80</span></div>
+          <div class="control-row"><span class="control-label">Pred Box W</span><input type="range" id="iou-w" min="60" max="250" value="160" oninput="runIoU()"><span class="control-value" id="iou-wv">160</span></div>
+          <div class="control-row"><span class="control-label">Pred Box H</span><input type="range" id="iou-h" min="40" max="180" value="120" oninput="runIoU()"><span class="control-value" id="iou-hv">120</span></div>
+          <canvas id="iou-canvas" width="580" style="max-width:100%" height="280" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+          <div class="result-box" id="iou-result"><div class="r-label">IoU Score</div><div class="r-value" id="iou-val">—</div></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       05  IMAGE SEGMENTATION
+  ═══════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#06d6a0;--acbg:#06d6a01a;--gl:#06d6a016" onclick="togglePhase('ph5',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#06d6a0;background:#06d6a01a;border-color:#06d6a0">05</span><span class="phase-icon">🎭</span>
+      <div><div class="phase-title">Image Segmentation</div>
+           <div class="phase-subtitle">Pixel-level understanding — semantic, instance and panoptic segmentation</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph5" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🎭 Segmentation <span class="tag" style="background:#06d6a022;color:#06d6a0">Pixel-Level</span></h3>
+        <p>Segmentation assigns a label to <strong>every pixel</strong> in an image — the finest level of spatial understanding. Different from detection which only draws bounding boxes.</p>
+        <ul>
+          <li><strong>Semantic:</strong> Each pixel gets a class label (all cars = one colour). No distinction between instances</li>
+          <li><strong>Instance:</strong> Each object instance gets a unique mask (car #1 vs car #2)</li>
+          <li><strong>Panoptic:</strong> Combines semantic + instance — best of both worlds</li>
+          <li><strong>U-Net:</strong> Encoder-decoder architecture with skip connections — dominates medical imaging</li>
+          <li><strong>SAM (Segment Anything):</strong> Meta's foundation model — click any object, get a mask</li>
+        </ul>
+      </div>
+      <div class="experiment">
+        <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+          <div><div class="exp-title">Semantic Segmentation Painter</div>
+               <div class="exp-desc">Choose a scene and colour mode — see pixel-perfect class masks applied to each region</div></div>
+        </div>
+        <div class="control-row"><span class="control-label">Scene Type</span>
+          <select id="seg-scene" onchange="runSegmentation()">
+            <option value="city">City Street</option><option value="indoor">Indoor Room</option>
+            <option value="medical">Medical Scan</option><option value="nature">Nature / Forest</option>
+          </select>
+        </div>
+        <div class="control-row"><span class="control-label">Mode</span>
+          <select id="seg-mode" onchange="runSegmentation()">
+            <option value="semantic">Semantic Segmentation</option>
+            <option value="instance">Instance Segmentation</option>
+            <option value="overlay">Overlay on Image</option>
+          </select>
+        </div>
+        <div class="control-row"><span class="control-label">Mask Opacity</span>
+          <input type="range" id="seg-alpha" min="30" max="100" value="70" oninput="document.getElementById('seg-alphav').innerText=this.value+'%';runSegmentation()">
+          <span class="control-value" id="seg-alphav">70%</span>
+        </div>
+        <canvas id="seg-canvas" width="580" style="max-width:100%" height="300" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+        <div id="seg-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+        <div class="result-box good" id="seg-result"><div class="r-label">Segmentation</div><div class="r-value" id="seg-val">—</div></div>
+        <div class="code-panel">
+          <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Semantic Segmentation (SegFormer)</span></div>
+<pre class="code"><span class="kw">from</span> transformers <span class="kw">import</span> SegformerForSemanticSegmentation, SegformerImageProcessor
+<span class="kw">from</span> PIL <span class="kw">import</span> Image
+<span class="kw">import</span> torch, numpy <span class="kw">as</span> np
+
+<span class="cm"># Load SegFormer fine-tuned on ADE20K (150 classes)</span>
+processor = SegformerImageProcessor.<span class="fn">from_pretrained</span>(
+    <span class="str">"nvidia/segformer-b0-finetuned-ade-512-512"</span>)
+model = SegformerForSemanticSegmentation.<span class="fn">from_pretrained</span>(
+    <span class="str">"nvidia/segformer-b0-finetuned-ade-512-512"</span>)
+
+image = Image.<span class="fn">open</span>(<span class="str">"street.jpg"</span>)
+inputs = processor(<span class="fn">images</span>=image, return_tensors=<span class="str">"pt"</span>)
+
+<span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+    outputs = model(**inputs)
+
+<span class="cm"># Upsample logits to original image size</span>
+logits = outputs.logits                   <span class="cm"># shape (1, num_classes, H/4, W/4)</span>
+upsampled = torch.nn.functional.<span class="fn">interpolate</span>(
+    logits, size=image.size[::-<span class="nb">1</span>], mode=<span class="str">"bilinear"</span>)
+
+<span class="cm"># Get per-pixel class prediction</span>
+seg_map = upsampled.<span class="fn">argmax</span>(dim=<span class="nb">1</span>)[<span class="nb">0</span>].<span class="fn">numpy</span>()
+<span class="cm"># seg_map[y, x] = class index for pixel (x, y)</span>
+
+<span class="cm"># U-Net for medical image segmentation</span>
+<span class="kw">from</span> segmentation_models_pytorch <span class="kw">import</span> Unet
+unet = <span class="fn">Unet</span>(encoder_name=<span class="str">"resnet34"</span>,
+             encoder_weights=<span class="str">"imagenet"</span>,
+             in_channels=<span class="nb">1</span>, classes=<span class="nb">1</span>)  <span class="cm"># grayscale → binary mask</span></pre>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       06  FACE RECOGNITION
+  ═══════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#ffd166;--acbg:#ffd1661a;--gl:#ffd16616" onclick="togglePhase('ph6',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#ffd166;background:#ffd1661a;border-color:#ffd166">06</span><span class="phase-icon">😀</span>
+      <div><div class="phase-title">Face Detection & Recognition</div>
+           <div class="phase-subtitle">Locating faces and verifying identity — from Haar cascades to ArcFace</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph6" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>😀 Face Detection & Recognition <span class="tag" style="background:#ffd16622;color:#ffd166">Biometrics</span></h3>
+        <p>Face <em>detection</em> finds where faces are. Face <em>recognition</em> identifies <em>who</em> a face belongs to by comparing <strong>face embeddings</strong> — 128-512 dimensional vectors that encode the unique geometry of a face.</p>
+        <ul>
+          <li><strong>Haar Cascade:</strong> Fast, classical method — slides a feature detector across image regions</li>
+          <li><strong>MTCNN:</strong> Multi-task CNN — simultaneously detects face, eyes, nose and mouth landmarks</li>
+          <li><strong>FaceNet / ArcFace:</strong> Deep CNN that maps each face to an embedding vector</li>
+          <li><strong>Verification vs Identification:</strong> 1:1 (is this person X?) vs 1:N (who is this person?)</li>
+        </ul>
+      </div>
+      <div class="experiment">
+        <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+          <div><div class="exp-title">Face Verification Simulator</div>
+               <div class="exp-desc">Adjust facial geometry features — see if two "faces" match via embedding distance</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:.68rem;color:#ffd166;margin-bottom:8px">FACE A</div>
+            <div class="control-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px;width:100%"><span class="control-label" style="min-width:90px">Eye Dist.</span><input type="range" id="fa-eye" min="1" max="10" value="6" oninput="runFaceRec()"><span class="control-value" id="fa-eyev">6</span></div>
+              <div style="display:flex;align-items:center;gap:10px;width:100%"><span class="control-label" style="min-width:90px">Nose Width</span><input type="range" id="fa-nose" min="1" max="10" value="5" oninput="runFaceRec()"><span class="control-value" id="fa-nosev">5</span></div>
+              <div style="display:flex;align-items:center;gap:10px;width:100%"><span class="control-label" style="min-width:90px">Jaw Width</span><input type="range" id="fa-jaw" min="1" max="10" value="7" oninput="runFaceRec()"><span class="control-value" id="fa-jawv">7</span></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:.68rem;color:#48bfe3;margin-bottom:8px">FACE B</div>
+            <div class="control-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px;width:100%"><span class="control-label" style="min-width:90px">Eye Dist.</span><input type="range" id="fb-eye" min="1" max="10" value="6" oninput="runFaceRec()"><span class="control-value" id="fb-eyev">6</span></div>
+              <div style="display:flex;align-items:center;gap:10px;width:100%"><span class="control-label" style="min-width:90px">Nose Width</span><input type="range" id="fb-nose" min="1" max="10" value="5" oninput="runFaceRec()"><span class="control-value" id="fb-nosev">5</span></div>
+              <div style="display:flex;align-items:center;gap:10px;width:100%"><span class="control-label" style="min-width:90px">Jaw Width</span><input type="range" id="fb-jaw" min="1" max="10" value="7" oninput="runFaceRec()"><span class="control-value" id="fb-jawv">7</span></div>
+            </div>
+          </div>
+        </div>
+        <canvas id="face-canvas" width="580" style="max-width:100%" height="220" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+        <div class="result-box" id="face-result"><div class="r-label">Verification Result</div><div class="r-value" id="face-val">—</div></div>
+        <div class="code-panel">
+          <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Face Recognition (face_recognition library)</span></div>
+<pre class="code"><span class="kw">import</span> face_recognition
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> cv2
+
+<span class="cm"># Load known face and compute its 128-d embedding</span>
+known_img  = face_recognition.<span class="fn">load_image_file</span>(<span class="str">"person_a.jpg"</span>)
+known_enc  = face_recognition.<span class="fn">face_encodings</span>(known_img)[<span class="nb">0</span>]
+
+<span class="cm"># Load unknown face</span>
+unknown_img = face_recognition.<span class="fn">load_image_file</span>(<span class="str">"unknown.jpg"</span>)
+unknown_enc = face_recognition.<span class="fn">face_encodings</span>(unknown_img)[<span class="nb">0</span>]
+
+<span class="cm"># Compute Euclidean distance (threshold typically 0.6)</span>
+distance = np.<span class="fn">linalg</span>.<span class="fn">norm</span>(known_enc - unknown_enc)
+match    = distance < <span class="nb">0.6</span>
+
+<span class="fn">print</span>(<span class="str">f"Distance: {distance:.3f}"</span>)
+<span class="fn">print</span>(<span class="str">"MATCH ✓"</span> <span class="kw">if</span> match <span class="kw">else</span> <span class="str">"NO MATCH ✗"</span>)
+
+<span class="cm"># Detect all faces in a group photo</span>
+group_img  = face_recognition.<span class="fn">load_image_file</span>(<span class="str">"group.jpg"</span>)
+locations  = face_recognition.<span class="fn">face_locations</span>(group_img)
+encodings  = face_recognition.<span class="fn">face_encodings</span>(group_img, locations)
+<span class="fn">print</span>(<span class="str">f"Found {len(locations)} faces"</span>)</pre>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       07  EDGE DETECTION & FILTERS
+  ═══════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#ff9a3c;--acbg:#ff9a3c1a;--gl:#ff9a3c16" onclick="togglePhase('ph7',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#ff9a3c;background:#ff9a3c1a;border-color:#ff9a3c">07</span><span class="phase-icon">⚡</span>
+      <div><div class="phase-title">Edge Detection & Convolution Filters</div>
+           <div class="phase-subtitle">Sobel, Canny, Laplacian — how CNNs learn to detect boundaries</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph7" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>⚡ Edge Detection <span class="tag" style="background:#ff9a3c22;color:#ff9a3c">Filters</span></h3>
+        <p>Edges mark the boundaries between objects. Detecting them is the first step in many CV pipelines. Convolutional filters (kernels) slide over images and highlight regions of rapid intensity change.</p>
+        <ul>
+          <li><strong>Sobel:</strong> Gradient in X or Y direction — detects horizontal or vertical edges</li>
+          <li><strong>Canny:</strong> Multi-stage: Gaussian blur → Sobel → Non-max suppression → Hysteresis thresholding</li>
+          <li><strong>Laplacian:</strong> Second derivative — detects all edges regardless of orientation</li>
+          <li><strong>CNN kernels:</strong> Learned automatically — hundreds of task-specific filters</li>
+        </ul>
+      </div>
+      <div class="experiment">
+        <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+          <div><div class="exp-title">Live Edge Detection Lab</div>
+               <div class="exp-desc">Draw on the canvas — apply different edge detectors and convolution filters in real time</div></div>
+        </div>
+        <div class="control-row"><span class="control-label">Filter</span>
+          <select id="edge-filter" onchange="runEdge()">
+            <option value="sobel_x">Sobel X (Vertical Edges)</option>
+            <option value="sobel_y">Sobel Y (Horizontal Edges)</option>
+            <option value="canny">Canny (All Edges)</option>
+            <option value="laplacian">Laplacian</option>
+            <option value="gabor">Gabor (Texture)</option>
+            <option value="emboss">Emboss</option>
+          </select>
+        </div>
+        <div class="control-row"><span class="control-label">Threshold</span>
+          <input type="range" id="edge-thresh" min="10" max="90" value="40" oninput="document.getElementById('edge-threshv').innerText=this.value;runEdge()">
+          <span class="control-value" id="edge-threshv">40</span>
+        </div>
+        <canvas id="edge-main" width="270" height="200" style="cursor:crosshair;border:1px solid #ff9a3c33;border-radius:10px;max-width:48%;display:inline-block"></canvas>
+        <canvas id="edge-out" width="270" height="200" style="border:1px solid #ff9a3c33;border-radius:10px;max-width:48%;display:inline-block;margin-left:8px"></canvas>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button class="btn btn-o" onclick="clearEdgeCanvas()">↺ Clear</button>
+          <button class="btn btn-p" onclick="drawEdgeSample()">🎨 Sample Image</button>
+        </div>
+        <div class="result-box info" id="edge-result"><div class="r-label">Filter Details</div><div class="r-value" id="edge-desc">Draw on the left canvas, or click Sample Image</div></div>
+        <div class="code-panel">
+          <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Edge Detection (OpenCV)</span></div>
+<pre class="code"><span class="kw">import</span> cv2
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+img  = cv2.<span class="fn">imread</span>(<span class="str">'image.jpg'</span>)
+gray = cv2.<span class="fn">cvtColor</span>(img, cv2.COLOR_BGR2GRAY)
+
+<span class="cm"># Sobel — gradient in X and Y</span>
+sobel_x = cv2.<span class="fn">Sobel</span>(gray, cv2.CV_64F, <span class="nb">1</span>, <span class="nb">0</span>, ksize=<span class="nb">3</span>)
+sobel_y = cv2.<span class="fn">Sobel</span>(gray, cv2.CV_64F, <span class="nb">0</span>, <span class="nb">1</span>, ksize=<span class="nb">3</span>)
+sobel   = np.<span class="fn">sqrt</span>(sobel_x**<span class="nb">2</span> + sobel_y**<span class="nb">2</span>)
+
+<span class="cm"># Canny — multi-stage edge detector</span>
+blurred = cv2.<span class="fn">GaussianBlur</span>(gray, (<span class="nb">5</span>,<span class="nb">5</span>), <span class="nb">0</span>)
+canny   = cv2.<span class="fn">Canny</span>(blurred, threshold1=<span class="nb">50</span>, threshold2=<span class="nb">150</span>)
+
+<span class="cm"># Laplacian — second derivative</span>
+laplacian = cv2.<span class="fn">Laplacian</span>(gray, cv2.CV_64F)
+
+<span class="cm"># Custom kernel (Laplacian of Gaussian)</span>
+log_kernel = np.<span class="fn">array</span>([
+    [<span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">0</span>], [<span class="nb">1</span>, -<span class="nb">4</span>, <span class="nb">1</span>], [<span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">0</span>]
+], dtype=np.float32)
+custom = cv2.<span class="fn">filter2D</span>(gray, -<span class="nb">1</span>, log_kernel)
+cv2.<span class="fn">imwrite</span>(<span class="str">'edges.jpg'</span>, canny)</pre>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       08  QUIZ
+  ═══════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#c77dff;--acbg:#c77dff1a;--gl:#c77dff16" onclick="togglePhase('ph8',event)">
+    <div class="phase-header">
+      <span class="phase-num">08</span><span class="phase-icon">🎯</span>
+      <div><div class="phase-title">Knowledge Check</div>
+           <div class="phase-subtitle">Test your Computer Vision understanding</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph8" onclick="event.stopPropagation()">
+      <div class="phase-inner" id="cv-quiz-wrap">
+        <div id="cv-quiz-body"></div>
+        <div class="btn-row" id="cv-quiz-btns" style="margin-top:18px"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<footer><div style="font-size:1.4rem;margin-bottom:8px">👁️</div>Computer Vision Lab · Visual AI for Curious Minds</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function toast(msg,dur=2200){const t=$('toast');t.innerText=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur)}
+function startLearning(){$('main-content').style.display='block';setTimeout(()=>$('main-content').scrollIntoView({behavior:'smooth'}),100)}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+/* PHASE TOGGLE */
+function togglePhase(id,e){
+  if(e.target.closest('button,input,select,canvas,a,label')) return;
+  const body=$(id),card=e.currentTarget;
+  if(!card||!body)return;
+  const isOpen=card.classList.contains('open');
+  document.querySelectorAll('.phase-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen){card.classList.add('open');setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}),80)}
+  if(id==='ph8') initCVQuiz();
+}
+function switchSub(pre,tab,btn){
+  const p=btn.closest('.phase-inner');
+  p.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  p.querySelectorAll('.sub-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');$(`${pre}-${tab}`).classList.add('active');
+}
+
+/* ══ 02 PIXEL CANVAS ══ */
+let pixDrawing=false;
+function initPixCanvas(){
+  const cv=$('pix-main'),ctx=cv.getContext('2d');
+  ctx.fillStyle='#0d0814';ctx.fillRect(0,0,cv.width,cv.height);
+  cv.addEventListener('mousedown',e=>{pixDrawing=true;pixDraw(e)});
+  cv.addEventListener('mousemove',e=>{if(pixDrawing)pixDraw(e)});
+  cv.addEventListener('mouseup',()=>pixDrawing=false);
+  cv.addEventListener('mouseleave',()=>pixDrawing=false);
+  cv.addEventListener('touchstart',e=>{pixDrawing=true;pixDraw(e.touches[0])},{passive:true});
+  cv.addEventListener('touchmove',e=>{if(pixDrawing)pixDraw(e.touches[0]);},{passive:true});
+  cv.addEventListener('touchend',()=>pixDrawing=false);
+}
+function pixDraw(e){
+  const cv=$('pix-main'),ctx=cv.getContext('2d');
+  const r=cv.getBoundingClientRect();
+  const x=(e.clientX-r.left)*(cv.width/r.width);
+  const y=(e.clientY-r.top)*(cv.height/r.height);
+  const brush=parseInt($('pix-brush').value);
+  $('pix-brushv').innerText=brush;
+  ctx.beginPath();ctx.arc(x,y,brush/2,0,Math.PI*2);
+  ctx.fillStyle=$('pix-color').value;ctx.fill();
+}
+function splitChannels(){
+  const src=$('pix-main'),ctx=src.getContext('2d');
+  const W=src.width,H=src.height;
+  const data=ctx.getImageData(0,0,W,H).data;
+  ['r','g','b','gray'].forEach(ch=>{
+    const tc=$(`pix-${ch}`),tctx=tc.getContext('2d');
+    const tw=tc.width,th=tc.height;
+    const id=tctx.createImageData(tw,th);
+    const sx=W/tw,sy=H/th;
+    for(let y=0;y<th;y++)for(let x=0;x<tw;x++){
+      const si=(Math.floor(y*sy)*W+Math.floor(x*sx))*4;
+      const t=(y*tw+x)*4;
+      const rv=data[si],gv=data[si+1],bv=data[si+2];
+      const gray=Math.round(0.299*rv+0.587*gv+0.114*bv);
+      if(ch==='r'){id.data[t]=rv;id.data[t+1]=0;id.data[t+2]=0;id.data[t+3]=255}
+      else if(ch==='g'){id.data[t]=0;id.data[t+1]=gv;id.data[t+2]=0;id.data[t+3]=255}
+      else if(ch==='b'){id.data[t]=0;id.data[t+1]=0;id.data[t+2]=bv;id.data[t+3]=255}
+      else{id.data[t]=id.data[t+1]=id.data[t+2]=gray;id.data[t+3]=255}
+    }
+    tctx.putImageData(id,0,0);
+  });
+  $('pix-stats').innerText='Channels split! RGB → Red, Green, Blue, and Grayscale (0.299R + 0.587G + 0.114B)';
+  $('pix-result').className='result-box good';
+  toast('Channels split!');
+}
+function clearPixCanvas(){
+  const cv=$('pix-main'),ctx=cv.getContext('2d');
+  ctx.fillStyle='#0d0814';ctx.fillRect(0,0,cv.width,cv.height);
+  ['r','g','b','gray'].forEach(ch=>{const c=$(`pix-${ch}`),ctx2=c.getContext('2d');ctx2.fillStyle='#080514';ctx2.fillRect(0,0,c.width,c.height);});
+}
+
+/* ══ 02 IMAGE TRANSFORMS ══ */
+function buildTestImage(W,H){
+  // Simple synthetic test image: gradient + shapes
+  const data=new Uint8ClampedArray(W*H*4);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=(y*W+x)*4;
+    // gradient bg
+    const bg=Math.round((x/W)*120+(y/H)*60);
+    let r=bg,g=bg,b=bg;
+    // circle
+    const dx=x-W*0.35,dy=y-H*0.4;
+    if(dx*dx+dy*dy<(Math.min(W,H)*0.18)**2){r=200;g=80;b=180}
+    // rectangle
+    if(x>W*0.6&&x<W*0.9&&y>H*0.25&&y<H*0.75){r=80;g=180;b=220}
+    // line
+    if(Math.abs(y-H*0.7)<4&&x>W*0.1&&x<W*0.9){r=240;g=200;b=80}
+    data[i]=r;data[i+1]=g;data[i+2]=b;data[i+3]=255;
+  }
+  return data;
+}
+function runTransform(){
+  const cv=$('xform-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#050310';ctx.fillRect(0,0,W,H);
+  const type=$('xform-type').value,intv=parseInt($('xform-int').value);
+  const IW=Math.floor(W/2)-10,IH=H-20;
+  const srcData=buildTestImage(IW,IH);
+  const srcImg=new ImageData(srcData,IW,IH);
+  // Draw original
+  ctx.putImageData(srcImg,5,10);
+  ctx.fillStyle='#9070b8';ctx.font='10px Space Mono';ctx.textAlign='center';ctx.fillText('Original',5+IW/2,H-2);
+  // Apply transform
+  const out=new Uint8ClampedArray(srcData.length);
+  const descs={original:'No transform applied',grayscale:'Grayscale: intensity = 0.299R + 0.587G + 0.114B',
+    threshold:`Binary threshold at ${intv*23}: pixels above→white, below→black`,
+    blur:`Gaussian blur (kernel size ${intv*2+1}×${intv*2+1})`,
+    sharpen:'Sharpen: emphasises high-frequency detail',
+    edge:'Sobel edge detection: highlights intensity gradients',
+    invert:'Pixel inversion: p → 255 - p for each channel',
+    equalize:'Histogram equalisation: redistributes intensity for better contrast'};
+  for(let y=0;y<IH;y++)for(let x=0;x<IW;x++){
+    const i=(y*IW+x)*4;
+    const r=srcData[i],g=srcData[i+1],b=srcData[i+2];
+    const gray=Math.round(0.299*r+0.587*g+0.114*b);
+    let nr=r,ng=g,nb=b;
+    if(type==='grayscale'){nr=ng=nb=gray}
+    else if(type==='threshold'){const v=gray>intv*23?255:0;nr=ng=nb=v}
+    else if(type==='blur'){
+      let sr=0,sg=0,sb=0,cnt=0;const k=intv;
+      for(let dy=-k;dy<=k;dy++)for(let dx=-k;dx<=k;dx++){
+        const nx=x+dx,ny=y+dy;
+        if(nx>=0&&nx<IW&&ny>=0&&ny<IH){const ii=(ny*IW+nx)*4;sr+=srcData[ii];sg+=srcData[ii+1];sb+=srcData[ii+2];cnt++;}
+      }
+      nr=sr/cnt;ng=sg/cnt;nb=sb/cnt;
+    }
+    else if(type==='sharpen'){
+      const kernel=[[0,-1,0],[-1,5+intv/3,-1],[0,-1,0]];
+      let sv=0;
+      kernel.forEach((row,dy)=>row.forEach((kv,dx)=>{const nx=x+dx-1,ny=y+dy-1;if(nx>=0&&nx<IW&&ny>=0&&ny<IH)sv+=srcData[(ny*IW+nx)*4]*kv;}));
+      nr=ng=nb=Math.max(0,Math.min(255,sv));
+    }
+    else if(type==='edge'){
+      const gx=[[-1,0,1],[-2,0,2],[-1,0,1]],gy=[[-1,-2,-1],[0,0,0],[1,2,1]];
+      let sx=0,sy2=0;
+      gx.forEach((row,dy)=>row.forEach((kv,dx)=>{const nx=x+dx-1,ny=y+dy-1;if(nx>=0&&nx<IW&&ny>=0&&ny<IH){const g2=0.299*srcData[(ny*IW+nx)*4]+0.587*srcData[(ny*IW+nx)*4+1]+0.114*srcData[(ny*IW+nx)*4+2];sx+=g2*kv;sy2+=g2*gy[dy][dx];}}));
+      nr=ng=nb=Math.min(255,Math.sqrt(sx*sx+sy2*sy2)*intv*0.5);
+    }
+    else if(type==='invert'){nr=255-r;ng=255-g;nb=255-b}
+    else if(type==='equalize'){nr=ng=nb=Math.min(255,(gray/255)**(1/(intv/5))*255)}
+    out[i]=nr;out[i+1]=ng;out[i+2]=nb;out[i+3]=255;
+  }
+  ctx.putImageData(new ImageData(out,IW,IH),IW+15,10);
+  ctx.fillStyle='#c77dff';ctx.textAlign='center';ctx.fillText(type.charAt(0).toUpperCase()+type.slice(1),IW+15+IW/2,H-2);
+  // Arrow between
+  ctx.strokeStyle='#c77dff44';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(IW+5,H/2);ctx.lineTo(IW+13,H/2);ctx.stroke();
+  ctx.fillStyle='#c77dff55';ctx.font='16px sans-serif';ctx.fillText('→',IW+6,H/2+6);
+  $('xform-desc').innerText=descs[type]||type;
+  $('xform-result').className='result-box info';
+}
+
+/* ══ 03 ANIMAL CLASSIFIER ══ */
+function runClassifier(){
+  const fur=+$('cl-fur').value,wings=+$('cl-wings').value;
+  const size=+$('cl-size').value,ear=+$('cl-ear').value,scale=+$('cl-scale').value;
+  $('cl-furv').innerText=fur;$('cl-sizev').innerText=size;$('cl-earv').innerText=ear;$('cl-scalev').innerText=scale;
+  const cat=Math.max(0,fur*0.07+ear*0.09+(10-size)*0.04-wings*0.5-scale*0.05+0.05);
+  const dog=Math.max(0,fur*0.06+(10-ear)*0.05+size*0.05-wings*0.4-scale*0.04+0.04);
+  const bird=Math.max(0,wings*1.5+fur*0.02+(10-size)*0.03-scale*0.03-ear*0.03+0.02);
+  const fish=Math.max(0,scale*0.1+(10-fur)*0.05+(10-ear)*0.04+(10-size)*0.03-wings*0.3+0.01);
+  const snake=Math.max(0,scale*0.12+(10-fur)*0.06+(10-ear)*0.06-wings*0.4+0.01);
+  const total=cat+dog+bird+fish+snake||1;
+  const classes=[['🐱 Cat',cat,'#c77dff'],['🐶 Dog',dog,'#48bfe3'],['🦜 Bird',bird,'#f72585'],['🐟 Fish',fish,'#06d6a0'],['🐍 Snake',snake,'#ffd166']];
+  classes.sort((a,b)=>b[1]-a[1]);
+  const norm=classes.map(([l,v,c])=>[l,v/total,c]);
+  $('clf-probs').innerHTML=norm.map(([l,p,c])=>`
+    <div style="margin:7px 0"><div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.73rem;margin-bottom:3px"><span>${l}</span><span style="color:${c}">${(p*100).toFixed(1)}%</span></div>
+    <div class="prog-wrap"><div class="prog-bar" style="width:${(p*100).toFixed(1)}%;background:${c}77;border-right:2px solid ${c}"></div></div></div>`).join('');
+  // Draw softmax bar visualization
+  const cv=$('clf-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#050310';ctx.fillRect(0,0,W,H);
+  const bw=Math.floor((W-60)/5)-6;
+  norm.forEach(([l,p,c],i)=>{
+    const x=30+i*(bw+6),barH=Math.round((H-40)*p),y=H-20-barH;
+    ctx.fillStyle=c+'44';ctx.fillRect(x,y,bw,barH);
+    ctx.strokeStyle=c;ctx.lineWidth=2;ctx.strokeRect(x,y,bw,barH);
+    ctx.fillStyle=c;ctx.font='9px Space Mono';ctx.textAlign='center';ctx.fillText(l.split(' ')[0],x+bw/2,H-6);
+    if(i===0){ctx.fillStyle=c;ctx.font='bold 10px Space Mono';ctx.fillText((p*100).toFixed(0)+'%',x+bw/2,y-5)}
+  });
+  ctx.fillStyle='#6a4a8a';ctx.font='9px Space Mono';ctx.textAlign='center';ctx.fillText('Softmax Output (class probabilities)',W/2,12);
+  $('clf-val').innerText=`${norm[0][0]} — ${(norm[0][1]*100).toFixed(1)}% confidence`;
+  $('clf-result').className='result-box good';
+}
+
+/* ══ 03 CNN FEATURE MAPS ══ */
+const FEAT_DESCS=['Layer 1 — Detects low-level features: edges, colour gradients, simple textures','Layer 2 — Detects corners, curves, simple geometric primitives','Layer 3 — Detects compound shapes, object parts, textures patterns','Layer 4 — High-level semantic features: whole objects, faces, wheels'];
+function runFeatureMaps(){
+  const cv=$('feat-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  const shape=$('feat-shape').value,layer=+$('feat-layer').value;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#050310';ctx.fillRect(0,0,W,H);
+  // Draw input
+  drawShape(ctx,80,H/2,60,shape,'#c77dff');
+  ctx.fillStyle='#6a4a8a';ctx.font='9px Space Mono';ctx.textAlign='center';ctx.fillText('Input',80,H-8);
+  // Arrow
+  ctx.strokeStyle='#c77dff44';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(140,H/2);ctx.lineTo(170,H/2);ctx.stroke();
+  ctx.fillStyle='#c77dff55';ctx.font='14px sans-serif';ctx.fillText('→',148,H/2+5);
+  // Feature maps grid
+  const cols=4,rows=2,mw=52,mh=42,startX=180,startY=20,gap=8;
+  const colors=['#f72585','#48bfe3','#ffd166','#06d6a0','#c77dff','#ff9a3c','#f72585','#48bfe3'];
+  for(let i=0;i<cols*rows;i++){
+    const fx=startX+(i%cols)*(mw+gap),fy=startY+Math.floor(i/cols)*(mh+gap);
+    ctx.fillStyle='#0a0518';ctx.strokeStyle=colors[i%colors.length]+'77';ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect(fx,fy,mw,mh,5);ctx.fill();ctx.stroke();
+    // Draw simulated feature pattern
+    drawFeatureMap(ctx,fx,fy,mw,mh,i,layer,shape,colors[i%colors.length]);
+  }
+  ctx.fillStyle='#9070b8';ctx.font='9px Space Mono';ctx.textAlign='center';
+  ctx.fillText(`Feature Maps (Layer ${layer+1})`,startX+(cols*(mw+gap)-gap)/2,H-8);
+  $('feat-desc').innerText=FEAT_DESCS[layer];$('feat-result').className='result-box info';
+}
+function drawShape(ctx,cx,cy,r,shape,col){
+  ctx.fillStyle='#0a0518';ctx.fillRect(cx-r-5,cy-r-5,r*2+10,r*2+10);
+  ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.fillStyle=col+'33';
+  ctx.beginPath();
+  if(shape==='circle'){ctx.arc(cx,cy,r,0,Math.PI*2)}
+  else if(shape==='triangle'){ctx.moveTo(cx,cy-r);ctx.lineTo(cx+r,cy+r);ctx.lineTo(cx-r,cy+r)}
+  else if(shape==='cross'){ctx.moveTo(cx-r*0.3,cy-r);ctx.lineTo(cx+r*0.3,cy-r);ctx.lineTo(cx+r*0.3,cy-r*0.3);ctx.lineTo(cx+r,cy-r*0.3);ctx.lineTo(cx+r,cy+r*0.3);ctx.lineTo(cx+r*0.3,cy+r*0.3);ctx.lineTo(cx+r*0.3,cy+r);ctx.lineTo(cx-r*0.3,cy+r);ctx.lineTo(cx-r*0.3,cy+r*0.3);ctx.lineTo(cx-r,cy+r*0.3);ctx.lineTo(cx-r,cy-r*0.3);ctx.lineTo(cx-r*0.3,cy-r*0.3)}
+  else{const sz=r*0.6;for(let row=0;row<3;row++)for(let col=0;col<3;col++)if((row+col)%2===0){ctx.rect(cx-r+col*sz*2/1,cy-r+row*sz*2/1,sz,sz)}}
+  ctx.fill();ctx.stroke();ctx.closePath();
+}
+function drawFeatureMap(ctx,x,y,w,h,idx,layer,shape,col){
+  const noise=(idx*7919+layer*1301)%100;
+  for(let py=0;py<h;py+=2)for(let px=0;px<w;px+=2){
+    const n=(Math.sin(px*0.3+idx)*(Math.cos(py*0.25+layer))*0.5+0.5);
+    const v=Math.max(0,Math.min(1,n+noise/400));
+    ctx.fillStyle=`rgba(${parseInt(col.slice(1,3),16)},${parseInt(col.slice(3,5),16)},${parseInt(col.slice(5,7),16)},${v*0.9})`;
+    ctx.fillRect(x+px,y+py,2,2);
+  }
+}
+
+/* ══ 04 DETECTION ══ */
+const SCENES={
+  street:{bg:'#0a1020',objs:[{l:'🚗 Car',x:60,y:120,w:180,h:100,col:'#f72585',conf:94},{l:'🚶 Person',x:310,y:80,w:80,h:160,col:'#48bfe3',conf:88},{l:'🛑 Stop Sign',x:450,y:60,w:70,h:70,col:'#ffd166',conf:97},{l:'🚗 Car',x:100,y:200,w:140,h:80,col:'#f72585',conf:76}]},
+  indoor:{bg:'#100a0a',objs:[{l:'🪑 Chair',x:40,y:100,w:120,h:160,col:'#06d6a0',conf:91},{l:'💻 Laptop',x:220,y:130,w:150,h:100,col:'#c77dff',conf:96},{l:'☕ Cup',x:420,y:170,w:60,h:80,col:'#ffd166',conf:83},{l:'📱 Phone',x:350,y:180,w:50,h:90,col:'#48bfe3',conf:79}]},
+  medical:{bg:'#05080a',objs:[{l:'🫁 Lung',x:60,y:60,w:180,h:200,col:'#48bfe3',conf:98},{l:'⚠️ Nodule',x:130,y:120,w:60,h:60,col:'#f72585',conf:87},{l:'🫀 Heart',x:280,y:90,w:130,h:150,col:'#ff9a3c',conf:95}]},
+  aerial:{bg:'#080a10',objs:[{l:'🏠 Building',x:50,y:50,w:120,h:100,col:'#c77dff',conf:92},{l:'🌳 Tree',x:220,y:40,w:80,h:80,col:'#06d6a0',conf:85},{l:'🚗 Vehicle',x:350,y:180,w:70,h:50,col:'#f72585',conf:78},{l:'🏠 Building',x:400,y:60,w:140,h:110,col:'#c77dff',conf:90}]}
+};
+function runDetection(){
+  const scene=$('det-scene').value,thresh=parseInt($('det-conf').value)/100;
+  const cv=$('det-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const sc=SCENES[scene];
+  ctx.fillStyle=sc.bg;ctx.fillRect(0,0,W,H);
+  // Grid texture
+  ctx.strokeStyle='#ffffff05';ctx.lineWidth=1;
+  for(let i=0;i<W;i+=40){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke()}
+  for(let i=0;i<H;i+=40){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke()}
+  const visible=sc.objs.filter(o=>o.conf/100>=thresh);
+  visible.forEach(o=>{
+    ctx.strokeStyle=o.col;ctx.lineWidth=2.5;ctx.fillStyle=o.col+'15';
+    ctx.fillRect(o.x,o.y,o.w,o.h);ctx.strokeRect(o.x,o.y,o.w,o.h);
+    // Label box
+    ctx.fillStyle=o.col;ctx.fillRect(o.x,o.y-22,ctx.measureText(o.l+' '+o.conf+'%').width+16,22);
+    ctx.fillStyle='#0d0814';ctx.font='bold 11px Outfit';ctx.textAlign='left';
+    ctx.fillText(`${o.l} ${o.conf}%`,o.x+8,o.y-6);
+  });
+  // Legend
+  const leg=$('det-legend');leg.innerHTML='';
+  [...new Set(visible.map(o=>o.l.split(' ').slice(0,2).join(' ')))].forEach(lbl=>{
+    const o=visible.find(x=>x.l.includes(lbl.split(' ')[1])||x.l===lbl);
+    if(o)leg.innerHTML+=`<span class="det-chip" style="color:${o.col};border-color:${o.col}55;background:${o.col}14">${o.l} — ${o.conf}%</span>`;
+  });
+  $('det-val').innerText=`${visible.length} object${visible.length!==1?'s':''} detected above ${Math.round(thresh*100)}% threshold`;
+  $('det-result').className='result-box '+(visible.length>0?'good':'warn');
+}
+
+/* ══ 04 IoU ══ */
+function runIoU(){
+  const px=+$('iou-x').value,py=+$('iou-y').value,pw=+$('iou-w').value,ph=+$('iou-h').value;
+  $('iou-xv').innerText=px;$('iou-yv').innerText=py;$('iou-wv').innerText=pw;$('iou-hv').innerText=ph;
+  // Ground truth fixed box
+  const gx=130,gy=70,gw=200,gh=160;
+  const cv=$('iou-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#050310';ctx.fillRect(0,0,W,H);
+  // Intersection
+  const ix=Math.max(gx,px),iy=Math.max(gy,py),ix2=Math.min(gx+gw,px+pw),iy2=Math.min(gy+gh,py+ph);
+  const inter=Math.max(0,ix2-ix)*Math.max(0,iy2-iy);
+  const union=(gw*gh)+(pw*ph)-inter;
+  const iou=union>0?inter/union:0;
+  // Draw GT
+  ctx.fillStyle='#06d6a022';ctx.fillRect(gx,gy,gw,gh);
+  ctx.strokeStyle='#06d6a0';ctx.lineWidth=2.5;ctx.strokeRect(gx,gy,gw,gh);
+  ctx.fillStyle='#06d6a0';ctx.font='bold 11px Outfit';ctx.textAlign='left';ctx.fillText('Ground Truth',gx+6,gy+18);
+  // Draw Pred
+  ctx.fillStyle='#f7258522';ctx.fillRect(px,py,pw,ph);
+  ctx.strokeStyle='#f72585';ctx.lineWidth=2.5;ctx.setLineDash([6,3]);ctx.strokeRect(px,py,pw,ph);ctx.setLineDash([]);
+  ctx.fillStyle='#f72585';ctx.font='bold 11px Outfit';ctx.fillText('Predicted',px+6,py+18);
+  // Intersection highlight
+  if(inter>0){ctx.fillStyle='#ffd16633';ctx.fillRect(ix,iy,ix2-ix,iy2-iy);}
+  // IoU label
+  const col=iou>0.7?'#06d6a0':iou>0.4?'#ffd166':'#f72585';
+  ctx.fillStyle=col;ctx.font='bold 20px Outfit';ctx.textAlign='center';ctx.fillText(`IoU = ${(iou*100).toFixed(1)}%`,W/2,H-10);
+  // Equation
+  ctx.fillStyle='#6a4a8a';ctx.font='10px Space Mono';
+  ctx.fillText(`Intersection=${Math.round(inter)} | Union=${Math.round(union)}`,W/2,H-30);
+  const verdict=iou>0.7?'✅ Good detection (IoU>0.7)':iou>0.5?'⚠️ Acceptable (IoU>0.5)':'❌ Poor detection (IoU<0.5)';
+  $('iou-val').innerText=`${(iou*100).toFixed(1)}% — ${verdict}`;
+  $('iou-result').className='result-box '+(iou>0.7?'good':iou>0.5?'warn':'err');
+}
+
+/* ══ 05 SEGMENTATION ══ */
+const SEG_SCENES={
+  city:{regions:[{x:0,y:0,w:580,h:100,label:'Sky',col:'#48bfe3'},{x:0,y:100,w:580,h:80,label:'Building',col:'#c77dff'},{x:0,y:180,w:580,h:60,label:'Road',col:'#6a4a8a'},{x:60,y:120,w:140,h:120,label:'Car',col:'#f72585'},{x:320,y:90,w:80,h:160,label:'Person',col:'#ffd166'},{x:440,y:80,w:60,h:180,label:'Tree',col:'#06d6a0'}]},
+  indoor:{regions:[{x:0,y:0,w:580,h:300,label:'Wall',col:'#48bfe3'},{x:0,y:180,w:580,h:120,label:'Floor',col:'#6a4a8a'},{x:40,y:80,w:200,h:220,label:'Chair',col:'#06d6a0'},{x:280,y:60,w:220,h:170,label:'Table',col:'#c77dff'},{x:310,y:70,w:140,h:90,label:'Laptop',col:'#f72585'},{x:350,y:160,w:60,h:60,label:'Cup',col:'#ffd166'}]},
+  medical:{regions:[{x:0,y:0,w:580,h:300,label:'Background',col:'#6a4a8a'},{x:60,y:30,w:200,h:240,label:'Left Lung',col:'#48bfe3'},{x:320,y:30,w:200,h:240,label:'Right Lung',col:'#4d96ff'},{x:240,y:80,w:100,h:140,label:'Heart',col:'#ff9a3c'},{x:110,y:110,w:70,h:70,label:'Tumour',col:'#f72585'}]},
+  nature:{regions:[{x:0,y:0,w:580,h:120,label:'Sky',col:'#48bfe3'},{x:0,y:100,w:580,h:200,label:'Forest',col:'#06d6a0'},{x:0,y:220,w:580,h:80,label:'Ground',col:'#ff9a3c'},{x:80,y:60,w:120,h:180,label:'Tree',col:'#34d399'},{x:360,y:70,w:160,h:160,label:'Tree',col:'#34d399'},{x:220,y:180,w:100,h:80,label:'Animal',col:'#ffd166'}]}
+};
+function runSegmentation(){
+  const scene=$('seg-scene').value,mode=$('seg-mode').value;
+  const alpha=parseInt($('seg-alpha').value)/100;
+  const cv=$('seg-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#080514';ctx.fillRect(0,0,W,H);
+  const sc=SEG_SCENES[scene];
+  const instanceColors=['#f72585','#48bfe3','#ffd166','#06d6a0','#c77dff','#ff9a3c'];
+  sc.regions.forEach((r,i)=>{
+    const col=mode==='instance'?instanceColors[i%instanceColors.length]:r.col;
+    ctx.fillStyle=col+Math.round(alpha*255).toString(16).padStart(2,'0');
+    ctx.fillRect(r.x,r.y,r.w,r.h);
+    if(mode!=='overlay'){
+      ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.strokeRect(r.x,r.y,r.w,r.h);
+      ctx.fillStyle=col;ctx.font='bold 10px Outfit';ctx.textAlign='left';
+      ctx.fillText(mode==='instance'?`Instance ${i+1}: ${r.label}`:r.label,r.x+6,r.y+16);
+    }
+  });
+  // Legend
+  const leg=$('seg-legend');leg.innerHTML='';
+  const labels=[...new Set(sc.regions.map(r=>r.label))];
+  labels.forEach((lbl,i)=>{
+    const r=sc.regions.find(x=>x.label===lbl);
+    const col=mode==='instance'?instanceColors[i%instanceColors.length]:r.col;
+    leg.innerHTML+=`<span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.68rem;padding:3px 10px;border-radius:100px;background:${col}22;border:1px solid ${col}55;color:${col}"><span style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></span>${lbl}</span>`;
+  });
+  $('seg-val').innerText=`${sc.regions.length} regions segmented — ${mode} mode`;
+  $('seg-result').className='result-box good';
+}
+
+/* ══ 06 FACE RECOGNITION ══ */
+function runFaceRec(){
+  const ae=+$('fa-eye').value,an=+$('fa-nose').value,aj=+$('fa-jaw').value;
+  const be=+$('fb-eye').value,bn=+$('fb-nose').value,bj=+$('fb-jaw').value;
+  $('fa-eyev').innerText=ae;$('fa-nosev').innerText=an;$('fa-jawv').innerText=aj;
+  $('fb-eyev').innerText=be;$('fb-nosev').innerText=bn;$('fb-jawv').innerText=bj;
+  const embA=[ae/10,an/10,aj/10,ae*an/100];
+  const embB=[be/10,bn/10,bj/10,be*bn/100];
+  const dist=Math.sqrt(embA.reduce((s,v,i)=>(s+(v-embB[i])**2),0));
+  const sim=Math.max(0,1-dist/2);
+  const cv=$('face-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#050310';ctx.fillRect(0,0,W,H);
+  // Draw two faces
+  const drawFace=(cx,cy,r,ed,nw,jw,col,lbl)=>{
+    // Face oval
+    ctx.beginPath();ctx.ellipse(cx,cy,jw*r/12,r,0,0,Math.PI*2);
+    ctx.fillStyle=col+'22';ctx.strokeStyle=col;ctx.lineWidth=2;ctx.fill();ctx.stroke();
+    // Eyes
+    const eoff=ed*r/20;
+    [cx-eoff,cx+eoff].forEach(ex=>{
+      ctx.beginPath();ctx.ellipse(ex,cy-r*0.25,r*0.13,r*0.09,0,0,Math.PI*2);
+      ctx.fillStyle=col+'88';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+    });
+    // Nose
+    ctx.beginPath();ctx.moveTo(cx,cy-r*0.05);
+    ctx.lineTo(cx-nw*r/100,cy+r*0.2);ctx.lineTo(cx+nw*r/100,cy+r*0.2);
+    ctx.strokeStyle=col+'88';ctx.lineWidth=1.5;ctx.stroke();
+    // Mouth
+    ctx.beginPath();ctx.arc(cx,cy+r*0.35,r*0.18,0.1,Math.PI-0.1);
+    ctx.strokeStyle=col+'88';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle=col;ctx.font='bold 11px Outfit';ctx.textAlign='center';ctx.fillText(lbl,cx,cy+r+16);
+  };
+  drawFace(140,H/2-10,70,ae*10,an*8,aj*10,'#ffd166','Face A');
+  drawFace(380,H/2-10,70,be*10,bn*8,bj*10,'#48bfe3','Face B');
+  // Embedding vectors
+  const drawVec=(x,y,vals,col)=>{
+    vals.forEach((v,i)=>{ctx.fillStyle=col+Math.round(v*180+50).toString(16);ctx.fillRect(x+i*22,y,18,Math.round(v*35)+4)});
+  };
+  ctx.fillStyle='#6a4a8a';ctx.font='8px Space Mono';ctx.textAlign='center';ctx.fillText('Embedding A',140,H-35);ctx.fillText('Embedding B',380,H-35);
+  drawVec(106,H-30,embA,'#ffd166');drawVec(346,H-30,embB,'#48bfe3');
+  // Distance line
+  const match=dist<0.4;
+  ctx.strokeStyle=match?'#06d6a0':'#f72585';ctx.lineWidth=2.5;ctx.setLineDash(match?[]:[6,4]);
+  ctx.beginPath();ctx.moveTo(220,H/2-10);ctx.lineTo(300,H/2-10);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=match?'#06d6a0':'#f72585';ctx.font='bold 12px Outfit';ctx.textAlign='center';
+  ctx.fillText(match?'✓ MATCH':'✗ NO MATCH',260,H/2-25);
+  ctx.fillStyle='#6a4a8a';ctx.font='9px Space Mono';ctx.fillText(`L2 distance: ${dist.toFixed(3)} (threshold: 0.4)`,260,H/2+5);
+  $('face-val').innerText=match?`✅ SAME PERSON — distance ${dist.toFixed(3)} < 0.4 (${(sim*100).toFixed(0)}% similarity)`:`❌ DIFFERENT PERSON — distance ${dist.toFixed(3)} ≥ 0.4`;
+  $('face-result').className='result-box '+(match?'good':'err');
+}
+
+/* ══ 07 EDGE DETECTION ══ */
+let edgeDrawing=false;
+function initEdgeCanvas(){
+  const cv=$('edge-main'),ctx=cv.getContext('2d');
+  ctx.fillStyle='#080514';ctx.fillRect(0,0,cv.width,cv.height);
+  cv.addEventListener('mousedown',e=>{edgeDrawing=true;edgeDraw(e)});
+  cv.addEventListener('mousemove',e=>{if(edgeDrawing){edgeDraw(e);runEdge()}});
+  cv.addEventListener('mouseup',()=>{edgeDrawing=false;runEdge()});
+  cv.addEventListener('mouseleave',()=>edgeDrawing=false);
+  cv.addEventListener('touchstart',e=>{edgeDrawing=true;edgeDraw(e.touches[0])},{passive:true});
+  cv.addEventListener('touchmove',e=>{if(edgeDrawing){edgeDraw(e.touches[0]);runEdge()}},{passive:true});
+  cv.addEventListener('touchend',()=>{edgeDrawing=false;runEdge()});
+}
+function edgeDraw(e){
+  const cv=$('edge-main'),ctx=cv.getContext('2d');
+  const r=cv.getBoundingClientRect();
+  const x=(e.clientX-r.left)*(cv.width/r.width),y=(e.clientY-r.top)*(cv.height/r.height);
+  ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fillStyle='#e0d0ff';ctx.fill();
+}
+function clearEdgeCanvas(){
+  const cv=$('edge-main'),ctx=cv.getContext('2d');
+  ctx.fillStyle='#080514';ctx.fillRect(0,0,cv.width,cv.height);
+  const oc=$('edge-out'),octx=oc.getContext('2d');
+  octx.fillStyle='#080514';octx.fillRect(0,0,oc.width,oc.height);
+}
+function drawEdgeSample(){
+  const cv=$('edge-main'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.fillStyle='#0a0518';ctx.fillRect(0,0,W,H);
+  // shapes
+  ctx.fillStyle='#c0a0ff';ctx.beginPath();ctx.arc(80,80,50,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#80c0ff';ctx.fillRect(150,40,90,100);
+  ctx.strokeStyle='#ffe080';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(20,160);ctx.lineTo(250,160);ctx.stroke();
+  ctx.strokeStyle='#80ffa0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(20,180);ctx.bezierCurveTo(80,120,170,200,250,140);ctx.stroke();
+  runEdge();
+}
+const EDGE_KERNELS={
+  sobel_x:[[-1,0,1],[-2,0,2],[-1,0,1]],sobel_y:[[-1,-2,-1],[0,0,0],[1,2,1]],
+  laplacian:[[0,1,0],[1,-4,1],[0,1,0]],
+  emboss:[[-2,-1,0],[-1,1,1],[0,1,2]],
+  gabor:[[0.1,0.2,0.1],[0,-1,0],[-0.1,-0.2,-0.1]],
+  canny:[[-1,0,1],[-2,0,2],[-1,0,1]] // simplified
+};
+const EDGE_DESCS={sobel_x:'Sobel X: detects vertical edges (gradient in horizontal direction)',sobel_y:'Sobel Y: detects horizontal edges (gradient in vertical direction)',canny:'Canny: multi-stage detector — most popular edge algorithm',laplacian:'Laplacian: detects edges in all directions (second derivative)',gabor:'Gabor filter: detects oriented textures and patterns',emboss:'Emboss: creates 3D relief effect highlighting edges'};
+function runEdge(){
+  const src=$('edge-main'),out=$('edge-out'),ctx=out.getContext('2d');
+  const W=src.width,H=src.height;
+  const srcCtx=src.getContext('2d');
+  const imgData=srcCtx.getImageData(0,0,W,H).data;
+  const ft=$('edge-filter').value,thresh=parseInt($('edge-thresh').value);
+  const K=EDGE_KERNELS[ft]||EDGE_KERNELS.sobel_x;
+  const outData=new Uint8ClampedArray(W*H*4);
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    let s=0;
+    K.forEach((row,ky)=>row.forEach((kv,kx)=>{
+      const px=((y+ky-1)*W+(x+kx-1))*4;
+      const g=0.299*imgData[px]+0.587*imgData[px+1]+0.114*imgData[px+2];
+      s+=g*kv;
+    }));
+    const v=ft==='canny'?Math.abs(s)>thresh*1.5?255:0:Math.max(0,Math.min(255,Math.abs(s)*1.8));
+    const i=(y*W+x)*4;
+    outData[i]=v;outData[i+1]=Math.round(v*0.4);outData[i+2]=Math.round(v*0.8);outData[i+3]=255;
+  }
+  ctx.fillStyle='#080514';ctx.fillRect(0,0,W,H);
+  ctx.putImageData(new ImageData(outData,W,H),0,0);
+  $('edge-desc').innerText=EDGE_DESCS[ft];$('edge-result').className='result-box info';
+}
+
+/* ══ QUIZ ══ */
+const quizQ=[
+  {q:'What does a pixel in a colour image store?',options:['A single brightness value','Three values: Red, Green, Blue (0-255)','A depth value','A class label'],ans:1},
+  {q:'What is the key difference between object detection and image classification?',options:['Detection is faster','Detection predicts bounding box locations, not just class labels','Classification uses more layers','There is no difference'],ans:1},
+  {q:'What does IoU measure in object detection?',options:['Image quality score','Speed of inference','Overlap between predicted and ground-truth bounding boxes','Number of detected objects'],ans:2},
+  {q:'Semantic segmentation assigns:',options:['A label to the whole image','A label to each object instance','A class label to every pixel in the image','A bounding box to each object'],ans:2},
+  {q:'Which algorithm is commonly used for real-time object detection?',options:['ResNet','VGG','YOLO (You Only Look Once)','U-Net'],ans:2},
+  {q:'The Canny edge detector works by:',options:['Simply thresholding pixel brightness','Gaussian blur + gradient + non-max suppression + hysteresis','Random forest on pixel values','Averaging adjacent pixels'],ans:1},
+  {q:'Face recognition systems compare faces using:',options:['Pixel-by-pixel RGB difference','Embedding vectors in a high-dimensional space','The colour histogram','The image filename'],ans:1},
+  {q:'Transfer learning in CV means:',options:['Sharing weights between two student models','Starting from ImageNet pre-trained weights and fine-tuning on your dataset','Running a model on a different GPU','Copying data from one camera to another'],ans:1},
+];
+let qi=0,qs=0,qa=false;
+function initCVQuiz(){qi=0;qs=0;qa=false;renderCVQ();}
+function renderCVQ(){
+  if(qi>=quizQ.length){showCVResult();return;}
+  const q=quizQ[qi];
+  $('cv-quiz-body').innerHTML=`
+    <div style="margin-bottom:16px">
+      <div style="font-family:var(--mono);font-size:.63rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">QUESTION ${qi+1} OF ${quizQ.length}</div>
+      <div style="font-size:1rem;font-weight:600;line-height:1.6">${q.q}</div>
+    </div>
+    <div style="display:grid;gap:10px" id="cv-opts">
+      ${q.options.map((o,i)=>`<button onclick="answerCV(${i})" style="background:#080514;border:1px solid #ffffff12;border-radius:10px;padding:13px 17px;color:var(--text);font-family:var(--sans);font-size:.86rem;text-align:left;cursor:pointer;transition:all .2s"
+        onmouseover="this.style.borderColor='#c77dff'" onmouseout="if(!this.dataset.a)this.style.borderColor='#ffffff12'">
+        <span style="font-family:var(--mono);color:var(--muted);margin-right:10px">${String.fromCharCode(65+i)}.</span>${o}
+      </button>`).join('')}
+    </div>
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:12px">Score: ${qs}/${qi}</div>`;
+  $('cv-quiz-btns').innerHTML='';
+}
+function answerCV(chosen){
+  if(qa)return;qa=true;
+  const q=quizQ[qi];
+  document.querySelectorAll('#cv-opts button').forEach((b,i)=>{
+    b.style.pointerEvents='none';
+    if(i===q.ans){b.style.background='#100520';b.style.borderColor='#c77dff';b.style.color='#d8b4fe';}
+    else if(i===chosen&&chosen!==q.ans){b.style.background='#200510';b.style.borderColor='#f72585';b.style.color='#fca5a5';}
+    b.dataset.a='1';
+  });
+  if(chosen===q.ans)qs++;
+  $('cv-quiz-btns').innerHTML=`<button class="btn btn-p" onclick="nextCVQ()">${qi+1<quizQ.length?'Next Question →':'See Results 🎯'}</button>`;
+}
+function nextCVQ(){qi++;qa=false;renderCVQ();}
+function showCVResult(){
+  const p=Math.round(qs/quizQ.length*100);
+  const msg=p>=80?'🏆 Outstanding! You really understand Computer Vision!':p>=60?'👍 Good work — review the sections you missed.':'📚 Keep exploring the experiments above!';
+  $('cv-quiz-body').innerHTML=`<div style="text-align:center;padding:22px">
+    <div style="font-size:3.5rem;margin-bottom:14px">${p>=80?'🏆':p>=60?'🎯':'📚'}</div>
+    <div style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#c77dff,#48bfe3);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${qs}/${quizQ.length}</div>
+    <div style="font-family:var(--mono);font-size:.76rem;color:var(--muted);margin:8px 0">${p}% correct</div>
+    <div style="color:#9070b8;margin-top:14px;font-size:.92rem">${msg}</div></div>`;
+  $('cv-quiz-btns').innerHTML=`<button class="btn btn-p" onclick="initCVQuiz()">🔄 Try Again</button>`;
+}
+
+/* INIT */
+window.onload=()=>{
+  initPixCanvas();initEdgeCanvas();
+  runTransform();runClassifier();runFeatureMaps();
+  runDetection();runIoU();runSegmentation();runFaceRec();drawEdgeSample();
+};
+</script>
+</body>
+</html>

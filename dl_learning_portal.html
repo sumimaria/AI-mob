@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Learning Lab — Neural Networks for Students</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0f0f;--surface:#0d1a1a;--card:#122020;
+  --border:#ffffff0f;
+  --a1:#6bcb77;--a2:#4cc9f0;--a3:#f72585;--a4:#ffd166;--a5:#7b2d8b;--a6:#ff9a3c;
+  --text:#f0faf0;--muted:#4a7a5a;--radius:16px;
+  --mono:'Space Mono',monospace;--sans:'Outfit',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(#6bcb7706 1px,transparent 1px),linear-gradient(90deg,#6bcb7706 1px,transparent 1px);
+  background-size:44px 44px}
+.blob{position:fixed;border-radius:50%;filter:blur(110px);opacity:.1;pointer-events:none;z-index:0;animation:bf 15s ease-in-out infinite alternate}
+.b1{width:650px;height:650px;background:var(--a1);top:-220px;left:-180px}
+.b2{width:520px;height:520px;background:var(--a2);bottom:-160px;right:-160px;animation-delay:5s}
+.b3{width:380px;height:380px;background:var(--a3);top:38%;left:32%;animation-delay:9s}
+@keyframes bf{from{transform:translate(0,0) scale(1)}to{transform:translate(45px,30px) scale(1.1)}}
+
+/* LAYOUT */
+.wrap{position:relative;z-index:5;max-width:1020px;margin:0 auto;padding:0 20px 90px}
+
+/* HERO */
+.hero{text-align:center;padding:80px 20px 50px;position:relative;z-index:5}
+.hero-chip{display:inline-flex;align-items:center;gap:8px;background:#6bcb771a;border:1px solid #6bcb7733;color:var(--a1);font-family:var(--mono);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:22px}
+.hero h1{font-size:clamp(2.6rem,7vw,4.8rem);font-weight:800;line-height:1.06;letter-spacing:-1px;background:linear-gradient(135deg,#f0faf0 0%,var(--a1) 40%,var(--a2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:1.08rem;margin:16px auto 34px;max-width:560px;line-height:1.78}
+.hero-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--a1),var(--a2));color:#0a0f0f;font-family:var(--sans);font-size:1rem;font-weight:700;padding:clamp(11px,2.5vw,15px) clamp(20px,5vw,38px);border-radius:100px;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 0 40px #6bcb7744}
+.hero-btn:hover{transform:translateY(-3px);box-shadow:0 0 70px #6bcb7766}
+.hero-btn svg{transition:transform .2s}.hero-btn:hover svg{transform:translateX(4px)}
+
+/* BACK LINK */
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-family:var(--mono);font-size:.72rem;text-decoration:none;padding:8px 0;transition:color .2s;position:relative;z-index:5;margin:0 20px}
+.back-link:hover{color:var(--a1)}
+
+/* STATS */
+.stats{display:flex;justify-content:center;gap:44px;flex-wrap:wrap;margin:0 0 56px}
+.stat{text-align:center}
+.stat-num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.75rem;color:var(--muted);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+
+/* SECTION LABEL */
+.section-label{font-family:var(--mono);font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-label::before{content:'';width:24px;height:1px;background:var(--muted)}
+
+/* PHASE CARD */
+.phase-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin-bottom:18px;transition:border-color .25s,box-shadow .25s;cursor:pointer}
+.phase-card:hover{border-color:var(--ac,var(--a1));box-shadow:0 0 30px var(--gl,#6bcb7718)}
+.phase-header{display:flex;align-items:center;gap:20px;padding:26px 30px;user-select:none}
+.phase-num{font-family:var(--mono);font-size:.72rem;color:var(--ac,var(--a1));background:var(--acbg,#6bcb771a);border:1px solid var(--ac,var(--a1));padding:4px 10px;border-radius:6px;flex-shrink:0}
+.phase-icon{font-size:2rem;flex-shrink:0}
+.phase-title{font-size:1.25rem;font-weight:700}
+.phase-subtitle{font-size:.86rem;color:var(--muted);margin-top:3px}
+.phase-chevron{margin-left:auto;color:var(--muted);transition:transform .3s}
+.phase-card.open .phase-chevron{transform:rotate(180deg)}
+.phase-body{display:none;border-top:1px solid var(--border)}
+.phase-card.open .phase-body{display:block;animation:sopen .32s ease}
+@keyframes sopen{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.phase-inner{padding:30px}
+
+/* CONCEPT GRID */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:26px}
+@media(max-width:640px){.concept-grid{grid-template-columns:1fr}}
+.concept-box{background:#0a1414;border:1px solid var(--border);border-radius:12px;padding:18px}
+.cb-title{font-family:var(--mono);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--ac,var(--a1));margin-bottom:8px}
+.concept-box p{color:#7aaa8a;font-size:.88rem;line-height:1.72}
+
+/* SUB TABS */
+.sub-tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.sub-tab{background:#0a1414;border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-size:.86rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted)}
+.sub-tab:hover{border-color:var(--ac,var(--a1));color:var(--text)}
+.sub-tab.active{background:var(--ac,var(--a1));color:#0a0f0f;border-color:transparent}
+.sub-content{display:none}
+.sub-content.active{display:block;animation:fin .28s ease}
+@keyframes fin{from{opacity:0}to{opacity:1}}
+
+/* EXPLAIN */
+.explain-block{background:#0a1414;border-radius:12px;border:1px solid var(--border);padding:22px;margin-bottom:18px}
+.explain-block h3{font-size:1.08rem;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.explain-block p{color:#7aaa8a;font-size:.9rem;line-height:1.76}
+.explain-block ul{margin:10px 0 0 18px;color:#7aaa8a;font-size:.9rem;line-height:1.9}
+.tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:1px;padding:2px 10px;border-radius:100px;margin-left:6px;text-transform:uppercase}
+
+/* EXPERIMENT */
+.experiment{background:linear-gradient(135deg,#0a1a14,#0a100f);border:1px solid #6bcb7720;border-radius:16px;padding:26px;margin-top:18px}
+.exp-header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.exp-badge{background:linear-gradient(135deg,var(--a1),var(--a2));color:#0a0f0f;font-family:var(--mono);font-size:.62rem;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:100px;font-weight:700}
+.exp-title{font-size:1.06rem;font-weight:700}
+.exp-desc{color:var(--muted);font-size:.86rem;margin-top:2px}
+
+/* CONTROLS */
+.control-row{display:flex;align-items:center;gap:14px;margin:11px 0;flex-wrap:wrap}
+.control-label{font-family:var(--mono);font-size:.7rem;color:var(--muted);min-width:0}
+.control-value{font-family:var(--mono);font-size:.78rem;color:var(--a1);min-width:0}
+input[type=range]{flex:1;min-width:0;accent-color:var(--a1);cursor:pointer}
+select,input[type=text]{background:#0a1414;border:1px solid #ffffff16;color:var(--text);font-family:var(--mono);font-size:.78rem;padding:8px 13px;border-radius:8px;cursor:pointer;outline:none}
+select:focus,input:focus{border-color:var(--a1)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;padding:10px 22px;border-radius:8px;font-family:var(--sans);font-weight:700;font-size:.86rem;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn-g{background:linear-gradient(135deg,var(--a1),#059669);color:#0a0f0f}
+.btn-b{background:linear-gradient(135deg,var(--a2),#0284c7);color:#0a0f0f}
+.btn-p{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff}
+.btn-r{background:linear-gradient(135deg,var(--a3),#be185d);color:#fff}
+.btn-y{background:linear-gradient(135deg,var(--a4),#d97706);color:#0a0f0f}
+.btn-o{background:linear-gradient(135deg,var(--a6),#c2410c);color:#fff}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* RESULT */
+.result-box{background:#060e0e;border:1px solid var(--border);border-radius:10px;padding:15px 19px;margin-top:14px;font-family:var(--mono);font-size:.83rem;min-height:50px;transition:border-color .3s}
+.result-box.good{border-color:var(--a1)}
+.result-box.warn{border-color:var(--a6)}
+.result-box.info{border-color:var(--a2)}
+.result-box.err{border-color:var(--a3)}
+.r-label{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.r-value{font-size:.96rem;font-weight:700}
+
+/* CODE */
+.code-panel{background:#040a0a;border:1px solid #6bcb7718;border-radius:12px;overflow:hidden;margin-top:18px}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:10px 15px;background:#0a1414;border-bottom:1px solid #ffffff08}
+.code-dots{display:flex;gap:6px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.code-lang{font-family:var(--mono);font-size:.66rem;color:var(--muted);letter-spacing:1px}
+pre.code{margin:0;padding:19px;font-family:var(--mono);font-size:.78rem;line-height:1.76;overflow-x:auto;color:#cdd6f4;white-space:pre}
+.kw{color:#cba6f7}.fn{color:#89b4fa}.str{color:#a6e3a1}.cm{color:#3a5040;font-style:italic}.nb{color:#fab387}.op{color:#89dceb}
+
+/* CANVAS */
+canvas{border-radius:10px;display:block}
+.canvas-wrap{background:#040a0a;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;margin:14px 0}
+
+/* NET VIZ */
+.net-wrap{background:#040a0a;border:1px solid #6bcb7718;border-radius:12px;padding:16px;margin:14px 0;overflow-x:auto}
+.net-wrap svg{display:block;margin:0 auto}
+
+/* PROGRESS BAR */
+.prog-bar-wrap{background:#0a1414;border-radius:100px;height:10px;overflow:hidden;border:1px solid #ffffff08;margin:6px 0}
+.prog-bar{height:100%;border-radius:100px;transition:width .6s ease}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:24px 0}
+
+/* STEPPER */
+.stepper{display:flex;gap:0;margin:18px 0;overflow:hidden;border-radius:10px}
+.step{flex:1;padding:9px 12px;text-align:center;font-size:.75rem;font-weight:600;background:#0a1414;color:var(--muted);border-right:1px solid var(--border);transition:all .3s}
+.step:last-child{border-right:none}
+.step.done{background:#0d2a1a;color:var(--a1)}
+.step.active{background:#0a1e2a;color:var(--a2)}
+
+/* EPOCH TABLE */
+.epoch-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.75rem;margin-top:12px}
+.epoch-table th{background:#0a1414;color:var(--muted);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.epoch-table td{padding:7px 12px;border-bottom:1px solid #ffffff06;color:#7aaa8a}
+.epoch-table tr:last-child td{color:var(--a1);font-weight:700}
+
+/* FOOTER */
+footer{position:relative;z-index:5;text-align:center;padding:32px 20px;color:var(--muted);font-size:.8rem}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--card);border:1px solid var(--a1);color:var(--a1);font-family:var(--mono);font-size:.76rem;padding:11px 18px;border-radius:10px;z-index:9999;opacity:0;transform:translateY(18px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES
+   Targets ≤600px (most phones)
+══════════════════════════════════ */
+@media(max-width:600px){
+  /* Hero */
+  .hero{padding:48px 16px 32px}
+  .hero h1{font-size:clamp(1.9rem,9vw,3rem);letter-spacing:-.5px}
+  .hero p{font-size:.95rem}
+  .hero-btn{padding:12px 24px;font-size:.9rem}
+
+  /* Stats row */
+  .stats{gap:24px}
+  .stat-num{font-size:1.5rem}
+
+  /* Wrap padding */
+  .wrap{padding:0 14px 60px}
+
+  /* Phase card header */
+  .phase-header{padding:18px 16px;gap:12px}
+  .phase-icon{font-size:1.5rem}
+  .phase-title{font-size:1rem}
+  .phase-subtitle{font-size:.76rem}
+  .phase-inner{padding:16px}
+
+  /* Concept grid → 1 col */
+  .concept-grid{grid-template-columns:1fr !important}
+
+  /* Sub tabs wrap */
+  .sub-tabs{gap:6px}
+  .sub-tab{padding:7px 12px;font-size:.78rem}
+
+  /* Experiment padding */
+  .experiment{padding:16px}
+  .exp-title{font-size:.96rem}
+  .exp-desc{font-size:.78rem}
+
+  /* Control rows: stack vertically */
+  .control-row{flex-direction:column;align-items:flex-start;gap:6px}
+  .control-label{min-width:0 !important;width:100%}
+  .control-value{min-width:0 !important}
+  input[type=range]{width:100%}
+  select{width:100%;font-size:.8rem}
+
+  /* Button rows */
+  .btn-row{gap:8px}
+  .btn{padding:9px 16px;font-size:.8rem}
+
+  /* Result boxes */
+  .result-box{padding:12px 14px}
+  .r-value{font-size:.86rem}
+
+  /* Code panels */
+  pre.code{font-size:.7rem;padding:14px;line-height:1.6}
+  .code-header{padding:8px 12px}
+  .code-lang{font-size:.6rem}
+
+  /* Canvas: always full width */
+  canvas{width:100% !important;height:auto !important}
+  .canvas-wrap{padding:10px}
+
+  /* Stepper: smaller text */
+  .stepper{border-radius:8px}
+  .step{padding:7px 5px;font-size:.65rem}
+
+  /* Epoch / trans tables */
+  .epoch-table td,.epoch-table th{padding:5px 8px;font-size:.7rem}
+  .trans-table td,.trans-table th{padding:5px 8px;font-size:.78rem}
+
+  /* AI Explorer specific */
+  .cards-grid{grid-template-columns:1fr !important}
+  .scene-wrap{grid-template-columns:1fr !important}
+  .sub-grid{grid-template-columns:1fr 1fr !important}
+  .card-btn{padding:18px 16px 14px}
+  .panel{padding:18px 16px}
+  header{padding:40px 16px 16px}
+  header h1{font-size:clamp(1.9rem,9vw,3rem)}
+  main{padding:14px 14px 60px}
+  .section-title{margin-top:32px}
+  .diagram-block{padding:12px 8px}
+  .diagram-block svg{min-width:0}
+
+  /* DL / RL dual-canvas grids → single col */
+  div[style*="grid-template-columns:1fr 1fr"]{
+    display:flex !important;flex-direction:column !important;gap:10px !important
+  }
+
+  /* Face recognition two-panel */
+  .fr-grid{grid-template-columns:1fr !important}
+
+  /* Back link */
+  .back-link{margin:0 14px;font-size:.64rem}
+
+  /* NER text */
+  .ner-text{font-size:.88rem;line-height:2}
+
+  /* Chips */
+  .chip{font-size:.68rem;padding:3px 8px}
+
+  /* Confusion matrix */
+  .matrix{transform:scale(0.85);transform-origin:left top}
+  .mx-cell{width:66px;height:44px}
+
+  /* Blob: reduce size so they don't dominate */
+  .blob{opacity:.07}
+}
+
+@media(max-width:400px){
+  .hero h1{font-size:1.7rem}
+  .phase-title{font-size:.93rem}
+  .phase-num{font-size:.62rem;padding:3px 7px}
+  pre.code{font-size:.64rem}
+  .sub-grid{grid-template-columns:1fr !important}
+}
+</style>
+</head>
+<body>
+
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<a class="back-link" href="ai_explorer.html">← Back to AI Explorer</a>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-chip">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="4"/></svg>
+    Deep Learning Lab
+  </div>
+  <h1>Deep Learning<br>& Neural Networks</h1>
+  <p>Explore how layered neural networks think — from simple perceptrons to Transformers powering ChatGPT, through hands-on visual experiments and real Python code.</p>
+  <button class="hero-btn" onclick="startLearning()">
+    Activate Your Brain
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="wrap" id="main-content" style="display:none">
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Architectures</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Live Labs</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Layers Deep</div></div>
+  </div>
+
+  <div class="section-label">Learning Modules</div>
+
+  <!-- ════════════════════════════════════════
+       01  WHAT IS DEEP LEARNING
+  ════════════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#6bcb77;--acbg:#6bcb771a;--gl:#6bcb7718" onclick="togglePhase('ph1',event)">
+    <div class="phase-header">
+      <span class="phase-num">01</span>
+      <span class="phase-icon">🧠</span>
+      <div><div class="phase-title">What is Deep Learning?</div>
+           <div class="phase-subtitle">Neurons, layers and how machines learn to see, hear and understand</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph1"><div class="phase-inner">
+      <div class="concept-grid">
+        <div class="concept-box" style="border-left:3px solid var(--a1)">
+          <div class="cb-title">The Neuron</div>
+          <p>Each artificial neuron takes weighted inputs, sums them, adds a bias, then passes the result through an <strong>activation function</strong> that decides whether to "fire". Inspired by biological brain cells.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a2)">
+          <div class="cb-title">Layers</div>
+          <p><strong>Input layer</strong> receives raw data. <strong>Hidden layers</strong> learn increasingly abstract features. <strong>Output layer</strong> produces the final prediction. "Deep" = many hidden layers.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a3)">
+          <div class="cb-title">Backpropagation</div>
+          <p>After a prediction, the error is propagated backwards through the network. Each weight is nudged in the direction that reduces error. Repeat thousands of times → the network gets smarter.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a4)">
+          <div class="cb-title">Why "Deep" Works</div>
+          <p>Layer 1 detects edges, layer 2 shapes, layer 3 objects. Each layer builds on the last. This hierarchical feature learning is what makes deep nets dramatically outperform shallow ones on complex tasks.</p>
+        </div>
+      </div>
+      <!-- Architecture overview SVG -->
+      <div class="explain-block" style="text-align:center">
+        <div class="cb-title" style="margin-bottom:14px">Deep Learning Architecture Family</div>
+        <svg viewBox="0 0 700 120" style="max-width:100%;display:block;margin:0 auto" font-family="Outfit,sans-serif" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#6bcb7755"/></marker></defs>
+          <rect x="10"  y="35" width="110" height="50" rx="9" fill="#122020" stroke="#6bcb77" stroke-width="1.5"/>
+          <text x="65"  y="57" text-anchor="middle" fill="#6bcb77" font-size="11" font-weight="700">🔗 ANN</text>
+          <text x="65"  y="74" text-anchor="middle" fill="#4a7a5a" font-size="9">Fully Connected</text>
+          <line x1="120" y1="60" x2="142" y2="60" stroke="#6bcb7755" stroke-width="1.5" marker-end="url(#arr)"/>
+          <rect x="142" y="35" width="110" height="50" rx="9" fill="#122020" stroke="#4cc9f0" stroke-width="1.5"/>
+          <text x="197" y="57" text-anchor="middle" fill="#4cc9f0" font-size="11" font-weight="700">🖼️ CNN</text>
+          <text x="197" y="74" text-anchor="middle" fill="#4a7a5a" font-size="9">Images / Vision</text>
+          <line x1="252" y1="60" x2="274" y2="60" stroke="#6bcb7755" stroke-width="1.5" marker-end="url(#arr)"/>
+          <rect x="274" y="35" width="110" height="50" rx="9" fill="#122020" stroke="#f72585" stroke-width="1.5"/>
+          <text x="329" y="57" text-anchor="middle" fill="#f72585" font-size="11" font-weight="700">🔄 RNN</text>
+          <text x="329" y="74" text-anchor="middle" fill="#4a7a5a" font-size="9">Sequences / Time</text>
+          <line x1="384" y1="60" x2="406" y2="60" stroke="#6bcb7755" stroke-width="1.5" marker-end="url(#arr)"/>
+          <rect x="406" y="35" width="110" height="50" rx="9" fill="#122020" stroke="#ffd166" stroke-width="1.5"/>
+          <text x="461" y="57" text-anchor="middle" fill="#ffd166" font-size="11" font-weight="700">🧬 LSTM</text>
+          <text x="461" y="74" text-anchor="middle" fill="#4a7a5a" font-size="9">Long Memory</text>
+          <line x1="516" y1="60" x2="538" y2="60" stroke="#6bcb7755" stroke-width="1.5" marker-end="url(#arr)"/>
+          <rect x="538" y="35" width="152" height="50" rx="9" fill="#122020" stroke="#ff9a3c" stroke-width="1.5"/>
+          <text x="614" y="57" text-anchor="middle" fill="#ff9a3c" font-size="11" font-weight="700">⚡ Transformer</text>
+          <text x="614" y="74" text-anchor="middle" fill="#4a7a5a" font-size="9">GPT / BERT / Claude</text>
+        </svg>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       02  ANN
+  ════════════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#6bcb77;--acbg:#6bcb771a;--gl:#6bcb7718" onclick="togglePhase('ph2',event)">
+    <div class="phase-header">
+      <span class="phase-num">02</span><span class="phase-icon">🔗</span>
+      <div><div class="phase-title">ANN — Artificial Neural Network</div>
+           <div class="phase-subtitle">The foundation: fully connected layers, activation functions & backpropagation</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph2"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🔗 What is an ANN? <span class="tag" style="background:#6bcb7722;color:#6bcb77">Foundation</span></h3>
+        <p>An Artificial Neural Network is a series of <strong>fully connected layers</strong>. Every neuron in one layer connects to every neuron in the next. It's the building block for all other deep learning architectures.</p>
+        <ul>
+          <li><strong>Activation functions:</strong> ReLU, Sigmoid, Tanh — add non-linearity so the network can learn complex patterns</li>
+          <li><strong>Loss function:</strong> Measures how wrong the prediction is (MSE, Cross-Entropy)</li>
+          <li><strong>Optimiser:</strong> Adam, SGD — adjusts weights to minimise loss</li>
+        </ul>
+      </div>
+
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#6bcb77" onclick="switchSub('ann','neuron',this)">⚡ Neuron Simulator</button>
+        <button class="sub-tab" style="--ac:#6bcb77" onclick="switchSub('ann','train',this)">🏋️ Training Visualiser</button>
+      </div>
+
+      <!-- Neuron Simulator -->
+      <div class="sub-content active" id="ann-neuron">
+        <div class="explain-block">
+          <h3>⚡ How a Single Neuron Works</h3>
+          <p>A neuron computes: <strong>output = activation( Σ(weight × input) + bias )</strong>. Adjust the inputs and weights below to watch it fire in real time.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Neuron Fire Simulator</div>
+                 <div class="exp-desc">Set inputs and weights — see the neuron activate or stay dormant</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Input x₁</span><input type="range" id="n-x1" min="-2" max="2" step="0.1" value="1" oninput="runNeuron()"><span class="control-value" id="n-x1v">1.0</span></div>
+          <div class="control-row"><span class="control-label">Weight w₁</span><input type="range" id="n-w1" min="-2" max="2" step="0.1" value="0.8" oninput="runNeuron()"><span class="control-value" id="n-w1v">0.8</span></div>
+          <div class="control-row"><span class="control-label">Input x₂</span><input type="range" id="n-x2" min="-2" max="2" step="0.1" value="0.5" oninput="runNeuron()"><span class="control-value" id="n-x2v">0.5</span></div>
+          <div class="control-row"><span class="control-label">Weight w₂</span><input type="range" id="n-w2" min="-2" max="2" step="0.1" value="0.6" oninput="runNeuron()"><span class="control-value" id="n-w2v">0.6</span></div>
+          <div class="control-row"><span class="control-label">Bias b</span><input type="range" id="n-bias" min="-2" max="2" step="0.1" value="0.1" oninput="runNeuron()"><span class="control-value" id="n-biasv">0.1</span></div>
+          <div class="control-row"><span class="control-label">Activation</span><select id="n-act" onchange="runNeuron()"><option value="relu">ReLU</option><option value="sigmoid">Sigmoid</option><option value="tanh">Tanh</option></select></div>
+          <canvas id="neuron-canvas" width="580" style="max-width:100%" height="200" style="max-width:100%;max-width:100%;margin-top:14px"></canvas>
+          <div class="result-box info" id="neuron-result"><div class="r-label">Neuron Output</div><div class="r-value" id="neuron-out">—</div></div>
+          <div class="code-panel" style="margin-top:18px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Single Neuron</span></div>
+<pre class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Inputs and weights</span>
+x = np.<span class="fn">array</span>([<span class="nb">1.0</span>, <span class="nb">0.5</span>])
+w = np.<span class="fn">array</span>([<span class="nb">0.8</span>, <span class="nb">0.6</span>])
+b = <span class="nb">0.1</span>
+
+<span class="cm"># Weighted sum + bias</span>
+z = np.<span class="fn">dot</span>(w, x) + b
+<span class="fn">print</span>(<span class="str">f"Weighted sum z = {z:.4f}"</span>)
+
+<span class="cm"># Activation functions</span>
+relu    = <span class="fn">max</span>(<span class="nb">0</span>, z)
+sigmoid = <span class="nb">1</span> / (<span class="nb">1</span> + np.<span class="fn">exp</span>(-z))
+tanh    = np.<span class="fn">tanh</span>(z)
+
+<span class="fn">print</span>(<span class="str">f"ReLU:    {relu:.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Sigmoid: {sigmoid:.4f}"</span>)
+<span class="fn">print</span>(<span class="str">f"Tanh:    {tanh:.4f}"</span>)</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Training Visualiser -->
+      <div class="sub-content" id="ann-train">
+        <div class="explain-block">
+          <h3>🏋️ Training an ANN on XOR</h3>
+          <p>XOR is the classic "hard" problem — not linearly separable, so a single neuron fails. An ANN with one hidden layer solves it. Watch the loss drop epoch by epoch.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">ANN Training on XOR Gate</div>
+                 <div class="exp-desc">Choose hidden units and learning rate, then train — watch the loss curve live</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Hidden Units</span><input type="range" id="xor-hu" min="2" max="8" value="4" oninput="document.getElementById('xor-huv').innerText=this.value"><span class="control-value" id="xor-huv">4</span></div>
+          <div class="control-row"><span class="control-label">Learning Rate</span><input type="range" id="xor-lr" min="1" max="10" value="5" oninput="document.getElementById('xor-lrv').innerText='0.'+this.value"><span class="control-value" id="xor-lrv">0.5</span></div>
+          <div class="control-row"><span class="control-label">Epochs</span><input type="range" id="xor-ep" min="100" max="2000" step="100" value="1000" oninput="document.getElementById('xor-epv').innerText=this.value"><span class="control-value" id="xor-epv">1000</span></div>
+          <div class="btn-row"><button class="btn btn-g" onclick="trainXOR()">▶ Train ANN</button><button class="btn btn-b" onclick="resetXOR()">↺ Reset</button></div>
+          <div class="stepper" id="xor-step">
+            <div class="step" id="xs1">Init Weights</div><div class="step" id="xs2">Forward Pass</div>
+            <div class="step" id="xs3">Calc Loss</div><div class="step" id="xs4">Backprop</div><div class="step" id="xs5">Converged ✓</div>
+          </div>
+          <canvas id="xor-canvas" width="580" style="max-width:100%" height="210" style="max-width:100%;max-width:100%"></canvas>
+          <div id="xor-table-wrap"></div>
+          <div class="result-box" id="xor-result" style="margin-top:14px"><div class="r-label">Training Status</div><div class="r-value" id="xor-status">Press "Train ANN" to start…</div></div>
+          <div class="code-panel" style="margin-top:18px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — ANN for XOR (NumPy)</span></div>
+<pre class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># XOR dataset</span>
+X = np.<span class="fn">array</span>([[<span class="nb">0</span>,<span class="nb">0</span>],[<span class="nb">0</span>,<span class="nb">1</span>],[<span class="nb">1</span>,<span class="nb">0</span>],[<span class="nb">1</span>,<span class="nb">1</span>]])
+y = np.<span class="fn">array</span>([[<span class="nb">0</span>],[<span class="nb">1</span>],[<span class="nb">1</span>],[<span class="nb">0</span>]])
+
+<span class="cm"># Weights</span>
+np.random.<span class="fn">seed</span>(<span class="nb">42</span>)
+W1 = np.random.<span class="fn">randn</span>(<span class="nb">2</span>, <span class="nb">4</span>)  <span class="cm"># 2 inputs → 4 hidden</span>
+W2 = np.random.<span class="fn">randn</span>(<span class="nb">4</span>, <span class="nb">1</span>)  <span class="cm"># 4 hidden → 1 output</span>
+b1 = np.<span class="fn">zeros</span>((<span class="nb">1</span>, <span class="nb">4</span>))
+b2 = np.<span class="fn">zeros</span>((<span class="nb">1</span>, <span class="nb">1</span>))
+
+sigmoid = <span class="kw">lambda</span> z: <span class="nb">1</span>/(<span class="nb">1</span>+np.<span class="fn">exp</span>(-z))
+lr = <span class="nb">0.5</span>
+
+<span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">1000</span>):
+    <span class="cm"># Forward pass</span>
+    A1 = <span class="fn">sigmoid</span>(X @ W1 + b1)
+    A2 = <span class="fn">sigmoid</span>(A1 @ W2 + b2)
+    
+    <span class="cm"># Loss (MSE)</span>
+    loss = np.<span class="fn">mean</span>((y - A2)**<span class="nb">2</span>)
+    
+    <span class="cm"># Backprop</span>
+    dA2 = -<span class="nb">2</span>*(y-A2)*A2*(<span class="nb">1</span>-A2)
+    dW2 = A1.T @ dA2
+    dA1 = (dA2 @ W2.T)*A1*(<span class="nb">1</span>-A1)
+    dW1 = X.T @ dA1
+    
+    <span class="cm"># Update</span>
+    W2 -= lr*dW2;  W1 -= lr*dW1
+    b2 -= lr*dA2.<span class="fn">mean</span>(<span class="nb">0</span>)
+    b1 -= lr*dA1.<span class="fn">mean</span>(<span class="nb">0</span>)
+
+<span class="fn">print</span>(<span class="str">f"Final Loss: {loss:.5f}"</span>)
+<span class="fn">print</span>(<span class="str">"Predictions:"</span>, A2.<span class="fn">round</span>(<span class="nb">2</span>))</pre>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       03  CNN
+  ════════════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#4cc9f0;--acbg:#4cc9f01a;--gl:#4cc9f018" onclick="togglePhase('ph3',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#4cc9f0;background:#4cc9f01a;border-color:#4cc9f0">03</span><span class="phase-icon">🖼️</span>
+      <div><div class="phase-title">CNN — Convolutional Neural Network</div>
+           <div class="phase-subtitle">How machines see: filters, feature maps, pooling and image classification</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph3"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🖼️ What is a CNN? <span class="tag" style="background:#4cc9f022;color:#4cc9f0">Vision</span></h3>
+        <p>A CNN slides small <strong>filters (kernels)</strong> across an image to detect local features — edges, textures, shapes. Unlike ANN, it preserves spatial structure. Used in face recognition, medical imaging, self-driving cars.</p>
+        <ul>
+          <li><strong>Convolution:</strong> Filter slides over input, computing dot products → feature map</li>
+          <li><strong>Pooling:</strong> Down-samples maps (Max Pool takes the largest value in each region)</li>
+          <li><strong>Flatten + Dense:</strong> Final classification layer</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#4cc9f0" onclick="switchSub('cnn','filter',this)">🔍 Filter Visualiser</button>
+        <button class="sub-tab" style="--ac:#4cc9f0" onclick="switchSub('cnn','classify',this)">🐱 Image Classifier</button>
+      </div>
+
+      <!-- FILTER VISUALISER -->
+      <div class="sub-content active" id="cnn-filter">
+        <div class="explain-block">
+          <h3>🔍 Convolution Filter Demo</h3>
+          <p>A filter (kernel) slides across a pixel grid and produces a feature map. Choose a filter type to see which features it highlights.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Kernel Filter Visualiser</div>
+                 <div class="exp-desc">Pick a filter — see the original patch and the result of applying it</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Filter Type</span>
+            <select id="cnn-ftype" onchange="runCNNFilter()">
+              <option value="edge_h">Horizontal Edge Detect</option>
+              <option value="edge_v">Vertical Edge Detect</option>
+              <option value="sharpen">Sharpen</option>
+              <option value="blur">Blur / Smooth</option>
+              <option value="emboss">Emboss</option>
+            </select>
+          </div>
+          <div class="control-row"><span class="control-label">Input Noise</span><input type="range" id="cnn-noise" min="0" max="50" value="10" oninput="runCNNFilter()"><span class="control-value" id="cnn-noisev">10</span></div>
+          <canvas id="cnn-canvas" width="580" style="max-width:100%" height="240" style="max-width:100%;max-width:100%;margin-top:12px"></canvas>
+          <div class="result-box info" id="cnn-result" style="margin-top:12px"><div class="r-label">Filter Applied</div><div class="r-value" id="cnn-rval">—</div></div>
+          <div class="code-panel" style="margin-top:18px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — CNN with Keras</span></div>
+<pre class="code"><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, models
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Build CNN for 28×28 grayscale images (e.g. MNIST digits)</span>
+model = models.<span class="fn">Sequential</span>([
+    <span class="cm"># Conv layer 1: 32 filters, 3×3 kernel, ReLU activation</span>
+    layers.<span class="fn">Conv2D</span>(<span class="nb">32</span>, (<span class="nb">3</span>,<span class="nb">3</span>), activation=<span class="str">'relu'</span>,
+                  input_shape=(<span class="nb">28</span>,<span class="nb">28</span>,<span class="nb">1</span>)),
+    layers.<span class="fn">MaxPooling2D</span>((<span class="nb">2</span>,<span class="nb">2</span>)),   <span class="cm"># halves spatial dims</span>
+
+    <span class="cm"># Conv layer 2: 64 filters</span>
+    layers.<span class="fn">Conv2D</span>(<span class="nb">64</span>, (<span class="nb">3</span>,<span class="nb">3</span>), activation=<span class="str">'relu'</span>),
+    layers.<span class="fn">MaxPooling2D</span>((<span class="nb">2</span>,<span class="nb">2</span>)),
+
+    layers.<span class="fn">Flatten</span>(),            <span class="cm"># flatten to 1D</span>
+    layers.<span class="fn">Dense</span>(<span class="nb">64</span>, activation=<span class="str">'relu'</span>),
+    layers.<span class="fn">Dense</span>(<span class="nb">10</span>, activation=<span class="str">'softmax'</span>)  <span class="cm"># 10 digit classes</span>
+])
+
+model.<span class="fn">compile</span>(optimizer=<span class="str">'adam'</span>,
+              loss=<span class="str">'sparse_categorical_crossentropy'</span>,
+              metrics=[<span class="str">'accuracy'</span>])
+
+model.<span class="fn">summary</span>()
+<span class="cm"># Total params: ~93,000</span>
+<span class="cm"># Achieves ~99% accuracy on MNIST</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMAGE CLASSIFIER -->
+      <div class="sub-content" id="cnn-classify">
+        <div class="explain-block">
+          <h3>🐱 CNN Image Classifier Demo</h3>
+          <p>A trained CNN takes an image and outputs probabilities for each class. Adjust the "image characteristics" and see the simulated classifier respond.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Animal Classifier</div>
+                 <div class="exp-desc">Tune image features — watch the CNN probability output shift between classes</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Fur Texture</span><input type="range" id="img-fur" min="0" max="10" value="8" oninput="runCNNClassify()"><span class="control-value" id="img-furv">8</span></div>
+          <div class="control-row"><span class="control-label">Ear Shape (pointed)</span><input type="range" id="img-ear" min="0" max="10" value="9" oninput="runCNNClassify()"><span class="control-value" id="img-earv">9</span></div>
+          <div class="control-row"><span class="control-label">Body Size</span><input type="range" id="img-size" min="0" max="10" value="3" oninput="runCNNClassify()"><span class="control-value" id="img-sizev">3</span></div>
+          <div class="control-row"><span class="control-label">Has Wings</span><select id="img-wing" onchange="runCNNClassify()"><option value="0">No</option><option value="1">Yes</option></select></div>
+          <div class="control-row"><span class="control-label">Feathers</span><input type="range" id="img-feat" min="0" max="10" value="0" oninput="runCNNClassify()"><span class="control-value" id="img-featv">0</span></div>
+          <div id="cnn-probs" style="margin-top:16px"></div>
+          <div class="result-box good" id="cnn-cls-result" style="margin-top:14px"><div class="r-label">Top Prediction</div><div class="r-value" id="cnn-cls-val">—</div></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       04  RNN
+  ════════════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#f72585;--acbg:#f725851a;--gl:#f7258518" onclick="togglePhase('ph4',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#f72585;background:#f725851a;border-color:#f72585">04</span><span class="phase-icon">🔄</span>
+      <div><div class="phase-title">RNN — Recurrent Neural Network</div>
+           <div class="phase-subtitle">Networks with memory: sequences, time-series and text generation</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph4"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🔄 What is an RNN? <span class="tag" style="background:#f7258522;color:#f72585">Sequence</span></h3>
+        <p>Unlike ANN/CNN, RNNs have <strong>loops</strong> — they pass a hidden state from one time step to the next, giving them a form of memory. Perfect for anything that unfolds in time: text, audio, stock prices.</p>
+        <ul>
+          <li><strong>Hidden state h:</strong> Carries information from previous steps</li>
+          <li><strong>Vanishing gradient:</strong> Classic RNNs forget distant context — solved by LSTM/GRU</li>
+          <li><strong>Uses:</strong> Text generation, speech recognition, sentiment analysis, time-series prediction</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#f72585" onclick="switchSub('rnn','seq',this)">📈 Sequence Predictor</button>
+        <button class="sub-tab" style="--ac:#f72585" onclick="switchSub('rnn','sentiment',this)">😊 Sentiment Analysis</button>
+      </div>
+
+      <!-- SEQUENCE PREDICTOR -->
+      <div class="sub-content active" id="rnn-seq">
+        <div class="explain-block">
+          <h3>📈 Time-Series Prediction</h3>
+          <p>An RNN reads a sequence of values and predicts the next one. Here we simulate a noisy sine wave — the model learns the pattern and forecasts future values.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">RNN Time-Series Forecaster</div>
+                 <div class="exp-desc">Choose the wave pattern and noise — watch the RNN predict future values</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Wave Pattern</span>
+            <select id="rnn-wave" onchange="runRNN()">
+              <option value="sine">Sine Wave</option><option value="sawtooth">Sawtooth</option>
+              <option value="square">Square Wave</option><option value="stock">Stock-Like</option>
+            </select>
+          </div>
+          <div class="control-row"><span class="control-label">Noise Level</span><input type="range" id="rnn-noise" min="0" max="40" value="10" oninput="runRNN()"><span class="control-value" id="rnn-noisev">10%</span></div>
+          <div class="control-row"><span class="control-label">Look-back Window</span><input type="range" id="rnn-lb" min="3" max="15" value="7" oninput="runRNN()"><span class="control-value" id="rnn-lbv">7 steps</span></div>
+          <div class="btn-row"><button class="btn btn-r" onclick="runRNN()">▶ Predict</button></div>
+          <canvas id="rnn-canvas" width="580" style="max-width:100%" height="220" style="max-width:100%;max-width:100%;margin-top:14px"></canvas>
+          <div class="result-box info" id="rnn-result"><div class="r-label">Forecast</div><div class="r-value" id="rnn-val">—</div></div>
+          <div class="code-panel" style="margin-top:18px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — RNN for Time-Series (Keras)</span></div>
+<pre class="code"><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, models
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Create noisy sine-wave dataset</span>
+t = np.<span class="fn">linspace</span>(<span class="nb">0</span>, <span class="nb">50</span>, <span class="nb">500</span>)
+signal = np.<span class="fn">sin</span>(t) + np.random.<span class="fn">normal</span>(<span class="nb">0</span>, <span class="nb">0.1</span>, <span class="nb">500</span>)
+
+<span class="cm"># Build sliding-window sequences (lookback=7)</span>
+lookback = <span class="nb">7</span>
+X, y = [], []
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(lookback, <span class="fn">len</span>(signal)):
+    X.<span class="fn">append</span>(signal[i-lookback:i])
+    y.<span class="fn">append</span>(signal[i])
+X = np.<span class="fn">array</span>(X)[..., np.newaxis]  <span class="cm"># shape: (493, 7, 1)</span>
+
+<span class="cm"># Build RNN model</span>
+model = models.<span class="fn">Sequential</span>([
+    layers.<span class="fn">SimpleRNN</span>(<span class="nb">32</span>, activation=<span class="str">'tanh'</span>,
+                     input_shape=(lookback, <span class="nb">1</span>)),
+    layers.<span class="fn">Dense</span>(<span class="nb">1</span>)  <span class="cm"># predict next value</span>
+])
+model.<span class="fn">compile</span>(optimizer=<span class="str">'adam'</span>, loss=<span class="str">'mse'</span>)
+model.<span class="fn">fit</span>(X, y, epochs=<span class="nb">20</span>, batch_size=<span class="nb">32</span>, verbose=<span class="nb">0</span>)
+
+<span class="cm"># Predict next step</span>
+last_seq = signal[-lookback:][np.newaxis, :, np.newaxis]
+prediction = model.<span class="fn">predict</span>(last_seq)
+<span class="fn">print</span>(<span class="str">f"Next value: {prediction[0,0]:.4f}"</span>)</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- SENTIMENT -->
+      <div class="sub-content" id="rnn-sentiment">
+        <div class="explain-block">
+          <h3>😊 Sentiment Analysis with RNN</h3>
+          <p>An RNN reads a sentence word by word, updating its hidden state at each step. The final hidden state captures the overall "feeling" of the sentence for classification.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Movie Review Sentiment</div>
+                 <div class="exp-desc">Type a movie review — watch the RNN process each word and output sentiment</div></div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:.76rem;color:var(--muted);font-family:var(--mono)">Movie Review Text</label><br>
+            <input type="text" id="rnn-text" placeholder="e.g. This movie was absolutely fantastic!" style="width:100%;margin-top:6px;padding:10px 14px;border-radius:8px;font-size:.9rem" oninput="runSentiment()">
+          </div>
+          <div id="rnn-word-chips" style="min-height:36px;display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+          <div style="background:#040a0a;border-radius:10px;padding:16px;margin-bottom:14px">
+            <div class="r-label" style="margin-bottom:10px">Hidden State Over Time (RNN processing)</div>
+            <canvas id="rnn-hidden-canvas" width="540" height="60" style="max-width:100%"></canvas>
+          </div>
+          <div class="result-box" id="rnn-sent-result"><div class="r-label">Sentiment</div><div class="r-value" id="rnn-sent-val">Type a review above…</div></div>
+          <div style="margin-top:14px">
+            <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-bottom:6px"><span>NEGATIVE</span><span>POSITIVE</span></div>
+            <div style="background:#0a1414;border-radius:100px;height:12px;overflow:hidden;border:1px solid #ffffff08">
+              <div id="rnn-sent-bar" style="height:100%;width:50%;border-radius:100px;transition:width .5s ease;background:linear-gradient(90deg,#f72585,#6bcb77)"></div>
+            </div>
+          </div>
+          <div class="code-panel" style="margin-top:18px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Sentiment RNN (Keras)</span></div>
+<pre class="code"><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, models
+<span class="kw">from</span> tensorflow.keras.datasets <span class="kw">import</span> imdb
+<span class="kw">from</span> tensorflow.keras.preprocessing <span class="kw">import</span> sequence
+
+<span class="cm"># Load IMDB (25k reviews, binary sentiment)</span>
+(X_train, y_train), (X_test, y_test) = imdb.<span class="fn">load_data</span>(
+    num_words=<span class="nb">10000</span>)
+
+<span class="cm"># Pad sequences to equal length</span>
+X_train = sequence.<span class="fn">pad_sequences</span>(X_train, maxlen=<span class="nb">200</span>)
+X_test  = sequence.<span class="fn">pad_sequences</span>(X_test,  maxlen=<span class="nb">200</span>)
+
+<span class="cm"># Build RNN model</span>
+model = models.<span class="fn">Sequential</span>([
+    layers.<span class="fn">Embedding</span>(<span class="nb">10000</span>, <span class="nb">32</span>),   <span class="cm"># word → vector</span>
+    layers.<span class="fn">SimpleRNN</span>(<span class="nb">32</span>),           <span class="cm"># recurrent layer</span>
+    layers.<span class="fn">Dense</span>(<span class="nb">1</span>, activation=<span class="str">'sigmoid'</span>)  <span class="cm"># 0=neg, 1=pos</span>
+])
+model.<span class="fn">compile</span>(optimizer=<span class="str">'rmsprop'</span>,
+              loss=<span class="str">'binary_crossentropy'</span>,
+              metrics=[<span class="str">'accuracy'</span>])
+model.<span class="fn">fit</span>(X_train, y_train, epochs=<span class="nb">5</span>,
+          batch_size=<span class="nb">128</span>, validation_split=<span class="nb">0.2</span>)
+<span class="cm"># Typical accuracy: ~85% on test set</span></pre>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       05  LSTM
+  ════════════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#ffd166;--acbg:#ffd1661a;--gl:#ffd16618" onclick="togglePhase('ph5',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#ffd166;background:#ffd1661a;border-color:#ffd166">05</span><span class="phase-icon">🧬</span>
+      <div><div class="phase-title">LSTM — Long Short-Term Memory</div>
+           <div class="phase-subtitle">Gates that selectively remember and forget — solving the vanishing gradient problem</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph5"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🧬 What is LSTM? <span class="tag" style="background:#ffd16622;color:#ffd166">Long Memory</span></h3>
+        <p>LSTM solves the vanilla RNN's "forgetting" problem with three <strong>gates</strong>: a <em>forget gate</em> (what to discard), an <em>input gate</em> (what new info to store), and an <em>output gate</em> (what to pass forward). This lets it remember context over hundreds of steps.</p>
+        <ul>
+          <li><strong>Cell state (c):</strong> Long-term memory — carried forward with minimal modification</li>
+          <li><strong>Hidden state (h):</strong> Short-term output — passed to next cell and output layer</li>
+          <li><strong>GRU:</strong> Simpler variant with just 2 gates, often equally effective</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#ffd166" onclick="switchSub('lstm','gate',this)">🚪 Gate Visualiser</button>
+        <button class="sub-tab" style="--ac:#ffd166" onclick="switchSub('lstm','textgen',this)">✍️ Text Generation</button>
+      </div>
+
+      <!-- GATE VISUALISER -->
+      <div class="sub-content active" id="lstm-gate">
+        <div class="explain-block">
+          <h3>🚪 LSTM Gate Simulator</h3>
+          <p>Adjust the gate values to see how each one controls information flow through the LSTM cell. The cell state (memory) is shaped by forget, input, and output gates.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">LSTM Cell Gate Control</div>
+                 <div class="exp-desc">Slide the gate values (0=closed, 1=open) and watch information flow</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Forget Gate f</span><input type="range" id="lg-forget" min="0" max="100" value="70" oninput="runLSTMGate()"><span class="control-value" id="lg-fv">0.70</span></div>
+          <div class="control-row"><span class="control-label">Input Gate i</span><input type="range" id="lg-input" min="0" max="100" value="80" oninput="runLSTMGate()"><span class="control-value" id="lg-iv">0.80</span></div>
+          <div class="control-row"><span class="control-label">New Candidate g</span><input type="range" id="lg-cand" min="-100" max="100" value="60" oninput="runLSTMGate()"><span class="control-value" id="lg-cv">0.60</span></div>
+          <div class="control-row"><span class="control-label">Output Gate o</span><input type="range" id="lg-out" min="0" max="100" value="90" oninput="runLSTMGate()"><span class="control-value" id="lg-ov">0.90</span></div>
+          <div class="control-row"><span class="control-label">Prev Cell State c</span><input type="range" id="lg-prev" min="-100" max="100" value="50" oninput="runLSTMGate()"><span class="control-value" id="lg-pv">0.50</span></div>
+          <canvas id="lstm-canvas" width="580" style="max-width:100%" height="260" style="max-width:100%;max-width:100%;margin-top:14px"></canvas>
+          <div class="result-box info" id="lstm-result"><div class="r-label">LSTM Cell State & Output</div><div class="r-value" id="lstm-val">—</div></div>
+          <div class="code-panel" style="margin-top:18px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — LSTM Cell (NumPy manual implementation)</span></div>
+<pre class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+sigmoid = <span class="kw">lambda</span> x: <span class="nb">1</span>/(<span class="nb">1</span>+np.<span class="fn">exp</span>(-x))
+
+<span class="cm"># Previous states</span>
+h_prev = np.<span class="fn">array</span>([<span class="nb">0.3</span>])   <span class="cm"># previous hidden state</span>
+c_prev = np.<span class="fn">array</span>([<span class="nb">0.5</span>])   <span class="cm"># previous cell state</span>
+x_t    = np.<span class="fn">array</span>([<span class="nb">0.8</span>])   <span class="cm"># current input</span>
+
+<span class="cm"># (Simplified — weights normally learned via backprop)</span>
+<span class="cm"># Forget gate: how much of c_prev to keep?</span>
+f = <span class="fn">sigmoid</span>(<span class="nb">0.9</span>)    <span class="cm"># 0.71 → keep 71% of old memory</span>
+
+<span class="cm"># Input gate: how much new info to add?</span>
+i = <span class="fn">sigmoid</span>(<span class="nb">1.2</span>)    <span class="cm"># 0.77</span>
+g = np.<span class="fn">tanh</span>(<span class="nb">0.6</span>)    <span class="cm"># candidate: 0.54</span>
+
+<span class="cm"># Output gate: what to expose as hidden state?</span>
+o = <span class="fn">sigmoid</span>(<span class="nb">1.5</span>)    <span class="cm"># 0.82</span>
+
+<span class="cm"># New cell state (long-term memory)</span>
+c_new = f * c_prev + i * g
+<span class="fn">print</span>(<span class="str">f"New cell state c: {c_new[0]:.4f}"</span>)
+
+<span class="cm"># New hidden state (output)</span>
+h_new = o * np.<span class="fn">tanh</span>(c_new)
+<span class="fn">print</span>(<span class="str">f"New hidden state h: {h_new[0]:.4f}"</span>)</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEXT GENERATION -->
+      <div class="sub-content" id="lstm-textgen">
+        <div class="explain-block">
+          <h3>✍️ Text Generation</h3>
+          <p>An LSTM trained on a corpus of text learns to predict the next character/word. Given a seed prompt, it generates new text one token at a time by sampling from its output distribution.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">LSTM Text Autocomplete</div>
+                 <div class="exp-desc">Type a seed phrase — the simulated LSTM generates a continuation token by token</div></div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:.76rem;color:var(--muted);font-family:var(--mono)">Seed Prompt</label><br>
+            <input type="text" id="lstm-seed" placeholder="e.g. The neural network" style="width:100%;margin-top:6px;padding:10px 14px;border-radius:8px;font-size:.9rem" value="The neural network">
+          </div>
+          <div class="control-row"><span class="control-label">Temperature</span><input type="range" id="lstm-temp" min="1" max="20" value="8" oninput="document.getElementById('lstm-tempv').innerText=(this.value/10).toFixed(1)"><span class="control-value" id="lstm-tempv">0.8</span></div>
+          <div class="control-row"><span class="control-label">Generate Length</span><input type="range" id="lstm-len" min="10" max="60" value="30" oninput="document.getElementById('lstm-lenv').innerText=this.value+' tokens'"><span class="control-value" id="lstm-lenv">30 tokens</span></div>
+          <div class="btn-row"><button class="btn btn-y" onclick="runLSTMTextGen()">✍️ Generate</button><button class="btn btn-b" onclick="document.getElementById('lstm-out').innerHTML='';document.getElementById('lstm-gen-result').className='result-box'">↺ Clear</button></div>
+          <div class="result-box" id="lstm-gen-result" style="margin-top:14px;min-height:80px">
+            <div class="r-label">Generated Text</div>
+            <div id="lstm-out" style="font-family:var(--sans);font-size:.9rem;line-height:1.7;color:#7aaa8a;margin-top:4px"></div>
+          </div>
+          <div class="code-panel" style="margin-top:18px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — LSTM Text Generation (Keras)</span></div>
+<pre class="code"><span class="kw">from</span> tensorflow.keras <span class="kw">import</span> layers, models
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Assume text = large string corpus, chars = unique chars</span>
+<span class="cm"># char_to_idx, idx_to_char dicts created from vocab</span>
+
+<span class="cm"># Build LSTM model (character-level)</span>
+model = models.<span class="fn">Sequential</span>([
+    layers.<span class="fn">LSTM</span>(<span class="nb">128</span>, input_shape=(seq_len, vocab_size)),
+    layers.<span class="fn">Dense</span>(vocab_size, activation=<span class="str">'softmax'</span>)
+])
+model.<span class="fn">compile</span>(optimizer=<span class="str">'adam'</span>,
+              loss=<span class="str">'categorical_crossentropy'</span>)
+
+<span class="cm"># Generation with temperature sampling</span>
+<span class="kw">def</span> <span class="fn">sample</span>(preds, temperature=<span class="nb">0.8</span>):
+    preds = np.<span class="fn">log</span>(preds) / temperature
+    preds = np.<span class="fn">exp</span>(preds) / np.<span class="fn">sum</span>(np.<span class="fn">exp</span>(preds))
+    <span class="kw">return</span> np.random.<span class="fn">choice</span>(<span class="fn">len</span>(preds), p=preds)
+
+<span class="cm"># Generate text token by token</span>
+generated = seed_text
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">200</span>):
+    x = encode(generated[-seq_len:])
+    preds = model.<span class="fn">predict</span>(x[np.newaxis])
+    next_char = idx_to_char[<span class="fn">sample</span>(preds[<span class="nb">0</span>])]
+    generated += next_char
+
+<span class="fn">print</span>(generated)</pre>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       06  TRANSFORMER
+  ════════════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#ff9a3c;--acbg:#ff9a3c1a;--gl:#ff9a3c18" onclick="togglePhase('ph6',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#ff9a3c;background:#ff9a3c1a;border-color:#ff9a3c">06</span><span class="phase-icon">⚡</span>
+      <div><div class="phase-title">Transformer — Attention is All You Need</div>
+           <div class="phase-subtitle">The architecture powering GPT, Claude, BERT — self-attention explained</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph6"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>⚡ What is a Transformer? <span class="tag" style="background:#ff9a3c22;color:#ff9a3c">State of the Art</span></h3>
+        <p>Transformers replaced RNNs for most NLP tasks. Instead of processing tokens sequentially, they use <strong>self-attention</strong> — every token looks at every other token simultaneously, weighting how relevant each is. This enables massive parallelism and long-range dependencies.</p>
+        <ul>
+          <li><strong>Query, Key, Value (QKV):</strong> Each token creates 3 vectors. Attention = softmax(Q·Kᵀ/√d)·V</li>
+          <li><strong>Multi-head attention:</strong> Run attention multiple times in parallel (different "views")</li>
+          <li><strong>Positional encoding:</strong> Adds position info (since there's no recurrence)</li>
+          <li><strong>GPT:</strong> Decoder-only. <strong>BERT:</strong> Encoder-only. <strong>T5:</strong> Encoder-Decoder</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#ff9a3c" onclick="switchSub('tfm','attn',this)">🎯 Attention Visualiser</button>
+        <button class="sub-tab" style="--ac:#ff9a3c" onclick="switchSub('tfm','compare',this)">📊 Architecture Compare</button>
+      </div>
+
+      <!-- ATTENTION VISUALISER -->
+      <div class="sub-content active" id="tfm-attn">
+        <div class="explain-block">
+          <h3>🎯 Self-Attention Heatmap</h3>
+          <p>In self-attention, each word attends to all other words. The heatmap shows how much attention word <em>i</em> pays to word <em>j</em>. Brighter = stronger attention.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Sentence Attention Heatmap</div>
+                 <div class="exp-desc">Enter a sentence — see which words attend strongly to each other</div></div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:.76rem;color:var(--muted);font-family:var(--mono)">Input Sentence</label><br>
+            <input type="text" id="attn-text" placeholder="The cat sat on the mat" style="width:100%;margin-top:6px;padding:10px 14px;border-radius:8px;font-size:.9rem" value="The cat sat on the mat" oninput="runAttention()">
+          </div>
+          <div class="control-row"><span class="control-label">Attention Head</span>
+            <select id="attn-head" onchange="runAttention()">
+              <option value="0">Head 1 — Syntactic</option><option value="1">Head 2 — Semantic</option>
+              <option value="2">Head 3 — Positional</option><option value="3">Head 4 — Coreference</option>
+            </select>
+          </div>
+          <div class="btn-row"><button class="btn btn-o" onclick="runAttention()">🎯 Visualise Attention</button></div>
+          <canvas id="attn-canvas" width="580" style="max-width:100%" height="300" style="max-width:100%;max-width:100%;margin-top:14px"></canvas>
+          <div class="result-box info" id="attn-result" style="margin-top:12px"><div class="r-label">Strongest Attention Pair</div><div class="r-value" id="attn-val">—</div></div>
+          <div class="code-panel" style="margin-top:18px">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Self-Attention (NumPy)</span></div>
+<pre class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">self_attention</span>(X, d_k=<span class="nb">64</span>):
+    <span class="cm">"""
+    X: input embeddings shape (seq_len, d_model)
+    d_k: key/query dimension
+    """</span>
+    <span class="cm"># Learned weight matrices (simplified)</span>
+    W_Q = np.random.<span class="fn">randn</span>(X.shape[<span class="nb">1</span>], d_k)
+    W_K = np.random.<span class="fn">randn</span>(X.shape[<span class="nb">1</span>], d_k)
+    W_V = np.random.<span class="fn">randn</span>(X.shape[<span class="nb">1</span>], d_k)
+
+    <span class="cm"># Compute Q, K, V projections</span>
+    Q = X @ W_Q   <span class="cm"># Queries</span>
+    K = X @ W_K   <span class="cm"># Keys</span>
+    V = X @ W_V   <span class="cm"># Values</span>
+
+    <span class="cm"># Scaled dot-product attention</span>
+    scores = Q @ K.T / np.<span class="fn">sqrt</span>(d_k)  <span class="cm"># (seq, seq)</span>
+
+    <span class="cm"># Softmax → attention weights</span>
+    e_scores = np.<span class="fn">exp</span>(scores - scores.<span class="fn">max</span>(axis=-<span class="nb">1</span>, keepdims=<span class="nb">True</span>))
+    weights   = e_scores / e_scores.<span class="fn">sum</span>(axis=-<span class="nb">1</span>, keepdims=<span class="nb">True</span>)
+
+    <span class="cm"># Weighted sum of values</span>
+    output = weights @ V
+    <span class="kw">return</span> output, weights
+
+<span class="cm"># Example usage</span>
+tokens = [<span class="str">"The"</span>, <span class="str">"cat"</span>, <span class="str">"sat"</span>, <span class="str">"on"</span>, <span class="str">"the"</span>, <span class="str">"mat"</span>]
+X = np.random.<span class="fn">randn</span>(<span class="fn">len</span>(tokens), <span class="nb">128</span>)  <span class="cm"># random embeddings</span>
+out, attn = <span class="fn">self_attention</span>(X)
+<span class="fn">print</span>(<span class="str">"Attention matrix shape:"</span>, attn.shape)  <span class="cm"># (6, 6)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARE -->
+      <div class="sub-content" id="tfm-compare">
+        <div class="explain-block">
+          <h3>📊 Architecture Comparison</h3>
+          <p>Different tasks call for different architectures. This interactive comparison shows the trade-offs across all five deep learning architectures.</p>
+        </div>
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Pick Your Task — Find the Best Architecture</div>
+                 <div class="exp-desc">Select a task — see which DL architecture wins and why</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Your Task</span>
+            <select id="cmp-task" onchange="runCompare()" style="flex:1">
+              <option value="image">Image Classification (cat vs dog)</option>
+              <option value="speech">Speech Recognition</option>
+              <option value="text">Text Sentiment Analysis</option>
+              <option value="timeseries">Stock Price Prediction</option>
+              <option value="translation">Language Translation</option>
+              <option value="generation">Text Generation (GPT-like)</option>
+              <option value="detection">Object Detection in Video</option>
+            </select>
+          </div>
+          <div id="cmp-output" style="margin-top:16px"></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       07  QUIZ
+  ════════════════════════════════════════ -->
+  <div class="phase-card" style="--ac:#4cc9f0;--acbg:#4cc9f01a;--gl:#4cc9f018" onclick="togglePhase('ph7',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#4cc9f0;background:#4cc9f01a;border-color:#4cc9f0">07</span><span class="phase-icon">🎯</span>
+      <div><div class="phase-title">Knowledge Check</div>
+           <div class="phase-subtitle">Test your Deep Learning understanding</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph7"><div class="phase-inner" id="dl-quiz-wrap">
+      <div id="dl-quiz-body"></div><div class="btn-row" id="dl-quiz-btns" style="margin-top:18px"></div>
+    </div></div>
+  </div>
+
+</div><!-- wrap -->
+<footer><div style="font-size:1.4rem;margin-bottom:8px">🧠</div>Deep Learning Lab · Neural Networks for Curious Minds</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══ UTILS ══ */
+const $ = id => document.getElementById(id);
+const rnd = (lo,hi) => lo + Math.random()*(hi-lo);
+function toast(msg,dur=2200){ const t=$('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
+function startLearning(){ $('main-content').style.display='block'; setTimeout(()=>$('main-content').scrollIntoView({behavior:'smooth'}),100); }
+function togglePhase(id,e){
+  if(e.target.closest('button,input,select,canvas,a')) return;
+  const card=$(`#${id}`).closest('.phase-card')||document.querySelector(`[onclick*="${id}"]`).closest('.phase-card');
+  // find by body id
+  const body=$(id); const c=body.closest('.phase-card');
+  const open=c.classList.contains('open');
+  c.classList.toggle('open',!open);
+  if(!open){ setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'nearest'}),80); if(id==='ph7') initDLQuiz(); }
+}
+function switchSub(pre,tab,btn){
+  const p=btn.closest('.phase-inner');
+  p.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  p.querySelectorAll('.sub-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active'); $(`${pre}-${tab}`).classList.add('active');
+}
+
+/* ══ NEURON SIMULATOR ══ */
+function runNeuron(){
+  const x1=parseFloat($('n-x1').value), w1=parseFloat($('n-w1').value);
+  const x2=parseFloat($('n-x2').value), w2=parseFloat($('n-w2').value);
+  const b=parseFloat($('n-bias').value), act=$('n-act').value;
+  $('n-x1v').innerText=x1.toFixed(1); $('n-w1v').innerText=w1.toFixed(1);
+  $('n-x2v').innerText=x2.toFixed(1); $('n-w2v').innerText=w2.toFixed(1);
+  $('n-biasv').innerText=b.toFixed(1);
+  const z=x1*w1+x2*w2+b;
+  let out; if(act==='relu') out=Math.max(0,z); else if(act==='sigmoid') out=1/(1+Math.exp(-z)); else out=Math.tanh(z);
+  $('neuron-out').innerText=`z = ${z.toFixed(4)}   →  ${act}(z) = ${out.toFixed(4)}  ${out>0.5?'🔥 FIRED':'💤 dormant'}`;
+  $('neuron-result').className='result-box '+(out>0.5?'good':'info');
+  drawNeuron(x1,w1,x2,w2,b,z,out,act);
+}
+function drawNeuron(x1,w1,x2,w2,b,z,out,act){
+  const cv=$('neuron-canvas'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#040a0a'; ctx.fillRect(0,0,W,H);
+  const fired=out>0.5;
+  // input nodes
+  [[x1,w1,'x₁','w₁'],[x2,w2,'x₂','w₂']].forEach(([xv,wv,xl,wl],i)=>{
+    const y=H*0.25+i*H*0.5;
+    ctx.beginPath(); ctx.arc(60,y,22,0,Math.PI*2);
+    ctx.fillStyle='#122020'; ctx.strokeStyle='#6bcb77'; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#6bcb77'; ctx.font='bold 11px Space Mono'; ctx.textAlign='center';
+    ctx.fillText(xl,60,y+4);
+    ctx.fillStyle='#4a7a5a'; ctx.font='9px Space Mono'; ctx.fillText(xv.toFixed(1),60,y+20);
+    // weight line
+    const lineColor=wv>=0?'#6bcb7788':'#f7258888';
+    ctx.beginPath(); ctx.moveTo(82,y); ctx.lineTo(220,H/2);
+    ctx.strokeStyle=lineColor; ctx.lineWidth=Math.abs(wv)*3+1; ctx.stroke();
+    // weight label
+    ctx.fillStyle=lineColor; ctx.font='9px Space Mono'; ctx.textAlign='center';
+    ctx.fillText(wl+'='+wv.toFixed(1),(82+220)/2,(y+H/2)/2);
+  });
+  // bias line
+  ctx.beginPath(); ctx.moveTo(W/2,H-20); ctx.lineTo(220,H/2);
+  ctx.strokeStyle='#ffd16655'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='#ffd166'; ctx.font='9px Space Mono'; ctx.textAlign='center';
+  ctx.fillText('b='+b.toFixed(1),W/2-30,H-8);
+  // neuron circle
+  ctx.beginPath(); ctx.arc(260,H/2,34,0,Math.PI*2);
+  ctx.fillStyle=fired?'#1a3a2a':'#1a1a2a';
+  ctx.strokeStyle=fired?'#6bcb77':'#4cc9f0'; ctx.lineWidth=3; ctx.fill(); ctx.stroke();
+  ctx.fillStyle=fired?'#6bcb77':'#4cc9f0'; ctx.font='bold 10px Space Mono'; ctx.textAlign='center';
+  ctx.fillText(act,260,H/2-6); ctx.fillText('z='+z.toFixed(2),260,H/2+10);
+  // glow if fired
+  if(fired){ ctx.beginPath(); ctx.arc(260,H/2,44,0,Math.PI*2); ctx.strokeStyle='#6bcb7733'; ctx.lineWidth=6; ctx.stroke(); }
+  // output
+  ctx.beginPath(); ctx.moveTo(294,H/2); ctx.lineTo(380,H/2);
+  ctx.strokeStyle=fired?'#6bcb77':'#4cc9f055'; ctx.lineWidth=3; ctx.stroke();
+  ctx.beginPath(); ctx.arc(410,H/2,28,0,Math.PI*2);
+  ctx.fillStyle=fired?'#1a3a2a':'#0a1a1a';
+  ctx.strokeStyle=fired?'#6bcb77':'#4a7a5a'; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+  ctx.fillStyle=fired?'#6bcb77':'#4a7a5a'; ctx.font='bold 11px Space Mono'; ctx.textAlign='center';
+  ctx.fillText(out.toFixed(3),410,H/2+4);
+  ctx.fillStyle='#4a7a5a'; ctx.font='9px Space Mono'; ctx.fillText('output',410,H/2+20);
+}
+
+/* ══ XOR TRAINING ══ */
+let xorHistory=[];
+async function trainXOR(){
+  const hu=parseInt($('xor-hu').value), lr=parseInt($('xor-lr').value)/10;
+  const ep=parseInt($('xor-ep').value);
+  const X=[[0,0],[0,1],[1,0],[1,1]], y=[0,1,1,0];
+  // init weights
+  let W1=Array.from({length:2},()=>Array.from({length:hu},()=>(Math.random()-0.5)*2));
+  let W2=Array.from({length:hu},()=>(Math.random()-0.5)*2);
+  let b1=Array(hu).fill(0), b2=0;
+  const sig=z=>1/(1+Math.exp(-z));
+  xorHistory=[];
+  const steps=['xs1','xs2','xs3','xs4','xs5'];
+  steps.forEach((s,i)=>$(s).className='step'+(i===0?' active':''));
+  async function animate(iter){
+    steps.forEach((s,i)=>$(s).className='step'+(i<Math.min(4,Math.floor(iter/ep*5))?'done':i===Math.min(4,Math.floor(iter/ep*5))?'active':''));
+  }
+  for(let e=0;e<ep;e++){
+    let loss=0;
+    for(let i=0;i<4;i++){
+      // forward
+      let h=b1.map((bi,j)=>sig(X[i][0]*W1[0][j]+X[i][1]*W1[1][j]+bi));
+      let o=sig(h.reduce((s,hj,j)=>s+hj*W2[j],b2));
+      loss+=(y[i]-o)**2;
+      // backward
+      let dO=(-2*(y[i]-o))*o*(1-o);
+      b2-=lr*dO;
+      h.forEach((hj,j)=>{ W2[j]-=lr*dO*hj; let dH=dO*W2[j]*hj*(1-hj); b1[j]-=lr*dH; W1[0][j]-=lr*dH*X[i][0]; W1[1][j]-=lr*dH*X[i][1]; });
+    }
+    if(e%Math.max(1,Math.floor(ep/40))===0) xorHistory.push({e,loss:loss/4});
+    if(e%Math.max(1,Math.floor(ep/5))===0){ animate(e); drawXOR(); await sleep(50); }
+  }
+  // final predictions
+  const preds=X.map(xi=>{ let h=b1.map((bi,j)=>sig(xi[0]*W1[0][j]+xi[1]*W1[1][j]+bi)); return sig(h.reduce((s,hj,j)=>s+hj*W2[j],b2)); });
+  steps.forEach(s=>$(s).className='step done');
+  $('xor-status').innerText=`✅ Training complete! Final Loss: ${(xorHistory.at(-1)?.loss||0).toFixed(5)}`;
+  $('xor-result').className='result-box good';
+  renderXORTable(preds);
+  drawXOR(); toast('XOR training complete!');
+}
+function drawXOR(){
+  const cv=$('xor-canvas'), ctx=cv.getContext('2d'), W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#040a0a'; ctx.fillRect(0,0,W,H);
+  if(!xorHistory.length) return;
+  const maxL=xorHistory[0].loss, minL=xorHistory.at(-1).loss;
+  const toX=i=>14+(W-28)*i/xorHistory.length;
+  const toY=l=>H-16-(H-28)*(Math.max(0,maxL-l))/(maxL-minL||1);
+  ctx.strokeStyle='#6bcb7722'; ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){ ctx.beginPath(); ctx.moveTo(14,toY(minL+(maxL-minL)*g/4)); ctx.lineTo(W-14,toY(minL+(maxL-minL)*g/4)); ctx.stroke(); }
+  ctx.beginPath(); xorHistory.forEach((p,i)=>{ const x=toX(i),y=toY(p.loss); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.strokeStyle='#6bcb77'; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.fillStyle='#4a7a5a'; ctx.font='9px Space Mono'; ctx.textAlign='left';
+  ctx.fillText('Loss: '+maxL.toFixed(3),16,H-6);
+  ctx.textAlign='right'; ctx.fillText('Loss: '+minL.toFixed(3),W-6,H-6);
+  ctx.fillStyle='#6bcb7777'; ctx.font='10px Space Mono'; ctx.textAlign='center';
+  ctx.fillText('Training Loss Curve (XOR)',W/2,14);
+}
+function resetXOR(){ xorHistory=[]; $('xor-canvas').getContext('2d').clearRect(0,0,$('xor-canvas').width,$('xor-canvas').height); $('xor-status').innerText='Reset. Press Train ANN…'; $('xor-result').className='result-box'; $('xor-table-wrap').innerHTML=''; ['xs1','xs2','xs3','xs4','xs5'].forEach(s=>$(s).className='step'); }
+function renderXORTable(preds){
+  const rows=[[0,0,0],[0,1,1],[1,0,1],[1,1,0]];
+  $('xor-table-wrap').innerHTML=`<table class="epoch-table"><thead><tr><th>x₁</th><th>x₂</th><th>Expected</th><th>Predicted</th><th>Correct?</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${preds[i].toFixed(3)}</td><td>${Math.round(preds[i])===r[2]?'✅':'❌'}</td></tr>`).join('')}</tbody></table>`;
+}
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* ══ CNN FILTER ══ */
+const KERNELS={
+  edge_h:[[-1,-1,-1],[0,0,0],[1,1,1]],
+  edge_v:[[-1,0,1],[-1,0,1],[-1,0,1]],
+  sharpen:[[0,-1,0],[-1,5,-1],[0,-1,0]],
+  blur:[[1/9,1/9,1/9],[1/9,1/9,1/9],[1/9,1/9,1/9]],
+  emboss:[[-2,-1,0],[-1,1,1],[0,1,2]]
+};
+function runCNNFilter(){
+  const ft=$('cnn-ftype').value, noise=parseInt($('cnn-noise').value);
+  $('cnn-noisev').innerText=noise;
+  const cv=$('cnn-canvas'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#040a0a'; ctx.fillRect(0,0,W,H);
+  const N=18;
+  // Generate pixel grid
+  let grid=[];
+  for(let r=0;r<N;r++){ grid.push([]); for(let c=0;c<N;c++){
+    let base=(r<N/2&&c<N/2)||(r>=N/2&&c>=N/2)?200:50;
+    grid[r].push(Math.max(0,Math.min(255,base+(Math.random()-0.5)*noise*2)));
+  }}
+  const K=KERNELS[ft]; const cellW=10, pad=8;
+  // Draw original
+  ctx.fillStyle='#4a7a5a'; ctx.font='9px Space Mono'; ctx.textAlign='center';
+  ctx.fillText('Input Image',pad+N*cellW/2,16);
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    const v=Math.round(grid[r][c]); ctx.fillStyle=`rgb(${v},${Math.round(v*0.9)},${Math.round(v*0.6)})`;
+    ctx.fillRect(pad+c*cellW,22+r*cellW,cellW-1,cellW-1);
+  }
+  // Kernel display
+  const kx=pad+N*cellW+30;
+  ctx.fillStyle='#ffd166'; ctx.textAlign='center'; ctx.fillText('Kernel',kx+44,16);
+  K.forEach((row,r)=>row.forEach((v,c)=>{
+    const mx=Math.max(...K.flat().map(Math.abs))||1;
+    const norm=v/mx; const col=norm>=0?`rgba(106,203,119,${Math.abs(norm)+0.1})`:`rgba(247,37,133,${Math.abs(norm)+0.1})`;
+    ctx.fillStyle=col; ctx.fillRect(kx+c*30,22+r*30,28,28);
+    ctx.fillStyle='#fff'; ctx.font='9px Space Mono'; ctx.textAlign='center';
+    ctx.fillText(typeof v==='number'?v.toFixed(2):v,kx+c*30+14,22+r*30+17);
+  }));
+  // Convolve
+  const out=[];
+  for(let r=1;r<N-1;r++){ out.push([]); for(let c=1;c<N-1;c++){
+    let s=0; K.forEach((row,kr)=>row.forEach((kv,kc)=>s+=grid[r-1+kr][c-1+kc]*kv));
+    out[r-1].push(Math.max(0,Math.min(255,s+128)));
+  }}
+  const ox=kx+120; ctx.fillStyle='#4cc9f0'; ctx.textAlign='center'; ctx.fillText('Feature Map',ox+(N-2)*cellW/2,16);
+  out.forEach((row,r)=>row.forEach((v,c)=>{
+    ctx.fillStyle=`rgb(${Math.round(v*0.4)},${Math.round(v*0.8)},${Math.round(v)})`; 
+    ctx.fillRect(ox+c*cellW,22+r*cellW,cellW-1,cellW-1);
+  }));
+  const labels={edge_h:'Horizontal edges detected',edge_v:'Vertical edges detected',sharpen:'Image sharpened',blur:'Image smoothed/blurred',emboss:'Emboss effect applied'};
+  $('cnn-rval').innerText=labels[ft]+` — Kernel: ${K.flat().join(', ')}`;
+}
+
+/* ══ CNN CLASSIFIER ══ */
+function runCNNClassify(){
+  const fur=parseInt($('img-fur').value), ear=parseInt($('img-ear').value);
+  const sz=parseInt($('img-size').value), wing=parseInt($('img-wing').value);
+  const feat=parseInt($('img-feat').value);
+  $('img-furv').innerText=fur; $('img-earv').innerText=ear; $('img-sizev').innerText=sz; $('img-featv').innerText=feat;
+  // Simulated class probabilities
+  const cat=Math.max(0,fur*0.06+ear*0.07+(10-sz)*0.04-(wing*0.5)-feat*0.04+0.1);
+  const dog=Math.max(0,fur*0.05+(10-ear)*0.04+sz*0.05-(wing*0.4)-feat*0.03+0.08);
+  const bird=Math.max(0,wing*1.2+feat*0.1+(10-fur)*0.03-ear*0.04+0.02);
+  const fish=Math.max(0,(10-fur)*0.05+(10-ear)*0.03-(wing*0.3)+sz*0.03+0.02);
+  const total=cat+dog+bird+fish||1;
+  const probs=[['🐱 Cat',cat/total,'#6bcb77'],['🐶 Dog',dog/total,'#4cc9f0'],['🦜 Bird',bird/total,'#f72585'],['🐟 Fish',fish/total,'#ffd166']];
+  probs.sort((a,b)=>b[1]-a[1]);
+  $('cnn-probs').innerHTML=probs.map(([lbl,p,col])=>`
+    <div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.76rem;margin-bottom:4px"><span>${lbl}</span><span style="color:${col}">${(p*100).toFixed(1)}%</span></div>
+    <div class="prog-bar-wrap"><div class="prog-bar" style="width:${(p*100).toFixed(1)}%;background:${col}66;border-right:2px solid ${col}"></div></div></div>`).join('');
+  $('cnn-cls-val').innerText=`${probs[0][0]} — ${(probs[0][1]*100).toFixed(1)}% confidence`;
+  $('cnn-cls-result').className='result-box good';
+}
+
+/* ══ RNN TIME SERIES ══ */
+function runRNN(){
+  const wave=$('rnn-wave').value, noise=parseInt($('rnn-noise').value)/100;
+  const lb=parseInt($('rnn-lb').value);
+  $('rnn-noisev').innerText=noise*100+'%'; $('rnn-lbv').innerText=lb+' steps';
+  const N=60;
+  let data=[];
+  for(let i=0;i<N;i++){
+    let v; const t=i*0.2;
+    if(wave==='sine') v=Math.sin(t);
+    else if(wave==='sawtooth') v=(t%(2*Math.PI))/(Math.PI)-1;
+    else if(wave==='square') v=Math.sin(t)>0?1:-1;
+    else v=0.6*Math.sin(t)+0.3*Math.sin(t*2.3)+0.1*Math.sin(t*5.1);
+    data.push(v+(Math.random()-0.5)*noise*2);
+  }
+  // Simple autoregression prediction
+  const weights=Array.from({length:lb},(_,i)=>0.8*Math.exp(-i*0.3));
+  const wsum=weights.reduce((a,b)=>a+b,1e-9);
+  const wn=weights.map(w=>w/wsum);
+  const preds=[];
+  for(let i=lb;i<N+5;i++){
+    const w=data.slice(Math.max(0,i-lb),i);
+    preds.push(w.reduce((s,v,j)=>s+v*(wn[lb-1-j]||0),0));
+  }
+  drawRNN(data,preds,lb);
+  $('rnn-val').innerText=`Predicted next 5 values: ${preds.slice(-5).map(v=>v.toFixed(3)).join(', ')}`;
+  $('rnn-result').className='result-box info';
+}
+function drawRNN(data,preds,lb){
+  const cv=$('rnn-canvas'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#040a0a'; ctx.fillRect(0,0,W,H);
+  const all=[...data,...preds.slice(-5)];
+  const mn=Math.min(...all)-0.1, mx=Math.max(...all)+0.1;
+  const toX=i=>16+(W-32)*i/(data.length+5);
+  const toY=v=>H-16-(H-28)*(v-mn)/(mx-mn);
+  ctx.strokeStyle='#ffffff0a'; ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){ ctx.beginPath(); ctx.moveTo(16,toY(mn+(mx-mn)*g/4)); ctx.lineTo(W-16,toY(mn+(mx-mn)*g/4)); ctx.stroke(); }
+  // actual data
+  ctx.beginPath(); data.forEach((v,i)=>{ i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)); });
+  ctx.strokeStyle='#4cc9f0'; ctx.lineWidth=2; ctx.stroke();
+  // lookback highlight
+  ctx.fillStyle='#f7258512';
+  ctx.fillRect(toX(data.length-lb),14,toX(data.length)-toX(data.length-lb),H-28);
+  ctx.fillStyle='#f72585'; ctx.font='9px Space Mono'; ctx.textAlign='center';
+  ctx.fillText('lookback',toX(data.length-lb/2),12);
+  // predictions
+  ctx.beginPath(); preds.forEach((v,i)=>{ const x=toX(data.length-1+i); i===0?ctx.moveTo(x,toY(data.at(-1))):ctx.lineTo(x,toY(v)); });
+  ctx.strokeStyle='#6bcb77'; ctx.lineWidth=2.5; ctx.setLineDash([6,4]); ctx.stroke(); ctx.setLineDash([]);
+  // labels
+  ctx.fillStyle='#4cc9f0'; ctx.font='9px Space Mono'; ctx.textAlign='left'; ctx.fillText('Actual',20,H-4);
+  ctx.fillStyle='#6bcb77'; ctx.fillText('RNN Prediction',90,H-4);
+}
+
+/* ══ SENTIMENT ══ */
+const posWords=['great','amazing','excellent','fantastic','wonderful','love','brilliant','perfect','outstanding','superb','best','incredible'];
+const negWords=['terrible','awful','boring','bad','worst','hate','horrible','disappointing','dull','poor','waste','pathetic'];
+function runSentiment(){
+  const text=($('rnn-text').value||'').toLowerCase().split(/\s+/).filter(Boolean);
+  let score=0.5, pos=0, neg=0;
+  const chips=$('rnn-word-chips'); chips.innerHTML='';
+  text.forEach(w=>{
+    const isPos=posWords.some(p=>w.includes(p));
+    const isNeg=negWords.some(p=>w.includes(p));
+    const neg2=['not','never','no','nothing'].some(p=>w===p);
+    if(isPos){ pos++; score+=0.12; }
+    if(isNeg){ neg++; score-=0.12; }
+    if(neg2) score-=0.05;
+    const chip=document.createElement('span');
+    chip.style.cssText=`display:inline-block;padding:3px 10px;border-radius:100px;font-family:var(--mono);font-size:.72rem;background:${isPos?'#1a3a2a':isNeg?'#2a1a1a':'#0a1414'};border:1px solid ${isPos?'#6bcb77':isNeg?'#f72585':'#ffffff14'};color:${isPos?'#6bcb77':isNeg?'#f72585':'#4a7a5a'}`;
+    chip.innerText=w; chips.appendChild(chip);
+  });
+  score=Math.max(0.02,Math.min(0.98,score));
+  $('rnn-sent-bar').style.width=(score*100)+'%';
+  const el=$('rnn-sent-val');
+  if(score>0.65){ el.innerHTML='😊 POSITIVE — '+Math.round(score*100)+'% confidence'; $('rnn-sent-result').className='result-box good'; }
+  else if(score<0.35){ el.innerHTML='😞 NEGATIVE — '+Math.round((1-score)*100)+'% confidence'; $('rnn-sent-result').className='result-box err'; }
+  else { el.innerHTML='😐 NEUTRAL — ambiguous sentiment'; $('rnn-sent-result').className='result-box info'; }
+  // Draw hidden state evolution
+  drawHiddenState(text,score);
+}
+function drawHiddenState(words,finalScore){
+  const cv=$('rnn-hidden-canvas'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#040a0a'; ctx.fillRect(0,0,W,H);
+  if(!words.length) return;
+  let h=0.5;
+  const pts=[{x:0,y:h}];
+  words.forEach((w,i)=>{
+    if(posWords.some(p=>w.includes(p))) h=Math.min(1,h+0.15);
+    else if(negWords.some(p=>w.includes(p))) h=Math.max(0,h-0.15);
+    else h+=(Math.random()-0.5)*0.04;
+    pts.push({x:(i+1)/words.length,y:Math.max(0,Math.min(1,h))});
+  });
+  const toX=v=>10+(W-20)*v, toY=v=>H-6-(H-12)*v;
+  ctx.beginPath(); pts.forEach((p,i)=>{ i===0?ctx.moveTo(toX(p.x),toY(p.y)):ctx.lineTo(toX(p.x),toY(p.y)); });
+  ctx.strokeStyle=finalScore>0.5?'#6bcb77':'#f72585'; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#4a7a5a'; ctx.font='8px Space Mono'; ctx.textAlign='left'; ctx.fillText('Hidden state h(t)',12,H-2);
+}
+
+/* ══ LSTM GATE ══ */
+function runLSTMGate(){
+  const f=parseInt($('lg-forget').value)/100, i_=parseInt($('lg-input').value)/100;
+  const g=parseInt($('lg-cand').value)/100, o=parseInt($('lg-out').value)/100;
+  const c_prev=parseInt($('lg-prev').value)/100;
+  $('lg-fv').innerText=f.toFixed(2); $('lg-iv').innerText=i_.toFixed(2);
+  $('lg-cv').innerText=g.toFixed(2); $('lg-ov').innerText=o.toFixed(2); $('lg-pv').innerText=c_prev.toFixed(2);
+  const c_new=f*c_prev+i_*g;
+  const h_new=o*Math.tanh(c_new);
+  drawLSTM(f,i_,g,o,c_prev,c_new,h_new);
+  $('lstm-val').innerText=`New cell state c = ${c_new.toFixed(4)}   |   Output h = ${h_new.toFixed(4)}`;
+  $('lstm-result').className='result-box '+(Math.abs(h_new)>0.3?'good':'info');
+}
+function drawLSTM(f,ig,g,o,cp,cn,hn){
+  const cv=$('lstm-canvas'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#040a0a'; ctx.fillRect(0,0,W,H);
+  const gateColor=(v,max=1)=>`hsl(${120*Math.abs(v)/max},60%,45%)`;
+  const boxes=[
+    {x:60, y:80, w:80, h:40, label:'Forget f', val:f, color:`rgba(247,37,133,${f})`},
+    {x:60, y:140, w:80, h:40, label:'Input i', val:ig, color:`rgba(76,201,240,${ig})`},
+    {x:60, y:200, w:80, h:40, label:'Cand. g', val:g, color:`rgba(255,209,102,${Math.abs(g)})`},
+    {x:60, y:30, w:80, h:40, label:'Output o', val:o, color:`rgba(106,203,119,${o})`},
+  ];
+  boxes.forEach(b=>{
+    ctx.fillStyle=b.color||'#1a2020'; ctx.strokeStyle='#6bcb7744'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.roundRect(b.x,b.y,b.w,b.h,6); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#f0faf0'; ctx.font='9px Space Mono'; ctx.textAlign='center';
+    ctx.fillText(b.label,b.x+b.w/2,b.y+16);
+    ctx.fillStyle='#6bcb77'; ctx.font='bold 10px Space Mono';
+    ctx.fillText(b.val.toFixed(2),b.x+b.w/2,b.y+30);
+  });
+  // Cell state highway
+  ctx.strokeStyle='#ffd16688'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(200,50); ctx.lineTo(480,50); ctx.stroke();
+  ctx.fillStyle='#ffd166'; ctx.font='9px Space Mono'; ctx.textAlign='center';
+  ctx.fillText('Cell State c (long-term memory)',340,40);
+  // c_prev, c_new nodes
+  ctx.beginPath(); ctx.arc(200,50,16,0,Math.PI*2); ctx.fillStyle='#1a2a1a'; ctx.strokeStyle='#ffd166'; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#ffd166'; ctx.font='8px Space Mono'; ctx.textAlign='center'; ctx.fillText(cp.toFixed(2),200,54);
+  ctx.fillStyle='#4a7a5a'; ctx.font='8px Space Mono'; ctx.fillText('c_prev',200,72);
+  ctx.beginPath(); ctx.arc(460,50,18,0,Math.PI*2); ctx.fillStyle=Math.abs(cn)>0.3?'#1a3a1a':'#1a1a2a'; ctx.strokeStyle=Math.abs(cn)>0.3?'#6bcb77':'#4cc9f0'; ctx.lineWidth=2.5; ctx.fill(); ctx.stroke();
+  ctx.fillStyle=Math.abs(cn)>0.3?'#6bcb77':'#4cc9f0'; ctx.font='bold 9px Space Mono'; ctx.fillText(cn.toFixed(2),460,54);
+  ctx.fillStyle='#4a7a5a'; ctx.font='8px Space Mono'; ctx.fillText('c_new',460,72);
+  // h_new output
+  ctx.strokeStyle='#6bcb7766'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(460,68); ctx.lineTo(460,110);ctx.lineTo(530,110); ctx.stroke();
+  ctx.beginPath(); ctx.arc(540,110,16,0,Math.PI*2); ctx.fillStyle='#1a3a2a'; ctx.strokeStyle='#6bcb77'; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#6bcb77'; ctx.font='bold 8px Space Mono'; ctx.textAlign='center'; ctx.fillText(hn.toFixed(2),540,113);
+  ctx.fillStyle='#4a7a5a'; ctx.font='8px Space Mono'; ctx.fillText('h_new',540,130);
+  // equations
+  ctx.fillStyle='#4a7a5a'; ctx.font='9px Space Mono'; ctx.textAlign='left';
+  ctx.fillText(`c = f·c_prev + i·g = ${f.toFixed(2)}×${cp.toFixed(2)} + ${ig.toFixed(2)}×${g.toFixed(2)} = ${cn.toFixed(3)}`,14,170);
+  ctx.fillText(`h = o·tanh(c) = ${o.toFixed(2)}×tanh(${cn.toFixed(3)}) = ${hn.toFixed(3)}`,14,190);
+}
+
+/* ══ LSTM TEXT GEN ══ */
+const vocab=['learns','processes','data','deeply','through','layers','features','patterns','neurons','weights','gradients','activates','converges','optimises','represents','transforms','encodes','predicts','generates','understands'];
+async function runLSTMTextGen(){
+  const seed=$('lstm-seed').value||'The network';
+  const temp=parseInt($('lstm-temp').value)/10;
+  const len=parseInt($('lstm-len').value);
+  $('lstm-out').innerHTML=''; $('lstm-gen-result').className='result-box info';
+  let text=seed+' ';
+  $('lstm-out').innerText=text;
+  // Simulate token-by-token generation with "temperature" randomness
+  for(let i=0;i<len;i++){
+    await sleep(120);
+    // Pick next word with temperature-based randomness
+    const pool=vocab.map(w=>({w,sc:Math.random()**(1/temp)})).sort((a,b)=>b.sc-a.sc);
+    const next=pool[Math.floor(Math.random()*Math.min(3,Math.floor(temp*3)+1))].w;
+    text+=next+' ';
+    $('lstm-out').innerText=text;
+  }
+  $('lstm-gen-result').className='result-box good';
+  toast('Generation complete!');
+}
+
+/* ══ ATTENTION ══ */
+function runAttention(){
+  const sentence=$('attn-text').value||'The cat sat on the mat';
+  const head=parseInt($('attn-head').value);
+  const words=sentence.trim().split(/\s+/);
+  const n=Math.min(words.length,10);
+  // Generate synthetic attention matrix based on head personality
+  const attn=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>{
+    let base=Math.random()*0.2;
+    if(head===0){ if(j===i+1||j===i-1) base+=0.4; } // syntactic: adjacent
+    else if(head===1){ if(words[i]&&words[j]&&words[i].length===words[j].length) base+=0.3; } // semantic: similar length
+    else if(head===2){ base+=Math.exp(-Math.abs(i-j)*0.5)*0.4; } // positional: nearby
+    else { if(words[i]==='the'&&j>i) base+=0.5; if(words[j]==='the'&&i>j) base+=0.3; } // coreference
+    return base;
+  }));
+  // Softmax each row
+  attn.forEach((row,i)=>{ const s=row.reduce((a,b)=>a+Math.exp(b),0); attn[i]=row.map(v=>Math.exp(v)/s); });
+  drawAttention(words.slice(0,n),attn);
+  // Find strongest
+  let best={val:0,i:0,j:0};
+  attn.forEach((row,i)=>row.forEach((v,j)=>{ if(v>best.val&&i!==j){best={val:v,i,j};} }));
+  $('attn-val').innerText=`"${words[best.i]||'?'}" → "${words[best.j]||'?'}" (${(best.val*100).toFixed(1)}% attention weight)`;
+  $('attn-result').className='result-box info';
+}
+function drawAttention(words,attn){
+  const cv=$('attn-canvas'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#040a0a'; ctx.fillRect(0,0,W,H);
+  const n=words.length, cell=Math.min(44,Math.floor((Math.min(W,H)-80)/n));
+  const ox=80, oy=60;
+  // Row labels (attending word)
+  ctx.fillStyle='#6bcb77'; ctx.font='bold 10px Outfit'; ctx.textAlign='right';
+  words.forEach((w,i)=>ctx.fillText(w,ox-6,oy+i*cell+cell/2+4));
+  // Col labels (attended to)
+  ctx.textAlign='center'; ctx.font='bold 10px Outfit';
+  words.forEach((w,j)=>{ ctx.save(); ctx.translate(ox+j*cell+cell/2,oy-6); ctx.rotate(-Math.PI/4); ctx.fillText(w,0,0); ctx.restore(); });
+  // Heatmap cells
+  attn.forEach((row,i)=>row.forEach((v,j)=>{
+    const intensity=Math.round(v*255);
+    ctx.fillStyle=`rgb(${Math.round(intensity*0.4)},${Math.round(intensity*0.8)},${intensity})`;
+    ctx.fillRect(ox+j*cell,oy+i*cell,cell-2,cell-2);
+    if(v>0.2){ ctx.fillStyle='#000'; ctx.font='8px Space Mono'; ctx.textAlign='center'; ctx.fillText((v*100).toFixed(0)+'%',ox+j*cell+cell/2-1,oy+i*cell+cell/2+3); }
+  }));
+  ctx.fillStyle='#4a7a5a'; ctx.font='9px Space Mono'; ctx.textAlign='left';
+  ctx.fillText('← attended-to words →',ox,H-5);
+}
+
+/* ══ COMPARE ══ */
+const compareData={
+  image:{winner:'🖼️ CNN',score:[95,40,30,25,90],reason:"CNNs are purpose-built for images — conv filters detect spatial features like edges, textures and shapes that are translation-invariant. Transformers (ViT) are catching up for large datasets."},
+  speech:{winner:'🧬 LSTM / Transformer',score:[20,50,80,90,95],reason:"Speech is a temporal sequence. LSTMs handle it well; modern systems use Transformer-based models (Wav2Vec, Whisper) which process long audio contexts with attention."},
+  text:{winner:'⚡ Transformer',score:[15,25,75,85,98],reason:"Transformers (BERT, RoBERTa) dominate NLP classification tasks. Bidirectional attention allows full-sentence context at every position, far outperforming RNNs."},
+  timeseries:{winner:'🧬 LSTM',score:[30,20,70,88,75],reason:"Time-series prediction benefits from LSTM's gating mechanism which selectively remembers long-term trends. Transformers also work well with positional encoding."},
+  translation:{winner:'⚡ Transformer',score:[10,15,55,70,99],reason:"Seq2Seq Transformers (encoder-decoder) revolutionised translation. The attention mechanism aligns source and target words far better than RNNs."},
+  generation:{winner:'⚡ Transformer (GPT)',score:[10,15,40,65,99],reason:"GPT-style decoder-only Transformers are the state of the art for text generation. Autoregressive attention over thousands of tokens with billions of parameters."},
+  detection:{winner:'🖼️ CNN + Transformer',score:[88,78,30,35,85],reason:"Object detection uses CNN backbones (ResNet, EfficientNet) for feature extraction, now combined with Transformer decoders (DETR) for detecting multiple objects."},
+};
+const archNames=['🔗 ANN','🖼️ CNN','🔄 RNN','🧬 LSTM','⚡ Transformer'];
+function runCompare(){
+  const task=$('cmp-task').value, d=compareData[task];
+  $('cmp-output').innerHTML=`
+    <div class="result-box good" style="margin-bottom:14px"><div class="r-label">Best Architecture</div><div class="r-value">${d.winner}</div></div>
+    <div class="explain-block" style="margin-bottom:14px"><p>${d.reason}</p></div>
+    <div class="cb-title" style="margin-bottom:10px;font-family:var(--mono);font-size:.68rem;letter-spacing:2px">Suitability Scores</div>
+    ${archNames.map((name,i)=>`
+      <div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.76rem;margin-bottom:4px"><span>${name}</span><span style="color:${d.score[i]>80?'#6bcb77':d.score[i]>50?'#ffd166':'#f72585'}">${d.score[i]}%</span></div>
+      <div class="prog-bar-wrap"><div class="prog-bar" style="width:${d.score[i]}%;background:${d.score[i]>80?'#6bcb7755':d.score[i]>50?'#ffd16655':'#f7258555'};border-right:2px solid ${d.score[i]>80?'#6bcb77':d.score[i]>50?'#ffd166':'#f72585'}"></div></div></div>`).join('')}`;
+}
+
+/* ══ QUIZ ══ */
+const quizQ=[
+  {q:'Which activation function outputs 0 for all negative inputs?',options:['Sigmoid','Tanh','ReLU','Softmax'],ans:2},
+  {q:'What makes a CNN different from a regular ANN?',options:['It has no hidden layers','It uses convolutional filters to preserve spatial structure','It processes sequences one at a time','It has no weights'],ans:1},
+  {q:'What problem do LSTMs solve that vanilla RNNs struggle with?',options:['Image recognition','Vanishing gradients / long-term dependencies','Overfitting on small data','Lack of activation functions'],ans:1},
+  {q:'In a Transformer, what does the "attention" mechanism compute?',options:['The average of all inputs','A weighted sum of values based on query-key similarity','A convolution over the sequence','A recurrent hidden state'],ans:1},
+  {q:'Which architecture is best suited for image classification?',options:['RNN','LSTM','CNN','Simple ANN'],ans:2},
+  {q:'What does "backpropagation" do in neural network training?',options:['Feeds data forward through layers','Shuffles training data','Propagates error backwards to update weights','Adds new layers to the network'],ans:2},
+  {q:'The "vanishing gradient" problem means…',options:['The network gets too large','Gradients shrink to near-zero, stopping early layers from learning','The learning rate is too high','The batch size is wrong'],ans:1},
+];
+let qi=0,qs=0,qa=false;
+function initDLQuiz(){ qi=0;qs=0;qa=false; renderDLQ(); }
+function renderDLQ(){
+  if(qi>=quizQ.length){showDLResult();return;}
+  const q=quizQ[qi];
+  $('dl-quiz-body').innerHTML=`
+    <div style="margin-bottom:16px"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">QUESTION ${qi+1} OF ${quizQ.length}</div>
+    <div style="font-size:1.02rem;font-weight:600;line-height:1.6">${q.q}</div></div>
+    <div style="display:grid;gap:10px" id="dq-opts">${q.options.map((o,i)=>`<button onclick="answerDL(${i})" style="background:#0a1414;border:1px solid #ffffff12;border-radius:10px;padding:13px 17px;color:var(--text);font-family:var(--sans);font-size:.88rem;text-align:left;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='#6bcb77'" onmouseout="if(!this.dataset.a)this.style.borderColor='#ffffff12'">
+      <span style="font-family:var(--mono);color:var(--muted);margin-right:10px">${String.fromCharCode(65+i)}.</span>${o}</button>`).join('')}</div>
+    <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:12px">Score: ${qs}/${qi}</div>`;
+  $('dl-quiz-btns').innerHTML='';
+}
+function answerDL(chosen){
+  if(qa)return; qa=true;
+  const q=quizQ[qi];
+  document.querySelectorAll('#dq-opts button').forEach((b,i)=>{
+    b.style.pointerEvents='none';
+    if(i===q.ans){b.style.background='#0d2a1a';b.style.borderColor='#6bcb77';b.style.color='#6bcb77';}
+    else if(i===chosen&&chosen!==q.ans){b.style.background='#2a0d0d';b.style.borderColor='#f72585';b.style.color='#f72585';}
+    b.dataset.a='1';
+  });
+  if(chosen===q.ans) qs++;
+  $('dl-quiz-btns').innerHTML=`<button class="btn btn-g" onclick="nextDLQ()">${qi+1<quizQ.length?'Next →':'See Results 🎯'}</button>`;
+}
+function nextDLQ(){ qi++; qa=false; renderDLQ(); }
+function showDLResult(){
+  const p=Math.round(qs/quizQ.length*100);
+  const msg=p>=80?'🏆 Outstanding! You really understand deep learning!':p>=60?'👍 Good work — review the sections you missed.':'📚 Keep exploring the experiments above!';
+  $('dl-quiz-body').innerHTML=`<div style="text-align:center;padding:20px">
+    <div style="font-size:3.6rem;margin-bottom:14px">${p>=80?'🏆':p>=60?'🎯':'📚'}</div>
+    <div style="font-size:2.6rem;font-weight:800;background:linear-gradient(135deg,#6bcb77,#4cc9f0);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${qs}/${quizQ.length}</div>
+    <div style="font-family:var(--mono);font-size:.78rem;color:var(--muted);margin:8px 0">${p}% correct</div>
+    <div style="color:#7aaa8a;margin-top:14px;font-size:.93rem">${msg}</div></div>`;
+  $('dl-quiz-btns').innerHTML=`<button class="btn btn-g" onclick="initDLQuiz()">🔄 Try Again</button>`;
+}
+
+/* ══ INIT ══ */
+window.onload=()=>{
+  runNeuron(); runCNNFilter(); runCNNClassify();
+  runRNN(); runSentiment(); runLSTMGate(); runAttention(); runCompare();
+};
+</script>
+</body>
+</html>

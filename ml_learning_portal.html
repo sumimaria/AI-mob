@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Lab — Machine Learning for Students</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0f1a;
+  --surface: #111827;
+  --card: #1a2235;
+  --border: #ffffff0f;
+  --accent1: #38bdf8;
+  --accent2: #a78bfa;
+  --accent3: #34d399;
+  --accent4: #fb923c;
+  --accent5: #f472b6;
+  --text: #f1f5f9;
+  --muted: #64748b;
+  --radius: 16px;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Outfit', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+
+/* ── GRID BG ── */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(#ffffff06 1px, transparent 1px), linear-gradient(90deg, #ffffff06 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── BLOBS ── */
+.blob { position: fixed; border-radius: 50%; filter: blur(100px); opacity: .12; pointer-events: none; z-index: 0; animation: bfloat 14s ease-in-out infinite alternate; }
+.b1 { width: 600px; height: 600px; background: var(--accent1); top: -200px; left: -200px; }
+.b2 { width: 500px; height: 500px; background: var(--accent2); bottom: -150px; right: -150px; animation-delay: 4s; }
+.b3 { width: 350px; height: 350px; background: var(--accent3); top: 40%; left: 35%; animation-delay: 8s; }
+@keyframes bfloat { from { transform: translate(0,0) scale(1); } to { transform: translate(40px, 28px) scale(1.08); } }
+
+/* ── LAYOUT ── */
+.wrap { position: relative; z-index: 5; max-width: 1000px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* ── HERO ── */
+.hero { text-align: center; padding: 80px 20px 48px; position: relative; z-index: 5; }
+.hero-chip { display: inline-flex; align-items: center; gap: 8px; background: #38bdf81a; border: 1px solid #38bdf833; color: var(--accent1); font-family: var(--mono); font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px; border-radius: 100px; margin-bottom: 24px; }
+.hero h1 { font-size: clamp(2.8rem, 7vw, 5rem); font-weight: 800; line-height: 1.05; letter-spacing: -1px; background: linear-gradient(135deg, #f1f5f9 0%, var(--accent1) 50%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p { color: var(--muted); font-size: 1.1rem; margin: 18px auto 36px; max-width: 540px; line-height: 1.75; }
+.hero-btn { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #0b0f1a; font-family: var(--sans); font-size: 1rem; font-weight: 700; padding: 15px 36px; border-radius: 100px; border: none; cursor: pointer; transition: transform .2s, box-shadow .2s; box-shadow: 0 0 40px #38bdf844; }
+.hero-btn:hover { transform: translateY(-3px); box-shadow: 0 0 60px #38bdf866; }
+.hero-btn svg { transition: transform .2s; }
+.hero-btn:hover svg { transform: translateX(4px); }
+
+/* ── STATS ROW ── */
+.stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin: 0 0 60px; }
+.stat { text-align: center; }
+.stat-num { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--accent1), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-label { font-size: .78rem; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+/* ── SECTION LABEL ── */
+.section-label { font-family: var(--mono); font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.section-label::before { content: ''; width: 24px; height: 1px; background: var(--muted); }
+
+/* ── PHASE CARD (main clickable) ── */
+.phase-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 0; overflow: hidden; margin-bottom: 20px; transition: border-color .25s, box-shadow .25s; cursor: pointer; }
+.phase-card:hover { border-color: var(--accent-color, var(--accent1)); box-shadow: 0 0 32px var(--glow, #38bdf822); }
+.phase-header { display: flex; align-items: center; gap: 20px; padding: 28px 32px; user-select: none; }
+.phase-num { font-family: var(--mono); font-size: .75rem; color: var(--accent-color, var(--accent1)); background: var(--accent-bg, #38bdf81a); border: 1px solid var(--accent-color, var(--accent1)); padding: 4px 10px; border-radius: 6px; flex-shrink: 0; }
+.phase-icon { font-size: 2.2rem; flex-shrink: 0; }
+.phase-title { font-size: 1.3rem; font-weight: 700; }
+.phase-subtitle { font-size: .88rem; color: var(--muted); margin-top: 3px; }
+.phase-chevron { margin-left: auto; color: var(--muted); transition: transform .3s; }
+.phase-card.open .phase-chevron { transform: rotate(180deg); }
+.phase-body { display: none; border-top: 1px solid var(--border); }
+.phase-card.open .phase-body { display: block; animation: slideOpen .3s ease; }
+@keyframes slideOpen { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.phase-inner { padding: 32px; }
+
+/* ── CONCEPT EXPLAIN ── */
+.concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+@media(max-width:640px){ .concept-grid { grid-template-columns: 1fr; } }
+.concept-box { background: #0d1422; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.concept-box .cb-title { font-family: var(--mono); font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--accent-color, var(--accent1)); margin-bottom: 8px; }
+.concept-box p { color: #9db4cc; font-size: .9rem; line-height: 1.7; }
+
+/* ── SUBCATEGORY TABS ── */
+.sub-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.sub-tab { background: #0d1422; border: 1px solid var(--border); border-radius: 8px; padding: 10px 20px; font-size: .88rem; font-weight: 600; cursor: pointer; transition: all .2s; color: var(--muted); }
+.sub-tab:hover { border-color: var(--accent-color, var(--accent1)); color: var(--text); }
+.sub-tab.active { background: var(--accent-color, var(--accent1)); color: #0b0f1a; border-color: transparent; }
+.sub-content { display: none; }
+.sub-content.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── EXPLANATION BLOCK ── */
+.explain-block { background: #0d1422; border-radius: 12px; border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
+.explain-block h3 { font-size: 1.1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.explain-block p { color: #9db4cc; font-size: .92rem; line-height: 1.75; }
+.explain-block ul { margin: 10px 0 0 18px; color: #9db4cc; font-size: .92rem; line-height: 1.9; }
+.tag { display: inline-block; font-size: .7rem; font-weight: 700; letter-spacing: 1px; padding: 2px 10px; border-radius: 100px; margin-left: 8px; text-transform: uppercase; }
+
+/* ── EXPERIMENT BLOCK ── */
+.experiment { background: linear-gradient(135deg, #0d1a2e, #120d1e); border: 1px solid #38bdf822; border-radius: 16px; padding: 28px; margin-top: 20px; }
+.exp-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.exp-badge { background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #0b0f1a; font-family: var(--mono); font-size: .65rem; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; font-weight: 700; }
+.exp-title { font-size: 1.1rem; font-weight: 700; }
+.exp-desc { color: var(--muted); font-size: .88rem; }
+
+/* ── CONTROLS ── */
+.control-row { display: flex; align-items: center; gap: 16px; margin: 12px 0; flex-wrap: wrap; }
+.control-label { font-family: var(--mono); font-size: .72rem; color: var(--muted); min-width:0; }
+.control-value { font-family: var(--mono); font-size: .8rem; color: var(--accent1); min-width:0; }
+input[type=range] { flex: 1; min-width:0; accent-color: var(--accent1); cursor: pointer; }
+select, input[type=text], input[type=number] { background: #0d1422; border: 1px solid #ffffff18; color: var(--text); font-family: var(--mono); font-size: .8rem; padding: 8px 14px; border-radius: 8px; cursor: pointer; outline: none; }
+select:focus, input:focus { border-color: var(--accent1); }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: none; padding: 10px 22px; border-radius: 8px; font-family: var(--sans); font-weight: 700; font-size: .88rem; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.btn:hover { transform: translateY(-2px); }
+.btn-primary { background: linear-gradient(135deg, var(--accent1), #0ea5e9); color: #0b0f1a; }
+.btn-secondary { background: linear-gradient(135deg, var(--accent2), #7c3aed); color: #fff; }
+.btn-green { background: linear-gradient(135deg, var(--accent3), #059669); color: #0b0f1a; }
+.btn-orange { background: linear-gradient(135deg, var(--accent4), #ea580c); color: #fff; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+/* ── RESULT BOX ── */
+.result-box { background: #0b0f1a; border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-top: 16px; font-family: var(--mono); font-size: .85rem; min-height: 52px; transition: border-color .3s; }
+.result-box.good { border-color: var(--accent3); }
+.result-box.warn { border-color: var(--accent4); }
+.result-box.info { border-color: var(--accent1); }
+.r-label { font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.r-value { font-size: 1rem; font-weight: 700; }
+
+/* ── CODE PANEL ── */
+.code-panel { background: #060912; border: 1px solid #38bdf822; border-radius: 12px; overflow: hidden; margin-top: 20px; }
+.code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #0d1422; border-bottom: 1px solid #ffffff0a; }
+.code-dots { display: flex; gap: 6px; }
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+.code-lang { font-family: var(--mono); font-size: .68rem; color: var(--muted); letter-spacing: 1px; }
+pre.code { margin: 0; padding: 20px; font-family: var(--mono); font-size: .8rem; line-height: 1.75; overflow-x: auto; color: #cdd6f4; white-space: pre; }
+.kw  { color: #cba6f7; }
+.fn  { color: #89b4fa; }
+.str { color: #a6e3a1; }
+.cm  { color: #585b70; font-style: italic; }
+.nb  { color: #fab387; }
+.op  { color: #89dceb; }
+
+/* ── CANVAS ── */
+canvas { border-radius: 10px; display: block; }
+.canvas-wrap { background: #060912; border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; margin: 16px 0; }
+
+/* ── SCATTER CHART (SVG-based) ── */
+.chart-area { background: #060912; border: 1px solid #ffffff0a; border-radius: 10px; overflow: hidden; }
+
+/* ── PROGRESS STEPPER ── */
+.stepper { display: flex; gap: 0; margin: 20px 0; overflow: hidden; border-radius: 10px; }
+.step { flex: 1; padding: 10px 14px; text-align: center; font-size: .78rem; font-weight: 600; background: #0d1422; color: var(--muted); border-right: 1px solid var(--border); transition: all .3s; }
+.step:last-child { border-right: none; }
+.step.done { background: #1a3a2a; color: var(--accent3); }
+.step.active { background: #1a2a3a; color: var(--accent1); }
+
+/* ── CONFUSION MATRIX ── */
+.matrix { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; width: fit-content; margin: 12px auto; }
+.mx-cell { width: 80px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-family: var(--mono); font-size: .78rem; }
+.mx-header { background: transparent; color: var(--muted); font-size: .7rem; font-weight: 700; }
+.mx-tp { background: #1a3a2a; color: var(--accent3); font-weight: 700; font-size: 1rem; }
+.mx-tn { background: #1a3a2a; color: var(--accent3); font-weight: 700; font-size: 1rem; }
+.mx-fp { background: #2a1a1a; color: #ff6b6b; font-weight: 700; font-size: 1rem; }
+.mx-fn { background: #2a1a1a; color: #ff6b6b; font-weight: 700; font-size: 1rem; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+/* ── FOOTER ── */
+footer { position: relative; z-index: 5; text-align: center; padding: 32px 20px; color: var(--muted); font-size: .82rem; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 30px; right: 30px; background: var(--card); border: 1px solid var(--accent3); color: var(--accent3); font-family: var(--mono); font-size: .78rem; padding: 12px 20px; border-radius: 10px; z-index: 9999; opacity: 0; transform: translateY(20px); transition: all .3s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES
+   Targets ≤600px (most phones)
+══════════════════════════════════ */
+@media(max-width:600px){
+  /* Hero */
+  .hero{padding:48px 16px 32px}
+  .hero h1{font-size:clamp(1.9rem,9vw,3rem);letter-spacing:-.5px}
+  .hero p{font-size:.95rem}
+  .hero-btn{padding:12px 24px;font-size:.9rem}
+
+  /* Stats row */
+  .stats{gap:24px}
+  .stat-num{font-size:1.5rem}
+
+  /* Wrap padding */
+  .wrap{padding:0 14px 60px}
+
+  /* Phase card header */
+  .phase-header{padding:18px 16px;gap:12px}
+  .phase-icon{font-size:1.5rem}
+  .phase-title{font-size:1rem}
+  .phase-subtitle{font-size:.76rem}
+  .phase-inner{padding:16px}
+
+  /* Concept grid → 1 col */
+  .concept-grid{grid-template-columns:1fr !important}
+
+  /* Sub tabs wrap */
+  .sub-tabs{gap:6px}
+  .sub-tab{padding:7px 12px;font-size:.78rem}
+
+  /* Experiment padding */
+  .experiment{padding:16px}
+  .exp-title{font-size:.96rem}
+  .exp-desc{font-size:.78rem}
+
+  /* Control rows: stack vertically */
+  .control-row{flex-direction:column;align-items:flex-start;gap:6px}
+  .control-label{min-width:0 !important;width:100%}
+  .control-value{min-width:0 !important}
+  input[type=range]{width:100%}
+  select{width:100%;font-size:.8rem}
+
+  /* Button rows */
+  .btn-row{gap:8px}
+  .btn{padding:9px 16px;font-size:.8rem}
+
+  /* Result boxes */
+  .result-box{padding:12px 14px}
+  .r-value{font-size:.86rem}
+
+  /* Code panels */
+  pre.code{font-size:.7rem;padding:14px;line-height:1.6}
+  .code-header{padding:8px 12px}
+  .code-lang{font-size:.6rem}
+
+  /* Canvas: always full width */
+  canvas{width:100% !important;height:auto !important}
+  .canvas-wrap{padding:10px}
+
+  /* Stepper: smaller text */
+  .stepper{border-radius:8px}
+  .step{padding:7px 5px;font-size:.65rem}
+
+  /* Epoch / trans tables */
+  .epoch-table td,.epoch-table th{padding:5px 8px;font-size:.7rem}
+  .trans-table td,.trans-table th{padding:5px 8px;font-size:.78rem}
+
+  /* AI Explorer specific */
+  .cards-grid{grid-template-columns:1fr !important}
+  .scene-wrap{grid-template-columns:1fr !important}
+  .sub-grid{grid-template-columns:1fr 1fr !important}
+  .card-btn{padding:18px 16px 14px}
+  .panel{padding:18px 16px}
+  header{padding:40px 16px 16px}
+  header h1{font-size:clamp(1.9rem,9vw,3rem)}
+  main{padding:14px 14px 60px}
+  .section-title{margin-top:32px}
+  .diagram-block{padding:12px 8px}
+  .diagram-block svg{min-width:0}
+
+  /* DL / RL dual-canvas grids → single col */
+  div[style*="grid-template-columns:1fr 1fr"]{
+    display:flex !important;flex-direction:column !important;gap:10px !important
+  }
+
+  /* Face recognition two-panel */
+  .fr-grid{grid-template-columns:1fr !important}
+
+  /* Back link */
+  .back-link{margin:0 14px;font-size:.64rem}
+
+  /* NER text */
+  .ner-text{font-size:.88rem;line-height:2}
+
+  /* Chips */
+  .chip{font-size:.68rem;padding:3px 8px}
+
+  /* Confusion matrix */
+  .matrix{transform:scale(0.85);transform-origin:left top}
+  .mx-cell{width:66px;height:44px}
+
+  /* Blob: reduce size so they don't dominate */
+  .blob{opacity:.07}
+}
+
+@media(max-width:400px){
+  .hero h1{font-size:1.7rem}
+  .phase-title{font-size:.93rem}
+  .phase-num{font-size:.62rem;padding:3px 7px}
+  pre.code{font-size:.64rem}
+  .sub-grid{grid-template-columns:1fr !important}
+}
+</style>
+</head>
+<body>
+
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<div class="hero">
+  <div class="hero-chip">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="4"/></svg>
+    Student Learning Portal
+  </div>
+  <h1>Machine Learning<br>from Scratch</h1>
+  <p>Explore the science of teaching computers to learn — through interactive experiments, live visualisations and real Python code.</p>
+  <button class="hero-btn" onclick="startLearning()">
+    Begin Your Journey
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<!-- ═══════════ MAIN CONTENT ═══════════ -->
+<div class="wrap" id="main-content" style="display:none">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">ML Categories</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Experiments</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Curiosity</div></div>
+  </div>
+
+  <div class="section-label">Learning Modules</div>
+
+  <!-- ══════════════════════════════════════════════════
+       PHASE 1 — WHAT IS ML
+  ══════════════════════════════════════════════════ -->
+  <div class="phase-card" style="--accent-color:#38bdf8;--accent-bg:#38bdf81a;--glow:#38bdf822" onclick="togglePhase('phase1',event)">
+    <div class="phase-header">
+      <span class="phase-num">01</span>
+      <span class="phase-icon">🧠</span>
+      <div>
+        <div class="phase-title">What is Machine Learning?</div>
+        <div class="phase-subtitle">The big picture — how machines learn from data</div>
+      </div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="phase1">
+      <div class="phase-inner">
+        <div class="concept-grid">
+          <div class="concept-box" style="border-left:3px solid var(--accent1)">
+            <div class="cb-title">Traditional Programming</div>
+            <p><strong>Rules + Data</strong> → Output<br><br>A programmer writes every rule manually. If income &gt; 50000 AND age &gt; 25 → approve loan. Fragile. Doesn't scale.</p>
+          </div>
+          <div class="concept-box" style="border-left:3px solid var(--accent2)">
+            <div class="cb-title">Machine Learning</div>
+            <p><strong>Data + Answers</strong> → Rules<br><br>You show the machine thousands of examples. It figures out the rules itself. No manual coding of logic.</p>
+          </div>
+          <div class="concept-box" style="border-left:3px solid var(--accent3)">
+            <div class="cb-title">The Learning Loop</div>
+            <p>Data → Model → Prediction → Error → Adjust → Repeat. Each cycle the model gets a little better, like practising a skill.</p>
+          </div>
+          <div class="concept-box" style="border-left:3px solid var(--accent4)">
+            <div class="cb-title">Real-World Uses</div>
+            <p>Spam filters, face recognition, Netflix recommendations, medical diagnosis, self-driving cars, language translators.</p>
+          </div>
+        </div>
+
+        <!-- SVG Diagram -->
+        <div class="explain-block" style="text-align:center">
+          <div class="cb-title" style="color:var(--accent1);font-family:var(--mono);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">The ML Pipeline</div>
+          <svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;display:block;margin:0 auto" font-family="Outfit,sans-serif">
+            <defs><marker id="ha" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#38bdf8"/></marker></defs>
+            <rect x="10"  y="25" width="110" height="50" rx="10" fill="#1a2235" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="65"  y="47" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="600">📊 Raw Data</text>
+            <text x="65"  y="64" text-anchor="middle" fill="#64748b" font-size="9">collect &amp; clean</text>
+            <line x1="120" y1="50" x2="148" y2="50" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#ha)"/>
+            <rect x="148" y="25" width="110" height="50" rx="10" fill="#1a2235" stroke="#a78bfa" stroke-width="1.5"/>
+            <text x="203" y="47" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">🔧 Features</text>
+            <text x="203" y="64" text-anchor="middle" fill="#64748b" font-size="9">extract patterns</text>
+            <line x1="258" y1="50" x2="286" y2="50" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#ha)"/>
+            <rect x="286" y="25" width="110" height="50" rx="10" fill="#1a2235" stroke="#34d399" stroke-width="1.5"/>
+            <text x="341" y="47" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">🤖 Train Model</text>
+            <text x="341" y="64" text-anchor="middle" fill="#64748b" font-size="9">learn from data</text>
+            <line x1="396" y1="50" x2="424" y2="50" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#ha)"/>
+            <rect x="424" y="25" width="110" height="50" rx="10" fill="#1a2235" stroke="#fb923c" stroke-width="1.5"/>
+            <text x="479" y="47" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="600">✅ Evaluate</text>
+            <text x="479" y="64" text-anchor="middle" fill="#64748b" font-size="9">test accuracy</text>
+            <line x1="534" y1="50" x2="562" y2="50" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#ha)"/>
+            <rect x="562" y="25" width="120" height="50" rx="10" fill="#1a2235" stroke="#f472b6" stroke-width="1.5"/>
+            <text x="622" y="47" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="600">🚀 Deploy</text>
+            <text x="622" y="64" text-anchor="middle" fill="#64748b" font-size="9">make predictions</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       PHASE 2 — SUPERVISED LEARNING
+  ══════════════════════════════════════════════════ -->
+  <div class="phase-card" style="--accent-color:#34d399;--accent-bg:#34d3991a;--glow:#34d39922" onclick="togglePhase('phase2',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#34d399;background:#34d3991a;border-color:#34d399">02</span>
+      <span class="phase-icon">🏷️</span>
+      <div>
+        <div class="phase-title">Supervised Learning</div>
+        <div class="phase-subtitle">Learning from labelled examples — Regression &amp; Classification</div>
+      </div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="phase2">
+      <div class="phase-inner">
+
+        <div class="explain-block">
+          <h3>🏷️ What is Supervised Learning? <span class="tag" style="background:#34d39922;color:#34d399">Supervised</span></h3>
+          <p>In supervised learning, the machine is given labelled data — every example has an input and a known correct output. It learns to map inputs → outputs, then makes predictions on new, unseen data.</p>
+          <ul>
+            <li><strong>Analogy:</strong> A student practising past exam papers with an answer key</li>
+            <li><strong>Input:</strong> Features (size, colour, weight, text…)</li>
+            <li><strong>Output:</strong> A label (category) or a number (prediction)</li>
+          </ul>
+        </div>
+
+        <!-- SUBCATEGORY TABS -->
+        <div class="sub-tabs">
+          <button class="sub-tab active" onclick="switchSub('sup','reg',this)" style="--accent-color:#34d399">📈 Regression</button>
+          <button class="sub-tab" onclick="switchSub('sup','cls',this)" style="--accent-color:#34d399">🗂️ Classification</button>
+          <button class="sub-tab" onclick="switchSub('sup','dt',this)" style="--accent-color:#34d399">🌳 Decision Tree</button>
+        </div>
+
+        <!-- ─── REGRESSION ─── -->
+        <div class="sub-content active" id="sup-reg">
+          <div class="explain-block">
+            <h3>📈 Regression — Predicting a Number</h3>
+            <p>Regression finds a mathematical relationship between input features and a continuous number output. "What price should this house sell for?"</p>
+            <ul>
+              <li><strong>Input:</strong> House size in sq ft, bedrooms, location score</li>
+              <li><strong>Output:</strong> Predicted price in $</li>
+              <li><strong>Algorithm:</strong> Linear Regression draws the best-fit line through data</li>
+            </ul>
+          </div>
+          <!-- EXPERIMENT -->
+          <div class="experiment">
+            <div class="exp-header">
+              <span class="exp-badge">🔬 Experiment</span>
+              <div>
+                <div class="exp-title">House Price Predictor</div>
+                <div class="exp-desc">Adjust house features — watch the ML model predict the price in real time</div>
+              </div>
+            </div>
+            <div class="stepper" id="reg-stepper">
+              <div class="step active" id="reg-s1">1. Set Features</div>
+              <div class="step" id="reg-s2">2. Model Predicts</div>
+              <div class="step" id="reg-s3">3. See Result</div>
+            </div>
+            <div class="control-row">
+              <span class="control-label">House Size</span>
+              <input type="range" id="reg-size" min="500" max="5000" value="1500" oninput="runRegression()">
+              <span class="control-value" id="reg-size-v">1500 sqft</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Bedrooms</span>
+              <input type="range" id="reg-beds" min="1" max="6" value="3" oninput="runRegression()">
+              <span class="control-value" id="reg-beds-v">3</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Location Score</span>
+              <input type="range" id="reg-loc" min="1" max="10" value="5" oninput="runRegression()">
+              <span class="control-value" id="reg-loc-v">5/10</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Age of House</span>
+              <input type="range" id="reg-age" min="1" max="50" value="10" oninput="runRegression()">
+              <span class="control-value" id="reg-age-v">10 yrs</span>
+            </div>
+            <div class="result-box info" id="reg-result">
+              <div class="r-label">Predicted Price</div>
+              <div class="r-value" id="reg-price">$285,000</div>
+            </div>
+            <canvas id="reg-canvas" width="560" height="180" style="max-width:100%;margin-top:16px;max-width:100%"></canvas>
+            <!-- CODE -->
+            <div class="code-panel" style="margin-top:20px">
+              <div class="code-header">
+                <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+                <span class="code-lang">Python — Linear Regression</span>
+              </div>
+<pre class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LinearRegression
+
+<span class="cm"># Training data (features: size, beds, location, age)</span>
+X_train = np.array([
+    [<span class="nb">800</span>,  <span class="nb">2</span>, <span class="nb">4</span>, <span class="nb">20</span>],   <span class="cm"># $180,000</span>
+    [<span class="nb">1200</span>, <span class="nb">3</span>, <span class="nb">5</span>, <span class="nb">10</span>],   <span class="cm"># $260,000</span>
+    [<span class="nb">2000</span>, <span class="nb">4</span>, <span class="nb">7</span>, <span class="nb">5</span>],    <span class="cm"># $420,000</span>
+    [<span class="nb">3500</span>, <span class="nb">5</span>, <span class="nb">9</span>, <span class="nb">2</span>],    <span class="cm"># $680,000</span>
+])
+y_train = np.array([<span class="nb">180000</span>, <span class="nb">260000</span>, <span class="nb">420000</span>, <span class="nb">680000</span>])
+
+<span class="cm"># Train the model</span>
+model = LinearRegression()
+model.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># Predict for a new house</span>
+new_house = np.array([[<span class="nb">1500</span>, <span class="nb">3</span>, <span class="nb">5</span>, <span class="nb">10</span>]])
+price = model.<span class="fn">predict</span>(new_house)
+<span class="fn">print</span>(<span class="str">f"Predicted Price: ${price[0]:,.0f}"</span>)
+<span class="cm"># Output: Predicted Price: $285,000</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── CLASSIFICATION ─── -->
+        <div class="sub-content" id="sup-cls">
+          <div class="explain-block">
+            <h3>🗂️ Classification — Predicting a Category</h3>
+            <p>Classification predicts which category or class an input belongs to. Instead of a number, the output is a label like "Spam / Not Spam" or "Cat / Dog."</p>
+            <ul>
+              <li><strong>Binary:</strong> Two classes (Spam vs Ham, Fraud vs Legit)</li>
+              <li><strong>Multi-class:</strong> Many classes (Dog / Cat / Bird / Fish)</li>
+              <li><strong>Algorithm:</strong> Logistic Regression, SVM, Random Forest</li>
+            </ul>
+          </div>
+          <div class="experiment">
+            <div class="exp-header">
+              <span class="exp-badge">🔬 Experiment</span>
+              <div>
+                <div class="exp-title">Email Spam Classifier</div>
+                <div class="exp-desc">Type or paste an email — the model analyses features and classifies it</div>
+              </div>
+            </div>
+            <div style="margin-bottom:12px">
+              <label style="font-size:.8rem;color:var(--muted);font-family:var(--mono)">Email Subject</label><br>
+              <input type="text" id="cls-subject" placeholder="e.g. YOU WON $1,000,000!!!" style="width:100%;margin-top:6px;padding:10px 14px;border-radius:8px;font-size:.9rem" oninput="runClassifier()">
+            </div>
+            <div class="control-row">
+              <span class="control-label">Links in email</span>
+              <input type="range" id="cls-links" min="0" max="10" value="1" oninput="runClassifier()">
+              <span class="control-value" id="cls-links-v">1</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Exclamation marks</span>
+              <input type="range" id="cls-excl" min="0" max="10" value="0" oninput="runClassifier()">
+              <span class="control-value" id="cls-excl-v">0</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">ALL CAPS words</span>
+              <input type="range" id="cls-caps" min="0" max="10" value="0" oninput="runClassifier()">
+              <span class="control-value" id="cls-caps-v">0</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Known sender</span>
+              <select id="cls-known" onchange="runClassifier()">
+                <option value="1">Yes — in contacts</option>
+                <option value="0">No — unknown</option>
+              </select>
+            </div>
+            <div class="btn-row"><button class="btn btn-green" onclick="runClassifier()">▶ Classify Email</button></div>
+            <div class="result-box" id="cls-result" style="margin-top:16px">
+              <div class="r-label">Classification</div>
+              <div class="r-value" id="cls-verdict">Adjust features above…</div>
+            </div>
+            <!-- Confidence bar -->
+            <div style="margin-top:14px">
+              <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-bottom:6px">
+                <span>NOT SPAM</span><span>SPAM</span>
+              </div>
+              <div style="background:#0d1422;border-radius:100px;height:12px;overflow:hidden;border:1px solid #ffffff0a">
+                <div id="cls-bar" style="height:100%;width:20%;background:linear-gradient(90deg,#34d399,#fb923c);border-radius:100px;transition:width .5s ease"></div>
+              </div>
+              <div style="text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:6px" id="cls-conf">Spam confidence: 20%</div>
+            </div>
+            <!-- Confusion matrix -->
+            <div style="margin-top:20px">
+              <div class="cb-title" style="text-align:center;margin-bottom:10px;font-family:var(--mono);font-size:.7rem;letter-spacing:2px;color:var(--muted)">Confusion Matrix (on 1000 test emails)</div>
+              <div class="matrix">
+                <div class="mx-cell mx-header"></div>
+                <div class="mx-cell mx-header">Pred: SPAM</div>
+                <div class="mx-cell mx-header">Pred: HAM</div>
+                <div class="mx-cell mx-header" style="justify-content:flex-end;padding-right:8px">Actual: SPAM</div>
+                <div class="mx-cell mx-tp">487</div>
+                <div class="mx-cell mx-fn">13</div>
+                <div class="mx-cell mx-header" style="justify-content:flex-end;padding-right:8px">Actual: HAM</div>
+                <div class="mx-cell mx-fp">22</div>
+                <div class="mx-cell mx-tn">478</div>
+              </div>
+              <div style="text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--accent3);margin-top:8px">Accuracy: 96.5% · Precision: 95.7% · Recall: 97.4%</div>
+            </div>
+            <div class="code-panel" style="margin-top:20px">
+              <div class="code-header">
+                <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+                <span class="code-lang">Python — Logistic Regression Classifier</span>
+              </div>
+<pre class="code"><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+<span class="kw">from</span> sklearn.feature_extraction.text <span class="kw">import</span> TfidfVectorizer
+
+<span class="cm"># Sample emails and labels (0=ham, 1=spam)</span>
+emails = [
+    <span class="str">"Meeting at 3pm today"</span>,           <span class="cm"># 0 - ham</span>
+    <span class="str">"YOU WON $1,000,000 CLICK NOW"</span>,    <span class="cm"># 1 - spam</span>
+    <span class="str">"Your order has shipped"</span>,           <span class="cm"># 0 - ham</span>
+    <span class="str">"FREE FREE FREE limited offer!!!"</span>,  <span class="cm"># 1 - spam</span>
+]
+labels = [<span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">0</span>, <span class="nb">1</span>]
+
+<span class="cm"># Convert text to numbers (TF-IDF features)</span>
+vectorizer = TfidfVectorizer()
+X = vectorizer.<span class="fn">fit_transform</span>(emails)
+
+<span class="cm"># Train classifier</span>
+clf = LogisticRegression()
+clf.<span class="fn">fit</span>(X, labels)
+
+<span class="cm"># Classify new email</span>
+new_email = [<span class="str">"Claim your FREE prize NOW!!"</span>]
+X_new = vectorizer.<span class="fn">transform</span>(new_email)
+prediction = clf.<span class="fn">predict</span>(X_new)
+<span class="fn">print</span>(<span class="str">"SPAM"</span> <span class="kw">if</span> prediction[<span class="nb">0</span>] <span class="op">==</span> <span class="nb">1</span> <span class="kw">else</span> <span class="str">"HAM"</span>)
+<span class="cm"># Output: SPAM</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── DECISION TREE ─── -->
+        <div class="sub-content" id="sup-dt">
+          <div class="explain-block">
+            <h3>🌳 Decision Trees — If/Else Learned from Data</h3>
+            <p>A Decision Tree splits data using the most informative feature at each step. Each branch is a condition; each leaf is a prediction. Interpretable and powerful.</p>
+            <ul>
+              <li><strong>Root node:</strong> First, most important split</li>
+              <li><strong>Branches:</strong> Conditions (age &lt; 30, income &gt; 50k)</li>
+              <li><strong>Leaves:</strong> Final predictions (Approved / Denied)</li>
+            </ul>
+          </div>
+          <div class="experiment">
+            <div class="exp-header">
+              <span class="exp-badge">🔬 Experiment</span>
+              <div>
+                <div class="exp-title">Loan Approval Decision Tree</div>
+                <div class="exp-desc">Fill in applicant details — trace through the decision tree to see the outcome</div>
+              </div>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Credit Score</span>
+              <input type="range" id="dt-credit" min="300" max="850" value="650" oninput="runDecisionTree()">
+              <span class="control-value" id="dt-credit-v">650</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Annual Income ($k)</span>
+              <input type="range" id="dt-income" min="20" max="200" value="60" oninput="runDecisionTree()">
+              <span class="control-value" id="dt-income-v">$60k</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Loan Amount ($k)</span>
+              <input type="range" id="dt-loan" min="10" max="500" value="150" oninput="runDecisionTree()">
+              <span class="control-value" id="dt-loan-v">$150k</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Employment</span>
+              <select id="dt-emp" onchange="runDecisionTree()">
+                <option value="stable">Stable (5+ yrs)</option>
+                <option value="new">New (&lt;1 yr)</option>
+                <option value="self">Self-employed</option>
+              </select>
+            </div>
+            <!-- Live tree SVG -->
+            <div class="chart-area" style="padding:20px;margin:16px 0">
+              <svg id="dt-svg" viewBox="0 0 660 280" style="max-width:100%;display:block;margin:0 auto" font-family="Outfit,sans-serif"></svg>
+            </div>
+            <div class="result-box" id="dt-result">
+              <div class="r-label">Loan Decision</div>
+              <div class="r-value" id="dt-verdict">Adjust inputs above…</div>
+            </div>
+            <div class="code-panel" style="margin-top:20px">
+              <div class="code-header">
+                <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+                <span class="code-lang">Python — Decision Tree Classifier</span>
+              </div>
+<pre class="code"><span class="kw">from</span> sklearn.tree <span class="kw">import</span> DecisionTreeClassifier, export_text
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Features: [credit_score, income_k, loan_k, employment]</span>
+<span class="cm"># employment: 0=new, 1=self, 2=stable</span>
+X_train = np.array([
+    [<span class="nb">720</span>, <span class="nb">80</span>,  <span class="nb">100</span>, <span class="nb">2</span>],  <span class="cm"># approved</span>
+    [<span class="nb">550</span>, <span class="nb">35</span>,  <span class="nb">200</span>, <span class="nb">0</span>],  <span class="cm"># denied</span>
+    [<span class="nb">680</span>, <span class="nb">60</span>,  <span class="nb">150</span>, <span class="nb">2</span>],  <span class="cm"># approved</span>
+    [<span class="nb">490</span>, <span class="nb">25</span>,  <span class="nb">300</span>, <span class="nb">1</span>],  <span class="cm"># denied</span>
+    [<span class="nb">760</span>, <span class="nb">120</span>, <span class="nb">80</span>,  <span class="nb">2</span>],  <span class="cm"># approved</span>
+])
+y_train = np.array([<span class="nb">1</span>, <span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">0</span>, <span class="nb">1</span>])  <span class="cm"># 1=approved, 0=denied</span>
+
+<span class="cm"># Train tree (max_depth=3 keeps it interpretable)</span>
+dt = DecisionTreeClassifier(max_depth=<span class="nb">3</span>)
+dt.<span class="fn">fit</span>(X_train, y_train)
+
+<span class="cm"># Print the tree rules</span>
+<span class="fn">print</span>(export_text(dt, feature_names=[
+    <span class="str">'credit'</span>, <span class="str">'income'</span>, <span class="str">'loan'</span>, <span class="str">'employment'</span>
+]))
+
+<span class="cm"># Predict for new applicant</span>
+applicant = [[<span class="nb">650</span>, <span class="nb">60</span>, <span class="nb">150</span>, <span class="nb">2</span>]]
+result = dt.<span class="fn">predict</span>(applicant)
+<span class="fn">print</span>(<span class="str">"APPROVED"</span> <span class="kw">if</span> result[<span class="nb">0</span>] <span class="kw">else</span> <span class="str">"DENIED"</span>)</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       PHASE 3 — UNSUPERVISED LEARNING
+  ══════════════════════════════════════════════════ -->
+  <div class="phase-card" style="--accent-color:#a78bfa;--accent-bg:#a78bfa1a;--glow:#a78bfa22" onclick="togglePhase('phase3',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#a78bfa;background:#a78bfa1a;border-color:#a78bfa">03</span>
+      <span class="phase-icon">🔍</span>
+      <div>
+        <div class="phase-title">Unsupervised Learning</div>
+        <div class="phase-subtitle">Finding hidden structure in unlabelled data</div>
+      </div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="phase3">
+      <div class="phase-inner">
+        <div class="explain-block">
+          <h3>🔍 What is Unsupervised Learning? <span class="tag" style="background:#a78bfa22;color:#a78bfa">Unsupervised</span></h3>
+          <p>No labels, no teacher. The algorithm explores raw data and discovers hidden patterns or groupings entirely on its own — like sorting a pile of coins by size and colour without being told the denominations.</p>
+          <ul>
+            <li><strong>Clustering:</strong> Group similar items (K-Means, DBSCAN)</li>
+            <li><strong>Dimensionality Reduction:</strong> Compress data (PCA, t-SNE)</li>
+            <li><strong>Anomaly Detection:</strong> Find outliers (Isolation Forest)</li>
+          </ul>
+        </div>
+
+        <div class="sub-tabs">
+          <button class="sub-tab active" onclick="switchSub('uns','kmeans',this)" style="--accent-color:#a78bfa">🫧 K-Means Clustering</button>
+          <button class="sub-tab" onclick="switchSub('uns','anomaly',this)" style="--accent-color:#a78bfa">🚨 Anomaly Detection</button>
+          <button class="sub-tab" onclick="switchSub('uns','pca',this)" style="--accent-color:#a78bfa">📉 PCA Reduction</button>
+        </div>
+
+        <!-- ─── K-MEANS ─── -->
+        <div class="sub-content active" id="uns-kmeans">
+          <div class="explain-block">
+            <h3>🫧 K-Means Clustering</h3>
+            <p>K-Means assigns each data point to the nearest cluster centre (centroid), then recalculates centroids, and repeats until stable. You choose K (number of clusters).</p>
+          </div>
+          <div class="experiment">
+            <div class="exp-header">
+              <span class="exp-badge">🔬 Experiment</span>
+              <div>
+                <div class="exp-title">Customer Segmentation</div>
+                <div class="exp-desc">Generate random customers and watch K-Means group them — live animated clustering</div>
+              </div>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Num Clusters (K)</span>
+              <input type="range" id="km-k" min="2" max="5" value="3" oninput="document.getElementById('km-k-v').innerText=this.value">
+              <span class="control-value" id="km-k-v">3</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Data Points</span>
+              <input type="range" id="km-n" min="20" max="100" value="60" oninput="document.getElementById('km-n-v').innerText=this.value">
+              <span class="control-value" id="km-n-v">60</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-secondary" onclick="genKMeans()">🔄 New Data</button>
+              <button class="btn btn-primary" onclick="animateKMeans()">▶ Run K-Means</button>
+            </div>
+            <div class="canvas-wrap" style="margin-top:16px">
+              <canvas id="km-canvas" width="560" height="340" style="max-width:100%;max-width:100%;border-radius:8px"></canvas>
+            </div>
+            <div class="result-box info" id="km-result" style="margin-top:0">
+              <div class="r-label">Status</div>
+              <div class="r-value" id="km-status">Click "New Data" then "Run K-Means"</div>
+            </div>
+            <div class="code-panel" style="margin-top:20px">
+              <div class="code-header">
+                <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+                <span class="code-lang">Python — K-Means Clustering</span>
+              </div>
+<pre class="code"><span class="kw">from</span> sklearn.cluster <span class="kw">import</span> KMeans
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># Generate customer data (annual spend vs visit frequency)</span>
+np.random.<span class="fn">seed</span>(<span class="nb">42</span>)
+X = np.random.<span class="fn">randn</span>(<span class="nb">100</span>, <span class="nb">2</span>) * <span class="nb">2</span>  <span class="cm"># 100 customers, 2 features</span>
+
+<span class="cm"># Fit K-Means with K=3 clusters</span>
+kmeans = KMeans(n_clusters=<span class="nb">3</span>, random_state=<span class="nb">42</span>)
+kmeans.<span class="fn">fit</span>(X)
+
+<span class="cm"># Get cluster labels and centroids</span>
+labels = kmeans.labels_           <span class="cm"># which cluster each customer belongs to</span>
+centroids = kmeans.cluster_centers_  <span class="cm"># centre of each cluster</span>
+
+<span class="cm"># Visualise</span>
+colors = [<span class="str">'#38bdf8'</span>, <span class="str">'#a78bfa'</span>, <span class="str">'#34d399'</span>]
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">3</span>):
+    mask = labels <span class="op">==</span> i
+    plt.<span class="fn">scatter</span>(X[mask, <span class="nb">0</span>], X[mask, <span class="nb">1</span>],
+                c=colors[i], label=<span class="str">f'Cluster {i}'</span>)
+
+plt.<span class="fn">scatter</span>(*centroids.T, marker=<span class="str">'X'</span>, s=<span class="nb">200</span>,
+            c=<span class="str">'white'</span>, zorder=<span class="nb">5</span>, label=<span class="str">'Centroids'</span>)
+plt.<span class="fn">legend</span>()
+plt.<span class="fn">title</span>(<span class="str">'Customer Segments (K=3)'</span>)
+plt.<span class="fn">show</span>()</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── ANOMALY DETECTION ─── -->
+        <div class="sub-content" id="uns-anomaly">
+          <div class="explain-block">
+            <h3>🚨 Anomaly Detection</h3>
+            <p>The model learns what "normal" looks like from unlabelled data. Any data point that deviates significantly is flagged as an anomaly — like a fraudulent transaction or a broken machine sensor.</p>
+          </div>
+          <div class="experiment">
+            <div class="exp-header">
+              <span class="exp-badge">🔬 Experiment</span>
+              <div>
+                <div class="exp-title">Bank Transaction Monitor</div>
+                <div class="exp-desc">Simulate a day of transactions — watch the model flag anomalies in real time</div>
+              </div>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Transaction Amount</span>
+              <input type="range" id="an-amount" min="1" max="10000" value="50" oninput="runAnomaly()">
+              <span class="control-value" id="an-amount-v">$50</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Time of Day</span>
+              <input type="range" id="an-hour" min="0" max="23" value="14" oninput="runAnomaly()">
+              <span class="control-value" id="an-hour-v">14:00</span>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Location</span>
+              <select id="an-loc" onchange="runAnomaly()">
+                <option value="local">Local (same city)</option>
+                <option value="foreign">Foreign country</option>
+                <option value="online">Online</option>
+              </select>
+            </div>
+            <div class="control-row">
+              <span class="control-label">Transactions today</span>
+              <input type="range" id="an-count" min="1" max="30" value="4" oninput="runAnomaly()">
+              <span class="control-value" id="an-count-v">4</span>
+            </div>
+            <div class="btn-row"><button class="btn btn-orange" onclick="runAnomaly()">🔍 Analyse Transaction</button></div>
+            <div class="result-box" id="an-result" style="margin-top:16px">
+              <div class="r-label">Anomaly Score</div>
+              <div class="r-value" id="an-verdict">Adjust inputs above…</div>
+            </div>
+            <!-- Anomaly gauge -->
+            <div style="margin-top:16px;background:#0d1422;border-radius:12px;padding:16px">
+              <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-bottom:8px"><span>NORMAL</span><span>SUSPICIOUS</span><span>ANOMALY</span></div>
+              <div style="background:#060912;border-radius:100px;height:18px;overflow:hidden;border:1px solid #ffffff0a">
+                <div id="an-gauge" style="height:100%;width:15%;border-radius:100px;transition:width .6s ease,background .6s ease;background:linear-gradient(90deg,#34d399,#fb923c,#ef4444)"></div>
+              </div>
+              <div style="display:flex;justify-content:space-around;font-family:var(--mono);font-size:.65rem;color:#ffffff22;margin-top:4px">
+                <span>0.0</span><span>0.25</span><span>0.5</span><span>0.75</span><span>1.0</span>
+              </div>
+            </div>
+            <div class="code-panel" style="margin-top:20px">
+              <div class="code-header">
+                <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+                <span class="code-lang">Python — Isolation Forest Anomaly Detection</span>
+              </div>
+<pre class="code"><span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> IsolationForest
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Normal transaction features: [amount, hour, is_foreign, daily_count]</span>
+normal_transactions = np.array([
+    [<span class="nb">25</span>,  <span class="nb">10</span>, <span class="nb">0</span>, <span class="nb">3</span>],
+    [<span class="nb">60</span>,  <span class="nb">14</span>, <span class="nb">0</span>, <span class="nb">4</span>],
+    [<span class="nb">120</span>, <span class="nb">12</span>, <span class="nb">0</span>, <span class="nb">2</span>],
+    [<span class="nb">45</span>,  <span class="nb">16</span>, <span class="nb">1</span>, <span class="nb">1</span>],  <span class="cm"># occasional foreign OK</span>
+    <span class="cm"># ... 1000s more normal transactions</span>
+])
+
+<span class="cm"># Train the anomaly detector on NORMAL data only</span>
+clf = IsolationForest(contamination=<span class="nb">0.05</span>, random_state=<span class="nb">42</span>)
+clf.<span class="fn">fit</span>(normal_transactions)
+
+<span class="cm"># Check a suspicious transaction</span>
+suspicious = np.array([[<span class="nb">8500</span>, <span class="nb">3</span>, <span class="nb">1</span>, <span class="nb">15</span>]])
+<span class="cm"># $8500, 3am, foreign, 15 transactions today</span>
+
+result = clf.<span class="fn">predict</span>(suspicious)
+score  = clf.<span class="fn">score_samples</span>(suspicious)
+
+<span class="fn">print</span>(<span class="str">"🚨 ANOMALY"</span> <span class="kw">if</span> result[<span class="nb">0</span>] <span class="op">==</span> -<span class="nb">1</span> <span class="kw">else</span> <span class="str">"✅ Normal"</span>)
+<span class="fn">print</span>(<span class="str">f"Anomaly score: {score[0]:.3f}"</span>)
+<span class="cm"># Output: 🚨 ANOMALY  |  Anomaly score: -0.842</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── PCA ─── -->
+        <div class="sub-content" id="uns-pca">
+          <div class="explain-block">
+            <h3>📉 Principal Component Analysis (PCA)</h3>
+            <p>PCA compresses high-dimensional data into fewer dimensions while preserving as much variance (information) as possible. It finds the directions of maximum spread in the data.</p>
+            <ul>
+              <li><strong>Use case:</strong> Visualise 100-dimensional data in 2D</li>
+              <li><strong>Components:</strong> New axes ordered by variance explained</li>
+              <li><strong>Benefit:</strong> Removes noise, speeds up training</li>
+            </ul>
+          </div>
+          <div class="experiment">
+            <div class="exp-header">
+              <span class="exp-badge">🔬 Experiment</span>
+              <div>
+                <div class="exp-title">PCA Dimension Reducer</div>
+                <div class="exp-desc">Choose features to include — see how PCA compresses them to 2 components for visualisation</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="pca-f1" checked onchange="runPCA()"> Age</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="pca-f2" checked onchange="runPCA()"> Income</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="pca-f3" checked onchange="runPCA()"> Spending Score</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="pca-f4" onchange="runPCA()"> Savings Rate</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="pca-f5" onchange="runPCA()"> Loan History</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="pca-f6" onchange="runPCA()"> Credit Score</label>
+            </div>
+            <button class="btn btn-secondary" onclick="runPCA()">📉 Run PCA</button>
+            <div class="canvas-wrap" style="margin-top:16px">
+              <canvas id="pca-canvas" width="560" height="300" style="max-width:100%;max-width:100%;border-radius:8px"></canvas>
+            </div>
+            <div class="result-box info" id="pca-result" style="margin-top:0">
+              <div class="r-label">Variance Explained</div>
+              <div class="r-value" id="pca-var">Run PCA to see results</div>
+            </div>
+            <div class="code-panel" style="margin-top:20px">
+              <div class="code-header">
+                <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+                <span class="code-lang">Python — PCA Dimensionality Reduction</span>
+              </div>
+<pre class="code"><span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> PCA
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Customer data: age, income, spending, savings, loans, credit</span>
+X = np.array([...])  <span class="cm"># shape: (200, 6) — 200 customers, 6 features</span>
+
+<span class="cm"># Step 1: Standardise (PCA is scale-sensitive)</span>
+scaler = StandardScaler()
+X_scaled = scaler.<span class="fn">fit_transform</span>(X)
+
+<span class="cm"># Step 2: Reduce from 6D to 2D</span>
+pca = PCA(n_components=<span class="nb">2</span>)
+X_2d = pca.<span class="fn">fit_transform</span>(X_scaled)
+
+<span class="cm"># How much variance is preserved?</span>
+variance = pca.explained_variance_ratio_
+<span class="fn">print</span>(<span class="str">f"PC1 explains: {variance[0]:.1%}"</span>)
+<span class="fn">print</span>(<span class="str">f"PC2 explains: {variance[1]:.1%}"</span>)
+<span class="fn">print</span>(<span class="str">f"Total: {sum(variance):.1%}"</span>)
+<span class="cm"># Output: PC1 explains: 48.3%</span>
+<span class="cm">#         PC2 explains: 27.1%</span>
+<span class="cm">#         Total: 75.4%</span>
+
+<span class="cm"># Now visualise the 2D projection</span>
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+plt.<span class="fn">scatter</span>(X_2d[:, <span class="nb">0</span>], X_2d[:, <span class="nb">1</span>], alpha=<span class="nb">0.7</span>)
+plt.<span class="fn">xlabel</span>(<span class="str">"Principal Component 1"</span>)
+plt.<span class="fn">ylabel</span>(<span class="str">"Principal Component 2"</span>)
+plt.<span class="fn">show</span>()</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 — QUIZ -->
+  <div class="phase-card" style="--accent-color:#fb923c;--accent-bg:#fb923c1a;--glow:#fb923c22" onclick="togglePhase('phase4',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#fb923c;background:#fb923c1a;border-color:#fb923c">04</span>
+      <span class="phase-icon">🎯</span>
+      <div>
+        <div class="phase-title">Knowledge Check</div>
+        <div class="phase-subtitle">Quick quiz to test what you've learned</div>
+      </div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="phase4">
+      <div class="phase-inner" id="quiz-wrap">
+        <div id="quiz-body"></div>
+        <div class="btn-row" id="quiz-btns" style="margin-top:20px"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end wrap -->
+
+<footer>
+  <div style="margin-bottom:8px;font-size:1.4rem">🤖</div>
+  ML Learning Portal · Built for curious students
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════ UTILS ═══════════ */
+const $ = id => document.getElementById(id);
+function showToast(msg, dur=2200) {
+  const t = $('toast'); t.innerText = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+/* ═══════════ HERO ═══════════ */
+function startLearning() {
+  $('main-content').style.display = 'block';
+  setTimeout(() => $('main-content').scrollIntoView({behavior:'smooth'}), 100);
+}
+
+/* ═══════════ PHASE TOGGLE ═══════════ */
+function togglePhase(id, e) {
+  if (e.target.closest('button,input,select,canvas,a')) return;
+  const card = document.querySelector(`#${id}`).closest('.phase-card');
+  const body = $(id);
+  const isOpen = card.classList.contains('open');
+  card.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    setTimeout(() => card.scrollIntoView({behavior:'smooth', block:'nearest'}), 80);
+    if (id==='phase4') initQuiz();
+  }
+}
+
+/* ═══════════ SUB TABS ═══════════ */
+function switchSub(prefix, tab, btn) {
+  const panel = btn.closest('.phase-inner');
+  panel.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  panel.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  $(`${prefix}-${tab}`).classList.add('active');
+}
+
+/* ═══════════ REGRESSION EXPERIMENT ═══════════ */
+function runRegression() {
+  const size  = parseInt($('reg-size').value);
+  const beds  = parseInt($('reg-beds').value);
+  const loc   = parseInt($('reg-loc').value);
+  const age   = parseInt($('reg-age').value);
+  $('reg-size-v').innerText = size + ' sqft';
+  $('reg-beds-v').innerText = beds;
+  $('reg-loc-v').innerText  = loc + '/10';
+  $('reg-age-v').innerText  = age + ' yrs';
+  // Simulated linear regression model
+  const price = Math.round(
+    size * 80 + beds * 18000 + loc * 22000 - age * 1200 + 10000
+  );
+  $('reg-price').innerText = '$' + price.toLocaleString();
+  // Update stepper
+  ['reg-s1','reg-s2','reg-s3'].forEach((s,i) => {
+    $(s).className = 'step ' + (i===0?'done':i===1?'done':'done');
+  });
+  drawRegressionChart(size, price);
+}
+
+function drawRegressionChart(curSize, curPrice) {
+  const canvas = $('reg-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  // Background
+  ctx.fillStyle = '#060912'; ctx.fillRect(0,0,W,H);
+  // Axes
+  ctx.strokeStyle = '#ffffff22'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(60,10); ctx.lineTo(60,H-30); ctx.lineTo(W-10,H-30); ctx.stroke();
+  // Labels
+  ctx.fillStyle = '#64748b'; ctx.font = '10px Space Mono'; ctx.textAlign = 'center';
+  ctx.fillText('House Size (sqft)', W/2, H-5);
+  ctx.save(); ctx.translate(14, H/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Price ($k)', 0, 0); ctx.restore();
+  // Data points (simulated training data)
+  const pts = [[800,156],[1000,192],[1200,235],[1500,290],[1800,348],[2200,432],[2800,528],[3500,640],[4500,810]];
+  const xMin=500,xMax=5000,yMin=100000,yMax=900000;
+  const toX = x => 60 + (x-xMin)/(xMax-xMin)*(W-80);
+  const toY = y => (H-30) - (y-yMin)/(yMax-yMin)*(H-50);
+  // Regression line
+  ctx.strokeStyle = '#38bdf855'; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
+  ctx.beginPath();
+  pts.forEach((p,i) => { const fn = toX(p[0]*10); const py = toY(p[1]*1000); i===0?ctx.moveTo(fn,py):ctx.lineTo(fn,py); });
+  ctx.stroke(); ctx.setLineDash([]);
+  // Points
+  pts.forEach(p => {
+    ctx.beginPath(); ctx.arc(toX(p[0]*10), toY(p[1]*1000), 4, 0, Math.PI*2);
+    ctx.fillStyle = '#a78bfa88'; ctx.fill();
+  });
+  // Current point highlight
+  ctx.beginPath(); ctx.arc(toX(curSize), toY(curPrice), 7, 0, Math.PI*2);
+  ctx.fillStyle = '#34d399'; ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#34d399'; ctx.font = '11px Outfit'; ctx.textAlign = 'left';
+  ctx.fillText('▲ Your house', toX(curSize)+10, toY(curPrice)+4);
+}
+
+/* ═══════════ CLASSIFIER EXPERIMENT ═══════════ */
+function runClassifier() {
+  const subject = ($('cls-subject').value || '').toLowerCase();
+  const links   = parseInt($('cls-links').value);
+  const excl    = parseInt($('cls-excl').value);
+  const caps    = parseInt($('cls-caps').value);
+  const known   = parseInt($('cls-known').value);
+  $('cls-links-v').innerText = links;
+  $('cls-excl-v').innerText  = excl;
+  $('cls-caps-v').innerText  = caps;
+  // Spam keywords
+  const spamWords = ['won','free','prize','click','offer','limited','congratulations','urgent','winner','money','cash','$'];
+  let wordScore = 0;
+  spamWords.forEach(w => { if(subject.includes(w)) wordScore += 0.12; });
+  // Compute spam probability
+  let prob = wordScore + (links * 0.05) + (excl * 0.08) + (caps * 0.09) - (known * 0.35);
+  prob = Math.max(0.02, Math.min(0.98, prob));
+  $('cls-bar').style.width = (prob*100).toFixed(0) + '%';
+  $('cls-conf').innerText = `Spam confidence: ${(prob*100).toFixed(0)}%`;
+  const el = $('cls-verdict');
+  const rb = $('cls-result');
+  if (prob > 0.65) {
+    el.innerHTML = '🚫 SPAM — Moved to Junk Folder'; rb.className='result-box warn';
+  } else if (prob > 0.35) {
+    el.innerHTML = '⚠️ SUSPICIOUS — Needs Review'; rb.className='result-box';
+    rb.style.borderColor='#a78bfa';
+  } else {
+    el.innerHTML = '✅ NOT SPAM — Delivered to Inbox'; rb.className='result-box good';
+  }
+}
+
+/* ═══════════ DECISION TREE EXPERIMENT ═══════════ */
+function runDecisionTree() {
+  const credit = parseInt($('dt-credit').value);
+  const income = parseInt($('dt-income').value);
+  const loan   = parseInt($('dt-loan').value);
+  const emp    = $('dt-emp').value;
+  $('dt-credit-v').innerText = credit;
+  $('dt-income-v').innerText = '$' + income + 'k';
+  $('dt-loan-v').innerText   = '$' + loan + 'k';
+  const dti = loan / income; // debt-to-income ratio
+  // Decision tree logic
+  let path = [], result;
+  if (credit < 580) {
+    path = [0,1]; result = false; // denied: bad credit
+  } else if (dti > 4.5) {
+    path = [0,2]; result = false; // denied: too much debt
+  } else if (emp === 'new' && credit < 680) {
+    path = [0,3,4]; result = false;
+  } else if (credit >= 700 && income >= 50) {
+    path = [0,3,5]; result = true;
+  } else if (credit >= 620 && dti < 3 && emp !== 'new') {
+    path = [0,3,6]; result = true;
+  } else {
+    path = [0,3,7]; result = income > 40 && credit > 600;
+  }
+  drawDecisionTree(path, result, credit, income, dti, emp);
+  const el = $('dt-verdict');
+  el.innerHTML = result
+    ? '✅ LOAN APPROVED — Meets all criteria'
+    : '❌ LOAN DENIED — Does not meet requirements';
+  $('dt-result').className = 'result-box ' + (result?'good':'warn');
+}
+
+function drawDecisionTree(path, approved, credit, income, dti, emp) {
+  const svg = $('dt-svg');
+  const W=660, H=280;
+  const activeColor = '#38bdf8';
+  const inactiveColor = '#1a2235';
+  const textActive = '#f1f5f9';
+  const textInactive = '#64748b';
+
+  const nodes = [
+    {x:330, y:30,  w:180, label:'Credit Score', sub:`Score: ${credit}`, id:0},
+    {x:140, y:110, w:160, label:'❌ Denied', sub:'Credit < 580', id:1, leaf:true, bad:true},
+    {x:470, y:110, w:160, label:'❌ Denied', sub:'DTI > 4.5', id:2, leaf:true, bad:true},
+    {x:330, y:110, w:160, label:'Employment & DTI', sub:`DTI: ${dti.toFixed(1)}`, id:3},
+    {x:140, y:200, w:160, label:'❌ Denied', sub:'New job + low credit', id:4, leaf:true, bad:true},
+    {x:330, y:200, w:160, label:'✅ Approved', sub:'Good credit + income', id:5, leaf:true, good:true},
+    {x:500, y:200, w:160, label:'✅ Approved', sub:'Good DTI + stable job', id:6, leaf:true, good:true},
+    {x:140, y:200, w:160, label:'⚠ Review', sub:'Borderline case', id:7, leaf:true},
+  ];
+
+  const edges = [
+    {from:0, to:1, label:'< 580'},
+    {from:0, to:2, label:'DTI>4.5'},
+    {from:0, to:3, label:'≥ 580'},
+    {from:3, to:4, label:'New+low'},
+    {from:3, to:5, label:'Score≥700'},
+    {from:3, to:6, label:'Stable'},
+    {from:3, to:7, label:'Borderline'},
+  ];
+
+  let s = `<defs><marker id="ta" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="#ffffff22"/></marker><marker id="tb" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="${activeColor}"/></marker></defs>`;
+
+  // Draw edges
+  edges.forEach(e => {
+    const from = nodes.find(n=>n.id===e.from);
+    const to   = nodes.find(n=>n.id===e.to);
+    if (!from || !to) return;
+    const isActive = path.includes(e.from) && path.includes(e.to);
+    const col = isActive ? activeColor : '#ffffff18';
+    const marker = isActive ? '#tb' : '#ta';
+    s += `<line x1="${from.x}" y1="${from.y+22}" x2="${to.x}" y2="${to.y-10}" stroke="${col}" stroke-width="${isActive?2:1}" marker-end="url(${marker})"/>`;
+    s += `<text x="${(from.x+to.x)/2+4}" y="${(from.y+to.y)/2}" fill="${isActive?activeColor:'#64748b'}" font-size="9" text-anchor="middle">${e.label}</text>`;
+  });
+
+  // Draw nodes
+  nodes.forEach(n => {
+    if (path.includes(n.id)) {
+      const bg = n.good?'#1a3a2a' : n.bad?'#2a1a1a' : '#1a2a3a';
+      const border = n.good?'#34d399' : n.bad?'#ef4444' : activeColor;
+      s += `<rect x="${n.x-n.w/2}" y="${n.y-18}" width="${n.w}" height="42" rx="8" fill="${bg}" stroke="${border}" stroke-width="2"/>`;
+      s += `<text x="${n.x}" y="${n.y}" text-anchor="middle" fill="${textActive}" font-size="11" font-weight="700">${n.label}</text>`;
+      s += `<text x="${n.x}" y="${n.y+14}" text-anchor="middle" fill="#94a3b8" font-size="9">${n.sub}</text>`;
+    } else {
+      s += `<rect x="${n.x-n.w/2}" y="${n.y-18}" width="${n.w}" height="42" rx="8" fill="${inactiveColor}" stroke="#ffffff12" stroke-width="1"/>`;
+      s += `<text x="${n.x}" y="${n.y}" text-anchor="middle" fill="${textInactive}" font-size="11">${n.label}</text>`;
+      s += `<text x="${n.x}" y="${n.y+14}" text-anchor="middle" fill="#334155" font-size="9">${n.sub}</text>`;
+    }
+  });
+
+  svg.innerHTML = s;
+}
+
+/* ═══════════ K-MEANS EXPERIMENT ═══════════ */
+let kmPoints = [], kmCentroids = [], kmIteration = 0;
+const KM_COLORS = ['#38bdf8','#a78bfa','#34d399','#fb923c','#f472b6'];
+
+function genKMeans() {
+  const n = parseInt($('km-n').value);
+  const k = parseInt($('km-k').value);
+  kmPoints = [];
+  // Generate k natural clusters
+  for (let c=0; c<k; c++) {
+    const cx = 80 + Math.random()*400;
+    const cy = 40 + Math.random()*260;
+    for (let i=0; i<Math.floor(n/k); i++) {
+      kmPoints.push({
+        x: cx + (Math.random()-0.5)*100,
+        y: cy + (Math.random()-0.5)*100,
+        cluster: -1
+      });
+    }
+  }
+  kmIteration = 0;
+  kmCentroids = [];
+  drawKMeans(false);
+  $('km-status').innerText = 'Data generated. Click "Run K-Means" to cluster.';
+}
+
+function drawKMeans(showCentroids) {
+  const canvas = $('km-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#060912'; ctx.fillRect(0,0,W,H);
+  // Grid
+  ctx.strokeStyle='#ffffff06'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // Points
+  kmPoints.forEach(p => {
+    ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+    ctx.fillStyle = p.cluster >= 0 ? KM_COLORS[p.cluster]+'cc' : '#64748b55';
+    ctx.fill();
+    if(p.cluster>=0){ ctx.strokeStyle=KM_COLORS[p.cluster]; ctx.lineWidth=1; ctx.stroke(); }
+  });
+  // Centroids
+  if(showCentroids && kmCentroids.length) {
+    kmCentroids.forEach((c,i) => {
+      ctx.beginPath(); ctx.arc(c.x, c.y, 10, 0, Math.PI*2);
+      ctx.fillStyle = KM_COLORS[i]; ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='#000'; ctx.font='bold 11px Space Mono'; ctx.textAlign='center';
+      ctx.fillText('✕', c.x, c.y+4);
+    });
+  }
+}
+
+async function animateKMeans() {
+  if(!kmPoints.length) { genKMeans(); await sleep(400); }
+  const k = parseInt($('km-k').value);
+  // Init centroids randomly from points
+  const shuffled = [...kmPoints].sort(()=>Math.random()-.5);
+  kmCentroids = shuffled.slice(0,k).map(p=>({x:p.x, y:p.y}));
+  for(let iter=0; iter<8; iter++) {
+    // Assign clusters
+    kmPoints.forEach(p => {
+      let best=-1, bestDist=Infinity;
+      kmCentroids.forEach((c,i) => {
+        const d = Math.hypot(p.x-c.x, p.y-c.y);
+        if(d<bestDist){bestDist=d;best=i;}
+      });
+      p.cluster=best;
+    });
+    // Update centroids
+    let moved=false;
+    kmCentroids = kmCentroids.map((c,i) => {
+      const pts = kmPoints.filter(p=>p.cluster===i);
+      if(!pts.length) return c;
+      const nx = pts.reduce((s,p)=>s+p.x,0)/pts.length;
+      const ny = pts.reduce((s,p)=>s+p.y,0)/pts.length;
+      if(Math.hypot(nx-c.x,ny-c.y)>0.5) moved=true;
+      return {x:nx, y:ny};
+    });
+    drawKMeans(true);
+    $('km-status').innerText = `Iteration ${iter+1} — centroid shift: ${moved?'moving…':'converged ✓'}`;
+    await sleep(420);
+    if(!moved) break;
+  }
+  $('km-status').innerText = `✅ Converged! ${kmPoints.length} points grouped into ${k} clusters.`;
+  showToast(`K-Means converged in iterations!`);
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* ═══════════ ANOMALY DETECTION ═══════════ */
+function runAnomaly() {
+  const amount = parseInt($('an-amount').value);
+  const hour   = parseInt($('an-hour').value);
+  const loc    = $('an-loc').value;
+  const count  = parseInt($('an-count').value);
+  $('an-amount-v').innerText = '$'+amount.toLocaleString();
+  $('an-hour-v').innerText   = String(hour).padStart(2,'0')+':00';
+  $('an-count-v').innerText  = count;
+  // Anomaly scoring
+  let score = 0;
+  if(amount > 2000) score += 0.35;
+  else if(amount > 500) score += 0.15;
+  if(hour < 5 || hour > 23) score += 0.25;
+  else if(hour < 7) score += 0.10;
+  if(loc==='foreign') score += 0.25;
+  else if(loc==='online') score += 0.05;
+  if(count > 15) score += 0.30;
+  else if(count > 8) score += 0.12;
+  score = Math.min(1, score);
+  $('an-gauge').style.width = (score*100).toFixed(0)+'%';
+  const el = $('an-verdict');
+  const rb = $('an-result');
+  if(score>0.7){ el.innerHTML=`🚨 HIGH ANOMALY (${(score*100).toFixed(0)}%) — Card Blocked!`; rb.className='result-box warn'; }
+  else if(score>0.4){ el.innerHTML=`⚠️ SUSPICIOUS (${(score*100).toFixed(0)}%) — SMS Verification Required`; rb.className='result-box'; rb.style.borderColor='#fb923c'; }
+  else { el.innerHTML=`✅ NORMAL (${(score*100).toFixed(0)}%) — Transaction Approved`; rb.className='result-box good'; }
+}
+
+/* ═══════════ PCA EXPERIMENT ═══════════ */
+function runPCA() {
+  const features = [
+    {id:'pca-f1',name:'Age'},
+    {id:'pca-f2',name:'Income'},
+    {id:'pca-f3',name:'Spending'},
+    {id:'pca-f4',name:'Savings'},
+    {id:'pca-f5',name:'Loans'},
+    {id:'pca-f6',name:'Credit'},
+  ];
+  const active = features.filter(f => $(f.id).checked);
+  if(active.length < 2){ $('pca-var').innerText = 'Need at least 2 features!'; return; }
+  // Simulate PCA result
+  const varPC1 = Math.min(0.85, 0.35 + active.length * 0.06 + Math.random()*0.08);
+  const varPC2 = Math.min(0.55, 0.20 + active.length * 0.03 + Math.random()*0.06);
+  const total = Math.min(0.97, varPC1+varPC2);
+  $('pca-var').innerText = `PC1: ${(varPC1*100).toFixed(1)}%  |  PC2: ${(varPC2*100).toFixed(1)}%  |  Total: ${(total*100).toFixed(1)}%`;
+  drawPCA(varPC1, varPC2, active);
+}
+
+function drawPCA(var1, var2, features) {
+  const canvas = $('pca-canvas');
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#060912'; ctx.fillRect(0,0,W,H);
+  // Axes
+  ctx.strokeStyle='#ffffff22'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(50,10); ctx.lineTo(50,H-40); ctx.lineTo(W-10,H-40); ctx.stroke();
+  // Axis labels
+  ctx.fillStyle='#64748b'; ctx.font='10px Space Mono'; ctx.textAlign='center';
+  ctx.fillText(`PC1 (${(var1*100).toFixed(0)}% variance)`, W/2, H-12);
+  ctx.save(); ctx.translate(14,H/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(`PC2 (${(var2*100).toFixed(0)}%)`, 0,0); ctx.restore();
+  // Seed random points per feature combo
+  const seed = features.map(f=>f.name).join('').length;
+  const rng = (n,s) => { let x=Math.sin(n*12345.6789+s)*43758.5453; return x-Math.floor(x); };
+  // Draw clusters (3 groups)
+  const clusters = [{cx:W*0.25,cy:H*0.35,col:'#38bdf8'},{cx:W*0.6,cy:H*0.55,col:'#a78bfa'},{cx:W*0.45,cy:H*0.2,col:'#34d399'}];
+  clusters.forEach((cl,ci) => {
+    for(let i=0;i<25;i++){
+      const px = cl.cx + (rng(i+ci*100,seed)-0.5)*120*var1;
+      const py = cl.cy + (rng(i+ci*200,seed+1)-0.5)*80*var2;
+      ctx.beginPath(); ctx.arc(px,py,4.5,0,Math.PI*2);
+      ctx.fillStyle=cl.col+'aa'; ctx.fill();
+    }
+  });
+  // Draw loadings arrows
+  ctx.strokeStyle='#ffffff33'; ctx.lineWidth=1.5;
+  features.forEach((f,i) => {
+    const ang = (i/features.length)*Math.PI*2;
+    const len = 60 + var1*40;
+    const ox=W*0.78, oy=H*0.5;
+    ctx.beginPath(); ctx.moveTo(ox,oy);
+    ctx.lineTo(ox+Math.cos(ang)*len, oy+Math.sin(ang)*len*0.6);
+    ctx.stroke();
+    ctx.fillStyle='#94a3b8'; ctx.font='9px Outfit'; ctx.textAlign='center';
+    ctx.fillText(f.name, ox+Math.cos(ang)*(len+14), oy+Math.sin(ang)*(len+14)*0.6+3);
+  });
+  // Biplot label
+  ctx.fillStyle='#ffffff22'; ctx.font='8px Space Mono'; ctx.textAlign='center';
+  ctx.fillText('Loading Biplot', W*0.78, H-50);
+}
+
+/* ═══════════ QUIZ ═══════════ */
+const quizData = [
+  { q:'Which type of ML uses labelled training data?', options:['Unsupervised','Supervised','Reinforcement','Random'], ans:1 },
+  { q:'Linear Regression is used to predict…', options:['A category','A number','A cluster','An anomaly'], ans:1 },
+  { q:'K-Means is an example of…', options:['Classification','Regression','Clustering','Decision Trees'], ans:2 },
+  { q:'Logistic Regression predicts…', options:['Continuous values','Categories','Clusters','Components'], ans:1 },
+  { q:'Which algorithm finds outliers in unlabelled data?', options:['Linear Regression','KMeans','Isolation Forest','Decision Tree'], ans:2 },
+  { q:'PCA stands for…', options:['Primary Classification Algorithm','Principal Component Analysis','Partial Clustering Approach','Predictive Correlation Array'], ans:1 },
+];
+let qIdx=0, qScore=0, qAnswered=false;
+
+function initQuiz() {
+  qIdx=0; qScore=0; qAnswered=false;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if(qIdx >= quizData.length) { showQuizResult(); return; }
+  const q = quizData[qIdx];
+  $('quiz-body').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">QUESTION ${qIdx+1} OF ${quizData.length}</div>
+      <div style="font-size:1.05rem;font-weight:600;line-height:1.6">${q.q}</div>
+    </div>
+    <div style="display:grid;gap:10px" id="quiz-opts">
+      ${q.options.map((o,i)=>`<button onclick="answerQ(${i})" style="background:#0d1422;border:1px solid #ffffff14;border-radius:10px;padding:14px 18px;color:var(--text);font-family:var(--sans);font-size:.9rem;text-align:left;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='#38bdf8'" onmouseout="if(!this.dataset.ans)this.style.borderColor='#ffffff14'">
+        <span style="font-family:var(--mono);color:var(--muted);margin-right:10px">${String.fromCharCode(65+i)}.</span>${o}
+      </button>`).join('')}
+    </div>
+    <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:12px">Score: ${qScore}/${qIdx}</div>
+  `;
+  $('quiz-btns').innerHTML = '';
+}
+
+function answerQ(chosen) {
+  if(qAnswered) return; qAnswered=true;
+  const q = quizData[qIdx];
+  const btns = document.querySelectorAll('#quiz-opts button');
+  btns.forEach((b,i) => {
+    b.style.pointerEvents='none';
+    if(i===q.ans){ b.style.background='#1a3a2a'; b.style.borderColor='#34d399'; b.style.color='#34d399'; }
+    else if(i===chosen && chosen!==q.ans){ b.style.background='#2a1a1a'; b.style.borderColor='#ef4444'; b.style.color='#ef4444'; }
+    b.dataset.ans = '1';
+  });
+  if(chosen===q.ans) qScore++;
+  $('quiz-btns').innerHTML = `<button class="btn btn-primary" onclick="nextQ()">${qIdx+1<quizData.length?'Next Question →':'See Results 🎯'}</button>`;
+}
+
+function nextQ() { qIdx++; qAnswered=false; renderQuestion(); }
+
+function showQuizResult() {
+  const pct = Math.round(qScore/quizData.length*100);
+  const msg = pct>=80?'🎉 Excellent! You really understood ML!':pct>=60?'👍 Good job! Review the sections you missed.':'📚 Keep studying — go back and try the experiments!';
+  $('quiz-body').innerHTML = `
+    <div style="text-align:center;padding:20px">
+      <div style="font-size:4rem;margin-bottom:16px">${pct>=80?'🏆':pct>=60?'🎯':'📚'}</div>
+      <div style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#38bdf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${qScore}/${quizData.length}</div>
+      <div style="font-family:var(--mono);font-size:.8rem;color:var(--muted);margin:8px 0">${pct}% correct</div>
+      <div style="color:#94a3b8;margin-top:14px;font-size:.95rem">${msg}</div>
+    </div>
+  `;
+  $('quiz-btns').innerHTML = `<button class="btn btn-primary" onclick="initQuiz()">🔄 Try Again</button>`;
+}
+
+/* ═══════════ INIT ON LOAD ═══════════ */
+window.onload = () => {
+  runRegression();
+  runClassifier();
+  runDecisionTree();
+  runAnomaly();
+  genKMeans();
+  runPCA();
+};
+</script>
+</body>
+</html>

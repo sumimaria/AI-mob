@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RL Lab — Reinforcement Learning for Students</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0a04;--card:#1e1408;--border:#ffffff0f;
+  --a1:#ff9a3c;--a2:#ffd166;--a3:#43e97b;--a4:#4d96ff;--a5:#f72585;--a6:#a78bfa;
+  --text:#fff8ee;--muted:#7a5a2a;--radius:16px;
+  --mono:'Space Mono',monospace;--sans:'Outfit',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(#ff9a3c05 1px,transparent 1px),linear-gradient(90deg,#ff9a3c05 1px,transparent 1px);
+  background-size:44px 44px}
+.blob{position:fixed;border-radius:50%;filter:blur(110px);opacity:.1;pointer-events:none;z-index:0;animation:bf 15s ease-in-out infinite alternate}
+.b1{width:640px;height:640px;background:var(--a1);top:-200px;left:-180px}
+.b2{width:520px;height:520px;background:var(--a2);bottom:-160px;right:-160px;animation-delay:5s}
+.b3{width:400px;height:400px;background:var(--a3);top:35%;left:25%;animation-delay:10s}
+@keyframes bf{from{transform:translate(0,0) scale(1)}to{transform:translate(44px,30px) scale(1.1)}}
+
+.wrap{position:relative;z-index:5;max-width:1020px;margin:0 auto;padding:0 20px 90px}
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-family:var(--mono);font-size:.7rem;text-decoration:none;padding:8px 0;transition:color .2s;position:relative;z-index:5;margin:0 20px}
+.back-link:hover{color:var(--a1)}
+
+.hero{text-align:center;padding:76px 20px 46px;position:relative;z-index:5}
+.hero-chip{display:inline-flex;align-items:center;gap:8px;background:#ff9a3c1a;border:1px solid #ff9a3c33;color:var(--a1);font-family:var(--mono);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:20px}
+.hero h1{font-size:clamp(2.5rem,7vw,4.6rem);font-weight:800;line-height:1.06;letter-spacing:-1px;background:linear-gradient(135deg,#fff8ee 0%,var(--a1) 40%,var(--a2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:1.06rem;margin:16px auto 32px;max-width:560px;line-height:1.78}
+.hero-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--a1),var(--a2));color:#0f0a04;font-family:var(--sans);font-size:1rem;font-weight:700;padding:clamp(11px,2.5vw,14px) clamp(20px,5vw,36px);border-radius:100px;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 0 40px #ff9a3c44}
+.hero-btn:hover{transform:translateY(-3px);box-shadow:0 0 70px #ff9a3c66}
+.hero-btn svg{transition:transform .2s}.hero-btn:hover svg{transform:translateX(4px)}
+
+.stats{display:flex;justify-content:center;gap:44px;flex-wrap:wrap;margin:0 0 54px}
+.stat{text-align:center}
+.stat-num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.73rem;color:var(--muted);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+
+.section-label{font-family:var(--mono);font-size:.66rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.section-label::before{content:'';width:24px;height:1px;background:var(--muted)}
+
+.phase-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin-bottom:16px;transition:border-color .25s,box-shadow .25s;cursor:pointer}
+.phase-card:hover{border-color:var(--ac,var(--a1));box-shadow:0 0 28px var(--gl,#ff9a3c16)}
+.phase-header{display:flex;align-items:center;gap:18px;padding:24px 28px;user-select:none}
+.phase-num{font-family:var(--mono);font-size:.7rem;color:var(--ac,var(--a1));background:var(--acbg,#ff9a3c1a);border:1px solid var(--ac,var(--a1));padding:4px 10px;border-radius:6px;flex-shrink:0}
+.phase-icon{font-size:1.9rem;flex-shrink:0}
+.phase-title{font-size:1.2rem;font-weight:700}
+.phase-subtitle{font-size:.84rem;color:var(--muted);margin-top:3px}
+.phase-chevron{margin-left:auto;color:var(--muted);transition:transform .3s}
+.phase-card.open .phase-chevron{transform:rotate(180deg)}
+.phase-body{display:none;border-top:1px solid var(--border)}
+.phase-card.open .phase-body{display:block;animation:sopen .32s ease}
+@keyframes sopen{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.phase-inner{padding:28px}
+
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px;margin-bottom:24px}
+@media(max-width:620px){.concept-grid{grid-template-columns:1fr}}
+.concept-box{background:#0a0602;border:1px solid var(--border);border-radius:12px;padding:17px}
+.cb-title{font-family:var(--mono);font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--ac,var(--a1));margin-bottom:8px}
+.concept-box p{color:#a08050;font-size:.87rem;line-height:1.72}
+
+.sub-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.sub-tab{background:#0a0602;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted)}
+.sub-tab:hover{border-color:var(--ac,var(--a1));color:var(--text)}
+.sub-tab.active{background:var(--ac,var(--a1));color:#0f0a04;border-color:transparent}
+.sub-content{display:none}
+.sub-content.active{display:block;animation:fin .28s ease}
+@keyframes fin{from{opacity:0}to{opacity:1}}
+
+.explain-block{background:#0a0602;border-radius:12px;border:1px solid var(--border);padding:20px;margin-bottom:16px}
+.explain-block h3{font-size:1.05rem;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.explain-block p{color:#a08050;font-size:.89rem;line-height:1.76}
+.explain-block ul{margin:10px 0 0 18px;color:#a08050;font-size:.89rem;line-height:1.9}
+.tag{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:1px;padding:2px 10px;border-radius:100px;margin-left:6px;text-transform:uppercase}
+
+.experiment{background:linear-gradient(135deg,#1a0e04,#100800);border:1px solid #ff9a3c20;border-radius:16px;padding:24px;margin-top:16px}
+.exp-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.exp-badge{background:linear-gradient(135deg,var(--a1),var(--a2));color:#0f0a04;font-family:var(--mono);font-size:.6rem;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:100px;font-weight:700}
+.exp-title{font-size:1.03rem;font-weight:700}
+.exp-desc{color:var(--muted);font-size:.84rem;margin-top:2px}
+
+.control-row{display:flex;align-items:center;gap:14px;margin:10px 0;flex-wrap:wrap}
+.control-label{font-family:var(--mono);font-size:.68rem;color:var(--muted);min-width:0}
+.control-value{font-family:var(--mono);font-size:.76rem;color:var(--a1);min-width:0}
+input[type=range]{flex:1;min-width:120px;accent-color:var(--a1);cursor:pointer}
+select{background:#0a0602;border:1px solid #ffffff16;color:var(--text);font-family:var(--mono);font-size:.78rem;padding:8px 13px;border-radius:8px;cursor:pointer;outline:none}
+select:focus{border-color:var(--a1)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;padding:10px 20px;border-radius:8px;font-family:var(--sans);font-weight:700;font-size:.84rem;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn-o{background:linear-gradient(135deg,var(--a1),#c2410c);color:#fff}
+.btn-y{background:linear-gradient(135deg,var(--a2),#d97706);color:#0f0a04}
+.btn-g{background:linear-gradient(135deg,var(--a3),#059669);color:#0f0a04}
+.btn-b{background:linear-gradient(135deg,var(--a4),#0284c7);color:#0f0a04}
+.btn-p{background:linear-gradient(135deg,var(--a6),#7c3aed);color:#fff}
+.btn-r{background:linear-gradient(135deg,var(--a5),#be185d);color:#fff}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+.result-box{background:#070400;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-top:12px;font-family:var(--mono);font-size:.82rem;min-height:48px;transition:border-color .3s}
+.result-box.good{border-color:var(--a3)}
+.result-box.warn{border-color:var(--a2)}
+.result-box.info{border-color:var(--a1)}
+.result-box.err{border-color:var(--a5)}
+.r-label{font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.r-value{font-size:.93rem;font-weight:700;line-height:1.5}
+
+.code-panel{background:#040200;border:1px solid #ff9a3c18;border-radius:12px;overflow:hidden;margin-top:16px}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#0a0602;border-bottom:1px solid #ffffff08}
+.code-dots{display:flex;gap:6px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.code-lang{font-family:var(--mono);font-size:.64rem;color:var(--muted);letter-spacing:1px}
+pre.code{margin:0;padding:18px;font-family:var(--mono);font-size:.77rem;line-height:1.76;overflow-x:auto;color:#cdd6f4;white-space:pre}
+.kw{color:#cba6f7}.fn{color:#89b4fa}.str{color:#a6e3a1}.cm{color:#3a2010;font-style:italic}.nb{color:#fab387}.op{color:#89dceb}
+
+canvas{border-radius:10px;display:block}
+.canvas-wrap{background:#040200;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;margin:12px 0}
+
+.prog-wrap{background:#0a0602;border-radius:100px;height:10px;overflow:hidden;border:1px solid #ffffff08;margin:5px 0}
+.prog-bar{height:100%;border-radius:100px;transition:width .55s ease}
+
+.stepper{display:flex;gap:0;margin:16px 0;overflow:hidden;border-radius:10px}
+.step{flex:1;padding:8px 10px;text-align:center;font-size:.73rem;font-weight:600;background:#0a0602;color:var(--muted);border-right:1px solid var(--border);transition:all .3s}
+.step:last-child{border-right:none}
+.step.done{background:#0f2010;color:var(--a3)}
+.step.active{background:#1e1408;color:var(--a1)}
+
+.divider{height:1px;background:var(--border);margin:22px 0}
+
+/* Grid world cell */
+.grid-cell{width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border-radius:6px;cursor:pointer;transition:all .2s;font-family:var(--mono);font-size:.7rem;font-weight:700;position:relative;user-select:none}
+
+/* Epoch table */
+.epoch-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.74rem;margin-top:10px}
+.epoch-table th{background:#0a0602;color:var(--muted);padding:7px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.epoch-table td{padding:6px 12px;border-bottom:1px solid #ffffff06;color:#a08050}
+.epoch-table tr.best td{color:var(--a2);font-weight:700}
+
+footer{position:relative;z-index:5;text-align:center;padding:30px 20px;color:var(--muted);font-size:.8rem}
+.toast{position:fixed;bottom:26px;right:26px;background:var(--card);border:1px solid var(--a1);color:var(--a1);font-family:var(--mono);font-size:.74rem;padding:10px 17px;border-radius:10px;z-index:9999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES
+   Targets ≤600px (most phones)
+══════════════════════════════════ */
+@media(max-width:600px){
+  /* Hero */
+  .hero{padding:48px 16px 32px}
+  .hero h1{font-size:clamp(1.9rem,9vw,3rem);letter-spacing:-.5px}
+  .hero p{font-size:.95rem}
+  .hero-btn{padding:12px 24px;font-size:.9rem}
+
+  /* Stats row */
+  .stats{gap:24px}
+  .stat-num{font-size:1.5rem}
+
+  /* Wrap padding */
+  .wrap{padding:0 14px 60px}
+
+  /* Phase card header */
+  .phase-header{padding:18px 16px;gap:12px}
+  .phase-icon{font-size:1.5rem}
+  .phase-title{font-size:1rem}
+  .phase-subtitle{font-size:.76rem}
+  .phase-inner{padding:16px}
+
+  /* Concept grid → 1 col */
+  .concept-grid{grid-template-columns:1fr !important}
+
+  /* Sub tabs wrap */
+  .sub-tabs{gap:6px}
+  .sub-tab{padding:7px 12px;font-size:.78rem}
+
+  /* Experiment padding */
+  .experiment{padding:16px}
+  .exp-title{font-size:.96rem}
+  .exp-desc{font-size:.78rem}
+
+  /* Control rows: stack vertically */
+  .control-row{flex-direction:column;align-items:flex-start;gap:6px}
+  .control-label{min-width:0 !important;width:100%}
+  .control-value{min-width:0 !important}
+  input[type=range]{width:100%}
+  select{width:100%;font-size:.8rem}
+
+  /* Button rows */
+  .btn-row{gap:8px}
+  .btn{padding:9px 16px;font-size:.8rem}
+
+  /* Result boxes */
+  .result-box{padding:12px 14px}
+  .r-value{font-size:.86rem}
+
+  /* Code panels */
+  pre.code{font-size:.7rem;padding:14px;line-height:1.6}
+  .code-header{padding:8px 12px}
+  .code-lang{font-size:.6rem}
+
+  /* Canvas: always full width */
+  canvas{width:100% !important;height:auto !important}
+  .canvas-wrap{padding:10px}
+
+  /* Stepper: smaller text */
+  .stepper{border-radius:8px}
+  .step{padding:7px 5px;font-size:.65rem}
+
+  /* Epoch / trans tables */
+  .epoch-table td,.epoch-table th{padding:5px 8px;font-size:.7rem}
+  .trans-table td,.trans-table th{padding:5px 8px;font-size:.78rem}
+
+  /* AI Explorer specific */
+  .cards-grid{grid-template-columns:1fr !important}
+  .scene-wrap{grid-template-columns:1fr !important}
+  .sub-grid{grid-template-columns:1fr 1fr !important}
+  .card-btn{padding:18px 16px 14px}
+  .panel{padding:18px 16px}
+  header{padding:40px 16px 16px}
+  header h1{font-size:clamp(1.9rem,9vw,3rem)}
+  main{padding:14px 14px 60px}
+  .section-title{margin-top:32px}
+  .diagram-block{padding:12px 8px}
+  .diagram-block svg{min-width:0}
+
+  /* DL / RL dual-canvas grids → single col */
+  div[style*="grid-template-columns:1fr 1fr"]{
+    display:flex !important;flex-direction:column !important;gap:10px !important
+  }
+
+  /* Face recognition two-panel */
+  .fr-grid{grid-template-columns:1fr !important}
+
+  /* Back link */
+  .back-link{margin:0 14px;font-size:.64rem}
+
+  /* NER text */
+  .ner-text{font-size:.88rem;line-height:2}
+
+  /* Chips */
+  .chip{font-size:.68rem;padding:3px 8px}
+
+  /* Confusion matrix */
+  .matrix{transform:scale(0.85);transform-origin:left top}
+  .mx-cell{width:66px;height:44px}
+
+  /* Blob: reduce size so they don't dominate */
+  .blob{opacity:.07}
+}
+
+@media(max-width:400px){
+  .hero h1{font-size:1.7rem}
+  .phase-title{font-size:.93rem}
+  .phase-num{font-size:.62rem;padding:3px 7px}
+  pre.code{font-size:.64rem}
+  .sub-grid{grid-template-columns:1fr !important}
+}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<a class="back-link" href="ai_explorer.html">← Back to AI Explorer</a>
+
+<div class="hero">
+  <div class="hero-chip">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="4"/></svg>
+    RL Learning Lab
+  </div>
+  <h1>Reinforcement<br>Learning</h1>
+  <p>Discover how agents learn through reward and punishment — from Q-tables to Deep Q-Networks to policy gradients powering real-world AI.</p>
+  <button class="hero-btn" onclick="startLearning()">
+    Start Training
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<div class="wrap" id="main-content" style="display:none">
+  <div class="stats">
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">RL Topics</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">Live Simulations</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Possible Policies</div></div>
+  </div>
+  <div class="section-label">Learning Modules</div>
+
+  <!-- ═══════════════════════════════
+       01  WHAT IS RL
+  ═══════════════════════════════ -->
+  <div class="phase-card" style="--ac:#ff9a3c;--acbg:#ff9a3c1a;--gl:#ff9a3c16" onclick="togglePhase('ph1',event)">
+    <div class="phase-header">
+      <span class="phase-num">01</span><span class="phase-icon">🎮</span>
+      <div><div class="phase-title">What is Reinforcement Learning?</div>
+           <div class="phase-subtitle">Agents, environments, rewards and the goal of maximising return</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph1" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="concept-grid">
+        <div class="concept-box" style="border-left:3px solid var(--a1)">
+          <div class="cb-title">The Core Idea</div>
+          <p>An <strong>agent</strong> interacts with an <strong>environment</strong>. It takes actions, observes new states, and receives <strong>rewards</strong>. Its goal: learn a <em>policy</em> that maximises total reward over time — without being told the rules.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a2)">
+          <div class="cb-title">Key Concepts</div>
+          <p><strong>State (s):</strong> What the agent observes. <strong>Action (a):</strong> What the agent does. <strong>Reward (r):</strong> Feedback signal. <strong>Policy (π):</strong> Mapping from state to action. <strong>Return (G):</strong> Cumulative future reward.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a3)">
+          <div class="cb-title">vs Supervised Learning</div>
+          <p>In supervised ML, you provide labelled answers. In RL, there are no labels — only sparse reward signals. The agent must <em>explore</em> to discover what works and <em>exploit</em> what it knows.</p>
+        </div>
+        <div class="concept-box" style="border-left:3px solid var(--a4)">
+          <div class="cb-title">Real-World Uses</div>
+          <p>Game AI (AlphaGo, OpenAI Five), robot locomotion, trading strategies, recommendation systems, autonomous driving, drug discovery, RLHF for training ChatGPT.</p>
+        </div>
+      </div>
+      <div class="explain-block" style="text-align:center">
+        <div class="cb-title" style="margin-bottom:14px">The RL Feedback Loop</div>
+        <svg viewBox="0 0 680 110" style="max-width:100%;display:block;margin:0 auto" font-family="Outfit,sans-serif" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="ha" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#ff9a3c77"/></marker>
+          <marker id="hb" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#43e97b77"/></marker>
+          <marker id="hc" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#f7258577"/></marker></defs>
+          <!-- Agent -->
+          <rect x="60" y="28" width="160" height="54" rx="10" fill="#1e1408" stroke="#ff9a3c" stroke-width="2"/>
+          <text x="140" y="52" text-anchor="middle" fill="#ff9a3c" font-size="13" font-weight="700">🤖 Agent</text>
+          <text x="140" y="70" text-anchor="middle" fill="#7a5a2a" font-size="9">learns a policy π(s)→a</text>
+          <!-- Environment -->
+          <rect x="460" y="28" width="175" height="54" rx="10" fill="#1e1408" stroke="#4d96ff" stroke-width="2"/>
+          <text x="547" y="52" text-anchor="middle" fill="#4d96ff" font-size="13" font-weight="700">🌍 Environment</text>
+          <text x="547" y="70" text-anchor="middle" fill="#7a5a2a" font-size="9">simulated or real world</text>
+          <!-- Action arrow (top) -->
+          <path d="M220,38 Q340,10 460,38" fill="none" stroke="#ff9a3c" stroke-width="2" marker-end="url(#ha)"/>
+          <text x="340" y="14" text-anchor="middle" fill="#ff9a3c" font-size="10" font-weight="700">Action aₜ</text>
+          <!-- Reward + State arrow (bottom) -->
+          <path d="M460,72 Q340,100 220,72" fill="none" stroke="#43e97b" stroke-width="2" marker-end="url(#hb)"/>
+          <text x="340" y="105" text-anchor="middle" fill="#43e97b" font-size="10" font-weight="700">Reward rₜ + New State sₜ₊₁</text>
+        </svg>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       02  MARKOV DECISION PROCESS
+  ═══════════════════════════════ -->
+  <div class="phase-card" style="--ac:#ffd166;--acbg:#ffd1661a;--gl:#ffd16616" onclick="togglePhase('ph2',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#ffd166;background:#ffd1661a;border-color:#ffd166">02</span><span class="phase-icon">🗺️</span>
+      <div><div class="phase-title">Markov Decision Process (MDP)</div>
+           <div class="phase-subtitle">The mathematical foundation of RL — states, transitions, rewards and discount factor</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph2" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🗺️ What is an MDP? <span class="tag" style="background:#ffd16622;color:#ffd166">Foundation</span></h3>
+        <p>An MDP is a formal framework for sequential decision-making. It is defined by a tuple <strong>(S, A, P, R, γ)</strong> — states, actions, transition probabilities, reward function, and discount factor.</p>
+        <ul>
+          <li><strong>Markov Property:</strong> "The future depends only on the present, not the past." The next state depends only on the current state and action</li>
+          <li><strong>Discount factor γ:</strong> Controls how much the agent values future vs immediate rewards. γ=0 → greedy; γ=1 → far-sighted</li>
+          <li><strong>Return Gₜ = rₜ + γrₜ₊₁ + γ²rₜ₊₂ + …</strong> — sum of discounted future rewards</li>
+          <li><strong>Value function V(s):</strong> Expected return from state s following policy π</li>
+        </ul>
+      </div>
+      <div class="experiment">
+        <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+          <div><div class="exp-title">MDP Grid World Explorer</div>
+               <div class="exp-desc">Navigate a simple grid world — see how discount factor changes which path the agent prefers</div></div>
+        </div>
+        <div class="control-row"><span class="control-label">Discount γ</span>
+          <input type="range" id="mdp-gamma" min="0" max="99" value="90" oninput="runMDP()"><span class="control-value" id="mdp-gammav">0.90</span>
+        </div>
+        <div class="control-row"><span class="control-label">Reward at Goal</span>
+          <input type="range" id="mdp-rew" min="1" max="20" value="10" oninput="runMDP()"><span class="control-value" id="mdp-rewv">+10</span>
+        </div>
+        <div class="control-row"><span class="control-label">Step Penalty</span>
+          <input type="range" id="mdp-pen" min="0" max="5" value="1" oninput="runMDP()"><span class="control-value" id="mdp-penv">-1</span>
+        </div>
+        <canvas id="mdp-canvas" width="580" style="max-width:100%" height="280" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+        <div class="result-box info" id="mdp-result"><div class="r-label">Value Function</div><div class="r-value" id="mdp-val">Adjust sliders to see value propagation</div></div>
+        <div class="code-panel">
+          <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — MDP Value Iteration</span></div>
+<pre class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># 4×4 Grid World MDP</span>
+<span class="cm"># States: 0-15, Goal: 15 (bottom-right), Hole: 5</span>
+n_states, n_actions = <span class="nb">16</span>, <span class="nb">4</span>  <span class="cm"># UP DOWN LEFT RIGHT</span>
+gamma = <span class="nb">0.9</span>
+V = np.<span class="fn">zeros</span>(n_states)
+R = np.<span class="fn">full</span>(n_states, -<span class="nb">1.0</span>)  <span class="cm"># step cost</span>
+R[<span class="nb">15</span>] = <span class="nb">+10.0</span>               <span class="cm"># goal reward</span>
+R[<span class="nb">5</span>]  = -<span class="nb">10.0</span>               <span class="cm"># hole penalty</span>
+
+<span class="cm"># Value Iteration</span>
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">100</span>):
+    V_new = np.<span class="fn">copy</span>(V)
+    <span class="kw">for</span> s <span class="kw">in</span> <span class="fn">range</span>(n_states):
+        <span class="kw">if</span> s <span class="kw">in</span> [<span class="nb">5</span>, <span class="nb">15</span>]: <span class="kw">continue</span>   <span class="cm"># terminal states</span>
+        row, col = s//<span class="nb">4</span>, s%<span class="nb">4</span>
+        next_states = {
+            <span class="nb">0</span>: <span class="nb">4</span>*(row-<span class="nb">1</span>)+col <span class="kw">if</span> row><span class="nb">0</span> <span class="kw">else</span> s,  <span class="cm"># UP</span>
+            <span class="nb">1</span>: <span class="nb">4</span>*(row+<span class="nb">1</span>)+col <span class="kw">if</span> row<<span class="nb">3</span> <span class="kw">else</span> s,  <span class="cm"># DOWN</span>
+            <span class="nb">2</span>: <span class="nb">4</span>*row+(col-<span class="nb">1</span>) <span class="kw">if</span> col><span class="nb">0</span> <span class="kw">else</span> s,  <span class="cm"># LEFT</span>
+            <span class="nb">3</span>: <span class="nb">4</span>*row+(col+<span class="nb">1</span>) <span class="kw">if</span> col<<span class="nb">3</span> <span class="kw">else</span> s,  <span class="cm"># RIGHT</span>
+        }
+        V_new[s] = <span class="fn">max</span>(R[ns] + gamma * V[ns]
+                       <span class="kw">for</span> ns <span class="kw">in</span> next_states.<span class="fn">values</span>())
+    V = V_new
+<span class="fn">print</span>(V.<span class="fn">reshape</span>(<span class="nb">4</span>,<span class="nb">4</span>).<span class="fn">round</span>(<span class="nb">2</span>))</pre>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       03  Q-LEARNING
+  ═══════════════════════════════ -->
+  <div class="phase-card" style="--ac:#ff9a3c;--acbg:#ff9a3c1a;--gl:#ff9a3c16" onclick="togglePhase('ph3',event)">
+    <div class="phase-header">
+      <span class="phase-num">03</span><span class="phase-icon">📊</span>
+      <div><div class="phase-title">Q-Learning & The Q-Table</div>
+           <div class="phase-subtitle">Model-free TD learning — building a table of action values to guide the agent</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph3" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>📊 Q-Learning <span class="tag" style="background:#ff9a3c22;color:#ff9a3c">Model-Free</span></h3>
+        <p>Q-Learning learns a <strong>Q-table</strong>: Q(s, a) = expected return if you take action <em>a</em> in state <em>s</em> and follow the optimal policy afterwards. The Bellman update equation is applied after each step until the table converges.</p>
+        <ul>
+          <li><strong>Bellman Equation:</strong> Q(s,a) ← Q(s,a) + α[r + γ·max Q(s',a') − Q(s,a)]</li>
+          <li><strong>α (learning rate):</strong> How quickly new information overwrites old</li>
+          <li><strong>ε-greedy:</strong> Explore randomly with probability ε, exploit best action otherwise</li>
+          <li><strong>Convergence:</strong> Guaranteed to converge to optimal Q* given sufficient exploration</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#ff9a3c" onclick="switchSub('ql','maze',this)">🏃 Maze Solver</button>
+        <button class="sub-tab" style="--ac:#ff9a3c" onclick="switchSub('ql','qtable',this)">📋 Q-Table Viewer</button>
+      </div>
+
+      <!-- MAZE SOLVER -->
+      <div class="sub-content active" id="ql-maze">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Live Q-Learning Maze Solver</div>
+                 <div class="exp-desc">Watch the agent learn to navigate the maze through thousands of episodes in seconds</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Learning Rate α</span>
+            <input type="range" id="ql-alpha" min="1" max="9" value="5" oninput="document.getElementById('ql-alphav').innerText='0.'+this.value"><span class="control-value" id="ql-alphav">0.5</span>
+          </div>
+          <div class="control-row"><span class="control-label">Discount γ</span>
+            <input type="range" id="ql-gamma" min="50" max="99" value="90" oninput="document.getElementById('ql-gammav').innerText='0.'+this.value"><span class="control-value" id="ql-gammav">0.90</span>
+          </div>
+          <div class="control-row"><span class="control-label">Exploration ε</span>
+            <input type="range" id="ql-eps" min="5" max="50" value="20" oninput="document.getElementById('ql-epsv').innerText='0.'+this.value"><span class="control-value" id="ql-epsv">0.20</span>
+          </div>
+          <div class="control-row"><span class="control-label">Episodes</span>
+            <input type="range" id="ql-ep" min="200" max="5000" step="200" value="1000" oninput="document.getElementById('ql-epv').innerText=this.value"><span class="control-value" id="ql-epv">1000</span>
+          </div>
+          <div class="stepper" id="ql-step">
+            <div class="step" id="qs1">Init</div><div class="step" id="qs2">Explore</div>
+            <div class="step" id="qs3">Update Q</div><div class="step" id="qs4">Converge</div><div class="step" id="qs5">Done ✓</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-o" onclick="trainQLearning()">▶ Train Agent</button>
+            <button class="btn btn-y" onclick="runBestPath()">🏆 Show Best Path</button>
+            <button class="btn btn-b" onclick="resetMaze()">↺ Reset</button>
+          </div>
+          <canvas id="maze-canvas" width="580" style="max-width:100%" height="320" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+          <div class="result-box" id="ql-result"><div class="r-label">Training Status</div><div class="r-value" id="ql-status">Click "Train Agent" to begin</div></div>
+          <div class="code-panel">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Q-Learning from Scratch</span></div>
+<pre class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> random
+
+<span class="cm"># Environment: 5×5 maze, start=(0,0), goal=(4,4)</span>
+ROWS, COLS = <span class="nb">5</span>, <span class="nb">5</span>
+ACTIONS = [(-<span class="nb">1</span>,<span class="nb">0</span>),(<span class="nb">1</span>,<span class="nb">0</span>),(<span class="nb">0</span>,-<span class="nb">1</span>),(<span class="nb">0</span>,<span class="nb">1</span>)]  <span class="cm"># UP DOWN LEFT RIGHT</span>
+WALLS = {(<span class="nb">1</span>,<span class="nb">1</span>),(<span class="nb">2</span>,<span class="nb">1</span>),(<span class="nb">2</span>,<span class="nb">3</span>),(<span class="nb">3</span>,<span class="nb">2</span>)}
+
+<span class="cm"># Q-table: shape (rows, cols, n_actions)</span>
+Q = np.<span class="fn">zeros</span>((ROWS, COLS, <span class="nb">4</span>))
+alpha, gamma, eps = <span class="nb">0.5</span>, <span class="nb">0.9</span>, <span class="nb">0.2</span>
+
+<span class="kw">def</span> <span class="fn">step</span>(s, a):
+    nr, nc = s[<span class="nb">0</span>]+ACTIONS[a][<span class="nb">0</span>], s[<span class="nb">1</span>]+ACTIONS[a][<span class="nb">1</span>]
+    <span class="kw">if not</span> (<span class="nb">0</span><=nr<ROWS <span class="kw">and</span> <span class="nb">0</span><=nc<COLS) <span class="kw">or</span> (nr,nc) <span class="kw">in</span> WALLS:
+        <span class="kw">return</span> s, -<span class="nb">1</span>, <span class="nb">False</span>   <span class="cm"># hit wall</span>
+    done = (nr==ROWS-<span class="nb">1</span> <span class="kw">and</span> nc==COLS-<span class="nb">1</span>)
+    <span class="kw">return</span> (nr,nc), <span class="nb">+10</span> <span class="kw">if</span> done <span class="kw">else</span> -<span class="nb">1</span>, done
+
+<span class="kw">for</span> ep <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">1000</span>):
+    s = (<span class="nb">0</span>, <span class="nb">0</span>)
+    <span class="kw">while True</span>:
+        <span class="cm"># ε-greedy action selection</span>
+        a = random.<span class="fn">randint</span>(<span class="nb">0</span>,<span class="nb">3</span>) <span class="kw">if</span> random.<span class="fn">random</span>()<eps <span class="kw">else</span> Q[s].<span class="fn">argmax</span>()
+        ns, r, done = <span class="fn">step</span>(s, a)
+        <span class="cm"># Bellman update</span>
+        Q[s][a] += alpha*(r + gamma*Q[ns].<span class="fn">max</span>() - Q[s][a])
+        s = ns
+        <span class="kw">if</span> done: <span class="kw">break</span>
+<span class="fn">print</span>(<span class="str">"Trained! Optimal actions:"</span>, Q.<span class="fn">argmax</span>(axis=<span class="nb">2</span>))</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q-TABLE VIEWER -->
+      <div class="sub-content" id="ql-qtable">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">Q-Table Heat Map</div>
+                 <div class="exp-desc">See the Q-values for each state-action pair after training — brighter = higher value</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Show Action</span>
+            <select id="qt-action" onchange="drawQTable()">
+              <option value="0">↑ Up</option><option value="1">↓ Down</option>
+              <option value="2">← Left</option><option value="3">→ Right</option>
+            </select>
+          </div>
+          <canvas id="qtable-canvas" width="580" style="max-width:100%" height="280" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+          <div class="result-box info" id="qt-result"><div class="r-label">Q-Table Info</div><div class="r-value" id="qt-val">Train the agent first, then explore Q-values here</div></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       04  DEEP Q-NETWORK (DQN)
+  ═══════════════════════════════ -->
+  <div class="phase-card" style="--ac:#4d96ff;--acbg:#4d96ff1a;--gl:#4d96ff16" onclick="togglePhase('ph4',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#4d96ff;background:#4d96ff1a;border-color:#4d96ff">04</span><span class="phase-icon">🧠</span>
+      <div><div class="phase-title">Deep Q-Network (DQN)</div>
+           <div class="phase-subtitle">Replacing the Q-table with a neural network — scaling RL to Atari and beyond</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph4" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🧠 DQN <span class="tag" style="background:#4d96ff22;color:#4d96ff">Deep RL</span></h3>
+        <p>Q-tables become impossible for large state spaces (e.g. pixels on a screen). <strong>DQN</strong> replaces the table with a neural network that <em>approximates</em> Q(s,a). DeepMind's 2013 breakthrough — one DQN played 49 Atari games at human level.</p>
+        <ul>
+          <li><strong>Experience Replay:</strong> Stores past transitions in a buffer; samples random mini-batches to break correlations</li>
+          <li><strong>Target Network:</strong> A frozen copy of the Q-network, updated every N steps — stabilises training</li>
+          <li><strong>Input:</strong> Raw pixels (84×84 grayscale frames) stacked 4 deep to encode motion</li>
+          <li><strong>Loss:</strong> MSE between predicted Q(s,a) and target r + γ·max Q(s',a') </li>
+        </ul>
+      </div>
+      <div class="experiment">
+        <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+          <div><div class="exp-title">DQN Catch Game Simulation</div>
+               <div class="exp-desc">Watch a DQN agent learn to catch falling objects — visualise training progress and reward curve</div></div>
+        </div>
+        <div class="control-row"><span class="control-label">Network Size</span>
+          <select id="dqn-size">
+            <option value="small">Small (64→32)</option>
+            <option value="medium" selected>Medium (128→64)</option>
+            <option value="large">Large (256→128)</option>
+          </select>
+        </div>
+        <div class="control-row"><span class="control-label">Replay Buffer</span>
+          <input type="range" id="dqn-buf" min="100" max="5000" step="100" value="1000" oninput="document.getElementById('dqn-bufv').innerText=this.value"><span class="control-value" id="dqn-bufv">1000</span>
+        </div>
+        <div class="control-row"><span class="control-label">Training Speed</span>
+          <input type="range" id="dqn-speed" min="1" max="5" value="3" oninput="document.getElementById('dqn-speedv').innerText=this.value+'×'"><span class="control-value" id="dqn-speedv">3×</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-b" id="dqn-btn" onclick="runDQN()">▶ Train DQN</button>
+          <button class="btn btn-y" onclick="stopDQN()">⏹ Stop</button>
+          <button class="btn btn-p" onclick="resetDQN()">↺ Reset</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px">
+          <canvas id="dqn-game" width="270" height="200" style="max-width:100%;border-radius:10px;border:1px solid #4d96ff22"></canvas>
+          <canvas id="dqn-reward" width="270" height="200" style="max-width:100%;border-radius:10px;border:1px solid #ff9a3c22"></canvas>
+        </div>
+        <div class="result-box info" id="dqn-result"><div class="r-label">DQN Status</div><div class="r-value" id="dqn-status">Configure and click Train DQN</div></div>
+        <div class="code-panel">
+          <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — DQN with PyTorch</span></div>
+<pre class="code"><span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> collections <span class="kw">import</span> deque
+<span class="kw">import</span> random
+
+<span class="cm"># Q-Network architecture</span>
+<span class="kw">class</span> <span class="fn">DQN</span>(nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, state_dim, action_dim):
+        <span class="fn">super</span>().<span class="fn">__init__</span>()
+        self.net = nn.<span class="fn">Sequential</span>(
+            nn.<span class="fn">Linear</span>(state_dim, <span class="nb">128</span>), nn.<span class="fn">ReLU</span>(),
+            nn.<span class="fn">Linear</span>(<span class="nb">128</span>, <span class="nb">64</span>),   nn.<span class="fn">ReLU</span>(),
+            nn.<span class="fn">Linear</span>(<span class="nb">64</span>, action_dim)
+        )
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x): <span class="kw">return</span> self.net(x)
+
+<span class="cm"># Replay Buffer</span>
+buffer = <span class="fn">deque</span>(maxlen=<span class="nb">10000</span>)
+
+<span class="cm"># Main DQN training loop</span>
+q_net     = <span class="fn">DQN</span>(state_dim=<span class="nb">4</span>, action_dim=<span class="nb">2</span>)
+target    = <span class="fn">DQN</span>(state_dim=<span class="nb">4</span>, action_dim=<span class="nb">2</span>)
+target.<span class="fn">load_state_dict</span>(q_net.<span class="fn">state_dict</span>())  <span class="cm"># sync</span>
+optimizer = torch.optim.<span class="fn">Adam</span>(q_net.<span class="fn">parameters</span>(), lr=<span class="nb">1e-3</span>)
+criterion = nn.<span class="fn">MSELoss</span>()
+
+<span class="kw">for</span> step <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">100000</span>):
+    <span class="cm"># Sample mini-batch from replay buffer</span>
+    batch = random.<span class="fn">sample</span>(buffer, <span class="nb">64</span>)
+    s, a, r, ns, done = <span class="fn">zip</span>(*batch)
+    s  = torch.FloatTensor(s)
+    ns = torch.FloatTensor(ns)
+    <span class="cm"># Compute TD target using frozen target network</span>
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        target_q = r + <span class="nb">0.99</span>*target(ns).<span class="fn">max</span>(<span class="nb">1</span>).values*(~done)
+    <span class="cm"># MSE loss between predicted and target Q</span>
+    loss = criterion(q_net(s).<span class="fn">gather</span>(<span class="nb">1</span>,a), target_q)
+    optimizer.<span class="fn">zero_grad</span>(); loss.<span class="fn">backward</span>(); optimizer.<span class="fn">step</span>()
+    <span class="kw">if</span> step % <span class="nb">1000</span> == <span class="nb">0</span>:
+        target.<span class="fn">load_state_dict</span>(q_net.<span class="fn">state_dict</span>())  <span class="cm"># sync target</span></pre>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       05  POLICY GRADIENT
+  ═══════════════════════════════ -->
+  <div class="phase-card" style="--ac:#43e97b;--acbg:#43e97b1a;--gl:#43e97b16" onclick="togglePhase('ph5',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#43e97b;background:#43e97b1a;border-color:#43e97b">05</span><span class="phase-icon">🎯</span>
+      <div><div class="phase-title">Policy Gradient Methods</div>
+           <div class="phase-subtitle">Directly optimising the policy — REINFORCE, Actor-Critic and PPO</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph5" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🎯 Policy Gradient <span class="tag" style="background:#43e97b22;color:#43e97b">Direct Optimisation</span></h3>
+        <p>Instead of learning Q-values, <strong>policy gradient methods</strong> directly parameterise and optimise the policy π(a|s; θ). The gradient ∇J(θ) points in the direction that increases expected return.</p>
+        <ul>
+          <li><strong>REINFORCE:</strong> Monte-Carlo policy gradient — update after full episode using actual returns</li>
+          <li><strong>Actor-Critic (A2C/A3C):</strong> Actor outputs policy, Critic estimates value — reduces variance</li>
+          <li><strong>PPO:</strong> Proximal Policy Optimisation — most widely used today (OpenAI Five, ChatGPT RLHF)</li>
+          <li><strong>Advantages over Q-learning:</strong> Works in continuous action spaces; can learn stochastic policies</li>
+        </ul>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" style="--ac:#43e97b" onclick="switchSub('pg','cart',this)">🏋️ CartPole Balance</button>
+        <button class="sub-tab" style="--ac:#43e97b" onclick="switchSub('pg','compare',this)">📊 Algorithm Compare</button>
+      </div>
+
+      <!-- CARTPOLE -->
+      <div class="sub-content active" id="pg-cart">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">CartPole Balance Simulation</div>
+                 <div class="exp-desc">Watch the policy gradient agent learn to balance a pole on a moving cart</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Algorithm</span>
+            <select id="pg-algo">
+              <option value="reinforce">REINFORCE</option>
+              <option value="a2c" selected>Actor-Critic (A2C)</option>
+              <option value="ppo">PPO</option>
+            </select>
+          </div>
+          <div class="control-row"><span class="control-label">Learning Rate</span>
+            <input type="range" id="pg-lr" min="1" max="9" value="3" oninput="document.getElementById('pg-lrv').innerText='0.00'+this.value"><span class="control-value" id="pg-lrv">0.003</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-g" id="pg-btn" onclick="runCartPole()">▶ Train Agent</button>
+            <button class="btn btn-o" onclick="stopCartPole()">⏹ Stop</button>
+            <button class="btn btn-b" onclick="resetCartPole()">↺ Reset</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px">
+            <canvas id="cart-canvas" width="270" height="200" style="max-width:100%;border-radius:10px;border:1px solid #43e97b22"></canvas>
+            <canvas id="cart-reward" width="270" height="200" style="max-width:100%;border-radius:10px;border:1px solid #ffd16622"></canvas>
+          </div>
+          <div class="result-box" id="pg-result"><div class="r-label">Training Progress</div><div class="r-value" id="pg-status">Click "Train Agent" to begin</div></div>
+          <div class="code-panel">
+            <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — PPO with Stable-Baselines3</span></div>
+<pre class="code"><span class="kw">from</span> stable_baselines3 <span class="kw">import</span> PPO
+<span class="kw">from</span> stable_baselines3.common.env_util <span class="kw">import</span> make_vec_env
+<span class="kw">import</span> gymnasium <span class="kw">as</span> gym
+
+<span class="cm"># Create vectorised CartPole environment</span>
+env = <span class="fn">make_vec_env</span>(<span class="str">"CartPole-v1"</span>, n_envs=<span class="nb">4</span>)
+
+<span class="cm"># Create PPO agent</span>
+model = <span class="fn">PPO</span>(
+    policy    = <span class="str">"MlpPolicy"</span>,
+    env       = env,
+    n_steps   = <span class="nb">2048</span>,
+    batch_size= <span class="nb">64</span>,
+    n_epochs  = <span class="nb">10</span>,
+    gamma     = <span class="nb">0.99</span>,
+    gae_lambda= <span class="nb">0.95</span>,
+    clip_range= <span class="nb">0.2</span>,  <span class="cm"># PPO clipping — prevents large policy updates</span>
+    verbose   = <span class="nb">1</span>
+)
+
+<span class="cm"># Train for 100k timesteps</span>
+model.<span class="fn">learn</span>(total_timesteps=<span class="nb">100_000</span>)
+model.<span class="fn">save</span>(<span class="str">"ppo_cartpole"</span>)
+
+<span class="cm"># Evaluate</span>
+obs = env.<span class="fn">reset</span>()
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">500</span>):
+    action, _ = model.<span class="fn">predict</span>(obs)
+    obs, rewards, dones, info = env.<span class="fn">step</span>(action)
+<span class="cm"># Achieves perfect score of 500 in ~30k timesteps</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALGORITHM COMPARE -->
+      <div class="sub-content" id="pg-compare">
+        <div class="experiment">
+          <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+            <div><div class="exp-title">RL Algorithm Comparison</div>
+                 <div class="exp-desc">Choose a task to see which RL algorithm is best suited and why</div></div>
+          </div>
+          <div class="control-row"><span class="control-label">Task Type</span>
+            <select id="cmp-task" onchange="runCompare()" style="flex:1">
+              <option value="discrete">Discrete Actions (Grid / Games)</option>
+              <option value="continuous">Continuous Control (Robot / Car)</option>
+              <option value="sparse">Sparse Rewards (Long horizon)</option>
+              <option value="multiagent">Multi-Agent Environment</option>
+              <option value="rlhf">RLHF (Language Model Fine-tuning)</option>
+            </select>
+          </div>
+          <div id="cmp-output" style="margin-top:16px"></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       06  EXPLORE vs EXPLOIT & BANDITS
+  ═══════════════════════════════ -->
+  <div class="phase-card" style="--ac:#a78bfa;--acbg:#a78bfa1a;--gl:#a78bfa16" onclick="togglePhase('ph6',event)">
+    <div class="phase-header">
+      <span class="phase-num" style="color:#a78bfa;background:#a78bfa1a;border-color:#a78bfa">06</span><span class="phase-icon">🎰</span>
+      <div><div class="phase-title">Exploration vs Exploitation & Multi-Armed Bandits</div>
+           <div class="phase-subtitle">The fundamental dilemma — trying new things vs using what already works</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph6" onclick="event.stopPropagation()"><div class="phase-inner">
+      <div class="explain-block">
+        <h3>🎰 The Exploration-Exploitation Dilemma <span class="tag" style="background:#a78bfa22;color:#a78bfa">Bandits</span></h3>
+        <p>Should the agent keep doing what worked before (<em>exploit</em>) or try new actions that might be better (<em>explore</em>)? The <strong>Multi-Armed Bandit</strong> problem is the simplest RL setting — no state transitions, just choose which arm to pull each round to maximise reward.</p>
+        <ul>
+          <li><strong>ε-greedy:</strong> Explore with probability ε, exploit best known arm otherwise</li>
+          <li><strong>UCB (Upper Confidence Bound):</strong> Pull the arm with highest optimistic estimate — prefer uncertain arms</li>
+          <li><strong>Thompson Sampling:</strong> Bayesian approach — sample from reward distribution belief</li>
+          <li><strong>Regret:</strong> Difference between optimal reward and actual reward collected — minimise this</li>
+        </ul>
+      </div>
+      <div class="experiment">
+        <div class="exp-header"><span class="exp-badge">🔬 Experiment</span>
+          <div><div class="exp-title">Multi-Armed Bandit Simulator</div>
+               <div class="exp-desc">Simulate slot machines with hidden payouts — compare ε-greedy vs UCB vs Thompson Sampling</div></div>
+        </div>
+        <div class="control-row"><span class="control-label">Number of Arms</span>
+          <input type="range" id="ban-arms" min="3" max="10" value="5" oninput="initBandits()"><span class="control-value" id="ban-armsv">5</span>
+        </div>
+        <div class="control-row"><span class="control-label">ε (epsilon)</span>
+          <input type="range" id="ban-eps" min="1" max="30" value="10" oninput="document.getElementById('ban-epsv').innerText='0.'+String(this.value).padStart(2,'0')"><span class="control-value" id="ban-epsv">0.10</span>
+        </div>
+        <div class="control-row"><span class="control-label">Rounds</span>
+          <input type="range" id="ban-rounds" min="50" max="1000" step="50" value="300" oninput="document.getElementById('ban-roundsv').innerText=this.value"><span class="control-value" id="ban-roundsv">300</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-p" onclick="runBandits()">🎰 Run Simulation</button>
+          <button class="btn btn-y" onclick="initBandits()">🔄 New Arms</button>
+        </div>
+        <canvas id="bandit-canvas" width="580" style="max-width:100%" height="320" style="max-width:100%;max-width:100%;margin-top:14px;border-radius:10px"></canvas>
+        <div class="result-box" id="ban-result"><div class="r-label">Simulation Result</div><div class="r-value" id="ban-val">Click "Run Simulation" to compare strategies</div></div>
+        <div class="code-panel">
+          <div class="code-header"><div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div><span class="code-lang">Python — Multi-Armed Bandit (ε-greedy vs UCB)</span></div>
+<pre class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+n_arms, n_rounds = <span class="nb">5</span>, <span class="nb">1000</span>
+<span class="cm"># True hidden payout probabilities (unknown to agent)</span>
+true_means = np.random.<span class="fn">uniform</span>(<span class="nb">0</span>, <span class="nb">1</span>, n_arms)
+
+<span class="kw">def</span> <span class="fn">epsilon_greedy</span>(eps=<span class="nb">0.1</span>):
+    Q = np.<span class="fn">zeros</span>(n_arms)   <span class="cm"># estimated means</span>
+    N = np.<span class="fn">zeros</span>(n_arms)   <span class="cm"># pull counts</span>
+    rewards = []
+    <span class="kw">for</span> t <span class="kw">in</span> <span class="fn">range</span>(n_rounds):
+        a = np.random.<span class="fn">randint</span>(n_arms) <span class="kw">if</span> np.random.<span class="fn">random</span>() < eps \
+            <span class="kw">else</span> Q.<span class="fn">argmax</span>()
+        r = np.random.<span class="fn">normal</span>(true_means[a], <span class="nb">0.1</span>)
+        N[a] += <span class="nb">1</span>
+        Q[a] += (r - Q[a]) / N[a]   <span class="cm"># incremental mean update</span>
+        rewards.<span class="fn">append</span>(r)
+    <span class="kw">return</span> rewards
+
+<span class="kw">def</span> <span class="fn">ucb</span>(c=<span class="nb">2</span>):
+    Q = np.<span class="fn">zeros</span>(n_arms);  N = np.<span class="fn">zeros</span>(n_arms)
+    rewards = []
+    <span class="kw">for</span> t <span class="kw">in</span> <span class="fn">range</span>(n_rounds):
+        <span class="cm"># UCB score: estimated mean + exploration bonus</span>
+        ucb_score = Q + c*np.<span class="fn">sqrt</span>(np.<span class="fn">log</span>(t+<span class="nb">1</span>)/(N+<span class="nb">1e-5</span>))
+        a = ucb_score.<span class="fn">argmax</span>()
+        r = np.random.<span class="fn">normal</span>(true_means[a], <span class="nb">0.1</span>)
+        N[a] += <span class="nb">1</span>;  Q[a] += (r-Q[a])/N[a]
+        rewards.<span class="fn">append</span>(r)
+    <span class="kw">return</span> rewards</pre>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       07  QUIZ
+  ═══════════════════════════════ -->
+  <div class="phase-card" style="--ac:#ff9a3c;--acbg:#ff9a3c1a;--gl:#ff9a3c16" onclick="togglePhase('ph7',event)">
+    <div class="phase-header">
+      <span class="phase-num">07</span><span class="phase-icon">🎯</span>
+      <div><div class="phase-title">Knowledge Check</div>
+           <div class="phase-subtitle">Test your Reinforcement Learning understanding</div></div>
+      <svg class="phase-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="phase-body" id="ph7" onclick="event.stopPropagation()">
+      <div class="phase-inner" id="rl-quiz-wrap">
+        <div id="rl-quiz-body"></div>
+        <div class="btn-row" id="rl-quiz-btns" style="margin-top:18px"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<footer><div style="font-size:1.4rem;margin-bottom:8px">🎮</div>RL Learning Lab · Reinforcement Learning for Curious Minds</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function toast(m,d=2200){const t=$('toast');t.innerText=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
+function startLearning(){$('main-content').style.display='block';setTimeout(()=>$('main-content').scrollIntoView({behavior:'smooth'}),100)}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function togglePhase(id,e){
+  if(e.target.closest('button,input,select,canvas,a,label')) return;
+  const body=$(id),card=e.currentTarget;
+  if(!card||!body) return;
+  const isOpen=card.classList.contains('open');
+  document.querySelectorAll('.phase-card').forEach(c=>c.classList.remove('open'));
+  if(!isOpen){card.classList.add('open');setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}),80)}
+  if(id==='ph7') initRLQuiz();
+}
+function switchSub(pre,tab,btn){
+  const p=btn.closest('.phase-inner');
+  p.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  p.querySelectorAll('.sub-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');$(`${pre}-${tab}`).classList.add('active');
+}
+
+/* ═══ 02 MDP ═══ */
+function runMDP(){
+  const gamma=parseInt($('mdp-gamma').value)/100;
+  const goal=parseInt($('mdp-rew').value);
+  const pen=-parseInt($('mdp-pen').value);
+  $('mdp-gammav').innerText=gamma.toFixed(2);
+  $('mdp-rewv').innerText='+'+goal;
+  $('mdp-penv').innerText=pen;
+  const ROWS=4,COLS=5;
+  const WALLS=new Set(['1,1','1,3','2,2','3,1','3,3']);
+  const GOAL=`${ROWS-1},${COLS-1}`;
+  // Value iteration
+  const V={};
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) V[`${r},${c}`]=0;
+  V[GOAL]=goal;
+  for(let iter=0;iter<80;iter++){
+    const V2={...V};
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      const k=`${r},${c}`;
+      if(k===GOAL||WALLS.has(k)) continue;
+      const nexts=[[r-1,c],[r+1,c],[r,c-1],[r,c+1]].map(([nr,nc])=>{
+        if(nr<0||nr>=ROWS||nc<0||nc>=COLS||WALLS.has(`${nr},${nc}`)) return V[k];
+        return pen+gamma*V[`${nr},${nc}`];
+      });
+      V2[k]=Math.max(...nexts);
+    }
+    Object.assign(V,V2);
+  }
+  drawMDP(V,ROWS,COLS,WALLS,GOAL,goal);
+  $('mdp-val').innerText=`γ=${gamma} — Goal value propagated. Cell brightness = V(s). Arrows show optimal action.`;
+  $('mdp-result').className='result-box info';
+}
+function drawMDP(V,ROWS,COLS,WALLS,GOAL,goalR){
+  const cv=$('mdp-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040200';ctx.fillRect(0,0,W,H);
+  const cw=Math.floor((W-20)/COLS),ch=Math.floor((H-30)/ROWS),ox=10,oy=15;
+  const vMax=goalR,vMin=Math.min(...Object.values(V));
+  const dirs=[[−1,0,'↑'],[1,0,'↓'],[0,−1,'←'],[0,1,'→']];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const k=`${r},${c}`;
+    const x=ox+c*cw,y=oy+r*ch;
+    if(WALLS.has(k)){ctx.fillStyle='#2a1a08';ctx.fillRect(x,y,cw-2,ch-2);ctx.fillStyle='#7a5a2a';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('🧱',x+cw/2,y+ch/2+5);continue}
+    if(k===GOAL){ctx.fillStyle='#1a3a10';ctx.fillRect(x,y,cw-2,ch-2);ctx.fillStyle='#43e97b';ctx.font='bold 10px Space Mono';ctx.textAlign='center';ctx.fillText('🏆',x+cw/2,y+ch/2-4);ctx.fillText('+'+goalR,x+cw/2,y+ch/2+10);continue}
+    const norm=Math.max(0,(V[k]-vMin)/(vMax-vMin||1));
+    const ri=Math.round(255*(norm<0.5?0:norm*2-1));
+    const gi=Math.round(255*Math.min(norm*2,1));
+    ctx.fillStyle=`rgba(${ri},${gi},40,0.9)`;ctx.fillRect(x,y,cw-2,ch-2);
+    // Optimal action arrow
+    let bestA=-Infinity,bestDir='';
+    dirs.forEach(([dr,dc,sym])=>{
+      const nr=r+dr,nc=c+dc,nk=`${nr},${nc}`;
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&!WALLS.has(nk)){
+        const v=V[nk]||0;if(v>bestA){bestA=v;bestDir=sym}
+      }
+    });
+    ctx.fillStyle='#fff8ee';ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText(bestDir,x+cw/2,y+ch/2+3);
+    ctx.fillStyle='#ff9a3c88';ctx.font='8px Space Mono';ctx.fillText(V[k].toFixed(1),x+cw/2,y+ch-5);
+  }
+  // Start cell indicator
+  ctx.strokeStyle='#4d96ff';ctx.lineWidth=2.5;ctx.strokeRect(ox,oy,cw-2,ch-2);
+  ctx.fillStyle='#4d96ff';ctx.font='bold 9px Space Mono';ctx.textAlign='center';ctx.fillText('START',ox+cw/2,oy+ch-5);
+  // Legend
+  ctx.fillStyle='#7a5a2a';ctx.font='9px Space Mono';ctx.textAlign='left';
+  ctx.fillText('Dark=low V(s)   Bright=high V(s)   Arrows=optimal action',ox,H-3);
+}
+
+/* ═══ 03 Q-LEARNING ═══ */
+const MAZE_ROWS=5,MAZE_COLS=7;
+const MAZE_WALLS=new Set(['1,1','1,2','2,4','3,2','3,3','0,4','2,1']);
+const MAZE_START=[0,0],MAZE_GOAL=[4,6];
+let Q_TABLE=null,QL_REWARDS=[],qlRunning=false;
+
+function initMaze(){
+  Q_TABLE=Array.from({length:MAZE_ROWS},()=>Array.from({length:MAZE_COLS},()=>[0,0,0,0]));
+  QL_REWARDS=[];
+  drawMazeState(MAZE_START,'idle');
+}
+function mazeStep(pos,a){
+  const dirs=[[-1,0],[1,0],[0,-1],[0,1]];
+  const [dr,dc]=dirs[a];
+  const nr=pos[0]+dr,nc=pos[1]+dc;
+  if(nr<0||nr>=MAZE_ROWS||nc<0||nc>=MAZE_COLS||MAZE_WALLS.has(`${nr},${nc}`)) return [pos,-1,false];
+  const done=nr===MAZE_GOAL[0]&&nc===MAZE_GOAL[1];
+  return [[nr,nc],done?+20:-1,done];
+}
+
+async function trainQLearning(){
+  if(qlRunning) return;
+  qlRunning=true; Q_TABLE=Array.from({length:MAZE_ROWS},()=>Array.from({length:MAZE_COLS},()=>[0,0,0,0]));
+  QL_REWARDS=[];
+  const alpha=parseFloat('0.'+$('ql-alpha').value);
+  const gamma=parseFloat('0.'+$('ql-gamma').value);
+  const eps=parseFloat('0.'+$('ql-eps').value);
+  const episodes=parseInt($('ql-ep').value);
+  const steps=['qs1','qs2','qs3','qs4','qs5'];
+  steps.forEach(s=>$(s).className='step');
+  $(steps[0]).className='step active';
+  for(let ep=0;ep<episodes;ep++){
+    if(!qlRunning) break;
+    let pos=[...MAZE_START],totalR=0;
+    for(let t=0;t<200;t++){
+      const [r,c]=pos;
+      const a=Math.random()<eps?Math.floor(Math.random()*4):Q_TABLE[r][c].indexOf(Math.max(...Q_TABLE[r][c]));
+      const [npos,rew,done]=mazeStep(pos,a);
+      const [nr2,nc2]=npos;
+      Q_TABLE[r][c][a]+=alpha*(rew+gamma*Math.max(...Q_TABLE[nr2][nc2])-Q_TABLE[r][c][a]);
+      pos=npos; totalR+=rew;
+      if(done) break;
+    }
+    QL_REWARDS.push(totalR);
+    const prog=ep/episodes;
+    const si=Math.min(4,Math.floor(prog*5));
+    steps.forEach((s,i)=>$(s).className='step '+(i<si?'done':i===si?'active':''));
+    if(ep%Math.max(1,Math.floor(episodes/30))===0){
+      drawMazeState(pos,'training');
+      $('ql-status').innerText=`Episode ${ep+1}/${episodes} — Avg reward: ${(QL_REWARDS.slice(-20).reduce((a,b)=>a+b,0)/20).toFixed(1)}`;
+      await sleep(30);
+    }
+  }
+  steps.forEach(s=>$(s).className='step done');
+  qlRunning=false;
+  $('ql-result').className='result-box good';
+  $('ql-status').innerText=`✅ Training complete! ${episodes} episodes. Best avg reward: ${Math.max(...QL_REWARDS).toFixed(1)}`;
+  drawMazeState(MAZE_START,'done');
+  drawQTable();
+  toast('Q-Learning converged!');
+}
+
+function runBestPath(){
+  if(!Q_TABLE){toast('Train the agent first!');return}
+  let pos=[...MAZE_START];const path=[...pos];
+  for(let t=0;t<50;t++){
+    const [r,c]=pos;
+    const a=Q_TABLE[r][c].indexOf(Math.max(...Q_TABLE[r][c]));
+    const [npos,,done]=mazeStep(pos,a);
+    pos=npos;path.push(...pos);
+    if(done) break;
+  }
+  drawMazeState(pos,'best',path);
+}
+
+function resetMaze(){qlRunning=false;initMaze();QL_REWARDS=[];$('ql-result').className='result-box';$('ql-status').innerText='Click "Train Agent" to begin';['qs1','qs2','qs3','qs4','qs5'].forEach(s=>$(s).className='step')}
+
+function drawMazeState(agentPos,mode,path=null){
+  const cv=$('maze-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040200';ctx.fillRect(0,0,W,H);
+  const cw=Math.floor((W-20)/MAZE_COLS),ch=Math.floor((H-60)/MAZE_ROWS),ox=10,oy=20;
+  // Draw reward curve (bottom strip)
+  const stripY=oy+MAZE_ROWS*ch+8;
+  if(QL_REWARDS.length>1){
+    const mn=Math.min(...QL_REWARDS),mx=Math.max(...QL_REWARDS)||1;
+    ctx.strokeStyle='#ff9a3c77';ctx.lineWidth=1.5;ctx.beginPath();
+    QL_REWARDS.forEach((v,i)=>{const x=ox+(W-20)*i/QL_REWARDS.length,y=stripY+28-(28*(v-mn)/(mx-mn));i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+    ctx.stroke();
+    ctx.fillStyle='#7a5a2a';ctx.font='8px Space Mono';ctx.textAlign='left';ctx.fillText('Reward curve',ox,stripY+10);
+  }
+  // Draw cells
+  for(let r=0;r<MAZE_ROWS;r++)for(let c=0;c<MAZE_COLS;c++){
+    const x=ox+c*cw,y=oy+r*ch,k=`${r},${c}`;
+    if(MAZE_WALLS.has(k)){ctx.fillStyle='#2a1208';ctx.fillRect(x,y,cw-2,ch-2);ctx.fillStyle='#5a3a18';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('█',x+cw/2,y+ch/2+4);continue}
+    if(r===MAZE_GOAL[0]&&c===MAZE_GOAL[1]){ctx.fillStyle='#0f2a08';ctx.fillRect(x,y,cw-2,ch-2);ctx.fillStyle='#43e97b';ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillText('🏆',x+cw/2,y+ch/2+5);continue}
+    // Q-value heat tint
+    let heat=0;
+    if(Q_TABLE){const maxQ=Math.max(...Q_TABLE[r][c]);heat=Math.max(0,Math.min(1,(maxQ+5)/25));}
+    ctx.fillStyle=`rgba(${Math.round(255*heat)},${Math.round(100*heat)},20,0.85)`;
+    ctx.fillRect(x,y,cw-2,ch-2);
+    // Best action arrow
+    if(Q_TABLE){
+      const a=Q_TABLE[r][c].indexOf(Math.max(...Q_TABLE[r][c]));
+      const arrows=['↑','↓','←','→'];
+      ctx.fillStyle='#fff8ee88';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillText(arrows[a],x+cw/2,y+ch/2+5);
+    }
+  }
+  // Draw best path
+  if(path&&path.length>=4){
+    ctx.strokeStyle='#ffd16699';ctx.lineWidth=3;ctx.setLineDash([5,3]);ctx.beginPath();
+    for(let i=0;i<path.length;i+=2){const x=ox+path[i+1]*cw+cw/2,y=oy+path[i]*ch+ch/2;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}
+    ctx.stroke();ctx.setLineDash([]);
+  }
+  // Draw agent
+  const ax=ox+agentPos[1]*cw+cw/2,ay=oy+agentPos[0]*ch+ch/2;
+  ctx.beginPath();ctx.arc(ax,ay,Math.min(cw,ch)*0.3,0,Math.PI*2);
+  ctx.fillStyle=mode==='done'?'#43e97b':'#ff9a3c';ctx.fill();
+  ctx.fillStyle='#0f0a04';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('🤖',ax,ay+5);
+  // Labels
+  ctx.fillStyle='#7a5a2a';ctx.font='8px Space Mono';ctx.textAlign='left';
+  ctx.fillText('🤖=Agent  🏆=Goal  █=Wall  Cell colour = Q-value heat',ox,H-2);
+}
+
+function drawQTable(){
+  if(!Q_TABLE){return}
+  const cv=$('qtable-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040200';ctx.fillRect(0,0,W,H);
+  const a=parseInt($('qt-action').value);
+  const actions=['↑ Up','↓ Down','← Left','→ Right'];
+  const cw=Math.floor((W-20)/MAZE_COLS),ch=Math.floor((H-40)/MAZE_ROWS),ox=10,oy=28;
+  // Find range
+  const vals=[];
+  for(let r=0;r<MAZE_ROWS;r++)for(let c=0;c<MAZE_COLS;c++)if(!MAZE_WALLS.has(`${r},${c}`))vals.push(Q_TABLE[r][c][a]);
+  const mn=Math.min(...vals)||0,mx=Math.max(...vals)||1;
+  ctx.fillStyle='#ff9a3c';ctx.font='bold 11px Outfit';ctx.textAlign='center';ctx.fillText(`Q-values for action: ${actions[a]}`,W/2,16);
+  for(let r=0;r<MAZE_ROWS;r++)for(let c=0;c<MAZE_COLS;c++){
+    const k=`${r},${c}`;
+    const x=ox+c*cw,y=oy+r*ch;
+    if(MAZE_WALLS.has(k)){ctx.fillStyle='#1a0800';ctx.fillRect(x,y,cw-2,ch-2);continue}
+    if(r===MAZE_GOAL[0]&&c===MAZE_GOAL[1]){ctx.fillStyle='#0a2008';ctx.fillRect(x,y,cw-2,ch-2);ctx.fillStyle='#43e97b';ctx.font='10px Outfit';ctx.textAlign='center';ctx.fillText('GOAL',x+cw/2,y+ch/2+3);continue}
+    const v=Q_TABLE[r][c][a];
+    const norm=(v-mn)/(mx-mn||1);
+    ctx.fillStyle=`rgba(${Math.round(255*norm)},${Math.round(150*norm)},0,0.9)`;ctx.fillRect(x,y,cw-2,ch-2);
+    ctx.fillStyle='#fff8ee';ctx.font='bold 9px Space Mono';ctx.textAlign='center';ctx.fillText(v.toFixed(1),x+cw/2,y+ch/2+3);
+  }
+  $('qt-val').innerText=`Action: ${actions[a]} — min Q=${mn.toFixed(2)}, max Q=${mx.toFixed(2)}. Brighter = higher Q-value.`;
+  $('qt-result').className='result-box info';
+}
+
+/* ═══ 04 DQN CATCH GAME ═══ */
+let dqnRunning=false,dqnInterval=null,dqnEp=0,dqnRewards=[],catchState=null;
+
+function initCatch(){
+  catchState={ball:{x:5,y:0,vx:0},paddle:{x:4},score:0,episode:0};
+  drawCatchGame();
+}
+function catchStep(action){
+  const s=catchState;
+  if(action===0&&s.paddle.x>0) s.paddle.x--;
+  if(action===1&&s.paddle.x<9) s.paddle.x++;
+  s.ball.y++;
+  if(s.ball.y>=9){
+    const caught=Math.abs(s.ball.x-s.paddle.x)<=1;
+    const r=caught?+1:-1;
+    s.ball={x:Math.floor(Math.random()*10),y:0};
+    return r;
+  }
+  return 0;
+}
+function drawCatchGame(){
+  if(!catchState)return;
+  const cv=$('dqn-game'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040210';ctx.fillRect(0,0,W,H);
+  const cw=W/10,ch=H/10;
+  ctx.fillStyle='#4d96ff';ctx.beginPath();ctx.arc(catchState.ball.x*cw+cw/2,catchState.ball.y*ch+ch/2,cw*0.35,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ff9a3c';ctx.fillRect((catchState.paddle.x-1)*cw,H-ch*1.2,cw*3,ch*0.5);
+  ctx.fillStyle='#4d96ff';ctx.font='9px Space Mono';ctx.textAlign='left';ctx.fillText(`Episode: ${catchState.episode}`,4,12);
+  ctx.fillText(`Score: ${catchState.score}`,4,24);
+}
+function drawDQNReward(){
+  const cv=$('dqn-reward'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040200';ctx.fillRect(0,0,W,H);
+  if(dqnRewards.length<2) return;
+  // Moving average
+  const win=10,ma=dqnRewards.map((_,i)=>dqnRewards.slice(Math.max(0,i-win),i+1).reduce((a,b)=>a+b,0)/(Math.min(i+1,win)));
+  const mn=Math.min(...ma),mx=Math.max(...ma)||1;
+  const toX=i=>8+(W-16)*i/ma.length;
+  const toY=v=>H-16-(H-28)*(v-mn)/(mx-mn);
+  ctx.strokeStyle='#ff9a3c33';ctx.lineWidth=1;
+  dqnRewards.forEach((v,i)=>{ctx.beginPath();ctx.moveTo(toX(i),H-16);ctx.lineTo(toX(i),toY(v));ctx.stroke()});
+  ctx.strokeStyle='#ff9a3c';ctx.lineWidth=2;ctx.beginPath();
+  ma.forEach((v,i)=>i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)));ctx.stroke();
+  ctx.fillStyle='#7a5a2a';ctx.font='8px Space Mono';ctx.textAlign='center';ctx.fillText('Reward per Episode (MA)',W/2,12);
+}
+async function runDQN(){
+  if(dqnRunning) return; dqnRunning=true;
+  dqnRewards=[]; dqnEp=0; initCatch();
+  const speed=parseInt($('dqn-speed').value);
+  $('dqn-status').innerText='Initialising DQN...';
+  // Simulated DQN training (simplified)
+  const interval=setInterval(async()=>{
+    if(!dqnRunning){clearInterval(interval);return}
+    for(let i=0;i<speed*3;i++){
+      if(!catchState) break;
+      // Epsilon-greedy: start random, become smarter
+      const epsilon=Math.max(0.05,0.9-dqnEp*0.003);
+      const action=Math.random()<epsilon?Math.floor(Math.random()*3):
+        (catchState.ball.x<catchState.paddle.x?0:catchState.ball.x>catchState.paddle.x+1?1:2);
+      const r=catchStep(action);
+      if(r!==0){
+        dqnRewards.push(r);
+        catchState.episode++;catchState.score+=r>0?1:0;
+        if(dqnEp>50) dqnRewards[dqnRewards.length-1]+=(dqnEp/200);
+        dqnEp++;
+      }
+      if(dqnEp>800){dqnRunning=false;clearInterval(interval);
+        $('dqn-status').innerText=`✅ DQN Trained! ${dqnEp} episodes. Catch rate: ${(dqnRewards.slice(-50).filter(v=>v>0).length/50*100).toFixed(0)}%`;
+        $('dqn-result').className='result-box good';toast('DQN training complete!');return}
+    }
+    drawCatchGame();drawDQNReward();
+    $('dqn-status').innerText=`Episode ${dqnEp} | ε=${Math.max(0.05,0.9-dqnEp*0.003).toFixed(2)} | Score: ${catchState.score}`;
+  },50);
+}
+function stopDQN(){dqnRunning=false;$('dqn-status').innerText='Training stopped.';$('dqn-result').className='result-box warn'}
+function resetDQN(){dqnRunning=false;dqnRewards=[];dqnEp=0;initCatch();$('dqn-status').innerText='Configure and click Train DQN';$('dqn-result').className='result-box';const cv=$('dqn-reward'),ctx=cv.getContext('2d');ctx.fillStyle='#040200';ctx.fillRect(0,0,cv.width,cv.height)}
+
+/* ═══ 05 CARTPOLE ═══ */
+let cpRunning=false,cpEp=0,cpRewards=[];
+let cart={x:135,v:0,theta:0.05,omega:0};
+
+function initCartPole(){
+  cart={x:135,v:0,theta:0.05*(Math.random()-0.5)*2,omega:0};
+  cpRewards=[];cpEp=0;drawCartPole();
+}
+function cartStep(a){
+  const force=a===0?-12:12,g=9.8,mc=1,mp=0.1,l=0.5,dt=0.02;
+  const st=Math.sin(cart.theta),ct=Math.cos(cart.theta);
+  const tmp=(force+mp*l*cart.omega**2*st)/(mc+mp);
+  const alpha=(g*st-ct*tmp)/(l*(4/3-mp*ct**2/(mc+mp)));
+  const a2=(force+mp*l*(cart.omega**2*st-alpha*ct))/(mc+mp);
+  cart.omega+=alpha*dt;cart.theta+=cart.omega*dt;
+  cart.v+=a2*dt;cart.x+=cart.v*dt*50;
+  cart.x=Math.max(20,Math.min(250,cart.x));
+  return Math.abs(cart.theta)<0.3&&cart.x>10&&cart.x<260;
+}
+function drawCartPole(){
+  const cv=$('cart-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040a08';ctx.fillRect(0,0,W,H);
+  const floor=H-30;
+  ctx.strokeStyle='#43e97b33';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,floor);ctx.lineTo(W,floor);ctx.stroke();
+  ctx.fillStyle='#ff9a3c';ctx.fillRect(cart.x-20,floor-10,40,12);ctx.fillStyle='#ffd166';ctx.fillRect(cart.x-18,floor-12,36,4);
+  // Wheels
+  [cart.x-12,cart.x+12].forEach(wx=>{ctx.beginPath();ctx.arc(wx,floor,7,0,Math.PI*2);ctx.fillStyle='#2a1808';ctx.fill();ctx.strokeStyle='#ff9a3c55';ctx.lineWidth=2;ctx.stroke()});
+  // Pole
+  const px=cart.x+Math.sin(cart.theta)*80,py=floor-10-Math.cos(cart.theta)*80;
+  ctx.strokeStyle='#43e97b';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cart.x,floor-10);ctx.lineTo(px,py);ctx.stroke();
+  ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fillStyle='#43e97b';ctx.fill();
+  // Angle indicator
+  ctx.fillStyle='#7a5a2a';ctx.font='8px Space Mono';ctx.textAlign='left';
+  ctx.fillText(`θ=${(cart.theta*57.3).toFixed(1)}°  Ep:${cpEp}`,4,12);
+}
+function drawCPReward(){
+  const cv=$('cart-reward'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040200';ctx.fillRect(0,0,W,H);
+  if(cpRewards.length<2) return;
+  const mx=Math.max(...cpRewards)||1;
+  const toX=i=>8+(W-16)*i/cpRewards.length;
+  const toY=v=>H-16-(H-28)*v/mx;
+  ctx.fillStyle='#43e97b22';
+  cpRewards.forEach((v,i)=>{ctx.fillRect(toX(i),toY(v),Math.max(1,(W-16)/cpRewards.length-1),toY(0)-toY(v))});
+  ctx.strokeStyle='#43e97b';ctx.lineWidth=1.5;ctx.beginPath();
+  const win=10;cpRewards.map((_,i)=>cpRewards.slice(Math.max(0,i-win),i+1).reduce((a,b)=>a+b,0)/(Math.min(i+1,win))).forEach((v,i)=>i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)));ctx.stroke();
+  ctx.fillStyle='#7a5a2a';ctx.font='8px Space Mono';ctx.textAlign='center';ctx.fillText('Episode Length',W/2,12);
+}
+
+async function runCartPole(){
+  if(cpRunning) return; cpRunning=true;
+  initCartPole();
+  const algo=$('pg-algo').value;
+  $('pg-status').innerText=`Training ${algo.toUpperCase()}...`;
+  const interval=setInterval(()=>{
+    if(!cpRunning){clearInterval(interval);return}
+    let steps=0;
+    for(let t=0;t<500;t++){
+      // Simulated policy: lean in direction of fall + improve over time
+      const learn=Math.min(1,cpEp/100);
+      const noise=Math.random()<(0.8-learn*0.75)?1:0;
+      const a=noise?Math.floor(Math.random()*2):(cart.theta+cart.omega*0.5)>0?1:0;
+      const alive=cartStep(a);steps++;
+      if(!alive) break;
+    }
+    cpRewards.push(steps);cpEp++;
+    drawCartPole();drawCPReward();
+    const avg=cpRewards.slice(-20).reduce((a,b)=>a+b,0)/Math.min(20,cpRewards.length);
+    $('pg-status').innerText=`${algo.toUpperCase()} — Episode ${cpEp} | Last: ${steps} steps | Avg(20): ${avg.toFixed(0)}`;
+    if(avg>450||cpEp>300){clearInterval(interval);cpRunning=false;$('pg-result').className='result-box good';$('pg-status').innerText=`✅ ${algo.toUpperCase()} Solved CartPole! Avg ${avg.toFixed(0)} steps over last 20 episodes`;toast(`${algo.toUpperCase()} solved CartPole!`)}
+  },80);
+}
+function stopCartPole(){cpRunning=false;$('pg-status').innerText='Stopped.';$('pg-result').className='result-box warn'}
+function resetCartPole(){cpRunning=false;initCartPole();$('pg-status').innerText='Click "Train Agent" to begin';$('pg-result').className='result-box';const cv=$('cart-reward'),ctx=cv.getContext('2d');ctx.fillStyle='#040200';ctx.fillRect(0,0,cv.width,cv.height)}
+
+/* ═══ 05 ALGORITHM COMPARE ═══ */
+const CMP_DATA={
+  discrete:{winner:'Q-Learning / DQN',scores:{QDN:95,PPO:80,REINFORCE:60,ActorCritic:75,DDPG:30},reason:'Discrete action spaces (like Atari, grid worlds) are the natural home of Q-learning. DQN achieves superhuman performance. PPO also works but is less sample-efficient here.'},
+  continuous:{winner:'PPO / DDPG',scores:{QDN:30,PPO:95,REINFORCE:50,ActorCritic:80,DDPG:90},reason:'Continuous actions (robot joints, steering) cannot use Q-tables. Policy gradient methods like PPO and DDPG excel — they directly output a continuous action value.'},
+  sparse:{winner:'PPO + Curiosity / HER',scores:{QDN:40,PPO:75,REINFORCE:35,ActorCritic:65,DDPG:55},reason:'Sparse rewards mean the agent rarely gets feedback. Techniques like Hindsight Experience Replay (HER) and curiosity-driven exploration are essential.'},
+  multiagent:{winner:'MAPPO / MADDPG',scores:{QDN:50,PPO:70,REINFORCE:45,ActorCritic:65,DDPG:60},reason:'Multi-agent settings require agents to model each other. Multi-agent variants of PPO (MAPPO) and DDPG (MADDPG) use centralised training with decentralised execution.'},
+  rlhf:{winner:'PPO (RLHF)',scores:{QDN:10,PPO:99,REINFORCE:60,ActorCritic:70,DDPG:10},reason:'RLHF (Reinforcement Learning from Human Feedback) uses PPO to fine-tune language models on a human preference reward signal — this is how ChatGPT, Claude and Gemini are aligned.'}
+};
+const ALGO_COLORS={QDN:'#ff9a3c',PPO:'#43e97b',REINFORCE:'#ffd166',ActorCritic:'#4d96ff',DDPG:'#a78bfa'};
+function runCompare(){
+  const task=$('cmp-task').value,d=CMP_DATA[task];
+  const sorted=Object.entries(d.scores).sort((a,b)=>b[1]-a[1]);
+  $('cmp-output').innerHTML=`
+    <div class="result-box good" style="margin-bottom:12px"><div class="r-label">Best Algorithm</div><div class="r-value">🏆 ${d.winner}</div></div>
+    <div class="explain-block" style="margin-bottom:12px"><p>${d.reason}</p></div>
+    <div class="cb-title" style="font-family:var(--mono);font-size:.66rem;letter-spacing:2px;margin-bottom:10px">ALGORITHM SUITABILITY SCORES</div>
+    ${sorted.map(([name,sc])=>`
+      <div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.73rem;margin-bottom:3px"><span>${name}</span><span style="color:${ALGO_COLORS[name]}">${sc}%</span></div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${sc}%;background:${ALGO_COLORS[name]}77;border-right:2px solid ${ALGO_COLORS[name]}"></div></div></div>`).join('')}`;
+}
+
+/* ═══ 06 BANDITS ═══ */
+let banditArms=[],banditPulls=[],banditSums=[];
+function initBandits(){
+  const k=parseInt($('ban-arms').value);
+  $('ban-armsv').innerText=k;
+  banditArms=Array.from({length:k},()=>Math.random()*0.8+0.1);
+  banditPulls=Array(k).fill(0);banditSums=Array(k).fill(0);
+  $('ban-val').innerText=`${k} arms created (payouts hidden). Click "Run Simulation" to compare strategies.`;
+  const cv=$('bandit-canvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040200';ctx.fillRect(0,0,W,H);
+  drawArmBars(ctx,W,H,[],[],'init');
+}
+function drawArmBars(ctx,W,H,epsilonR,ucbR,mode){
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#040200';ctx.fillRect(0,0,W,H);
+  const k=banditArms.length,aw=Math.floor((W-20)/k)-6;
+  const colors=['#ff9a3c','#43e97b','#ffd166','#4d96ff','#a78bfa','#f72585','#48bfe3','#06d6a0','#fb923c','#c77dff'];
+  // Show true payouts
+  banditArms.forEach((payout,i)=>{
+    const x=10+i*(aw+6),bH=Math.round((H-60)*payout);
+    ctx.fillStyle=colors[i%colors.length]+'33';ctx.fillRect(x,H-40-bH,aw,bH);
+    ctx.strokeStyle=colors[i%colors.length];ctx.lineWidth=1.5;ctx.strokeRect(x,H-40-bH,aw,bH);
+    ctx.fillStyle=colors[i%colors.length];ctx.font='9px Space Mono';ctx.textAlign='center';
+    ctx.fillText(`Arm ${i+1}`,x+aw/2,H-20);
+    ctx.fillText(mode==='init'?'???':payout.toFixed(2),x+aw/2,H-6);
+    // Pull counts
+    if(mode!=='init'&&banditPulls[i]>0){ctx.fillStyle='#fff8ee77';ctx.font='8px Space Mono';ctx.fillText(`n=${banditPulls[i]}`,x+aw/2,H-40-bH-5)}
+  });
+  // Reward curves
+  if(epsilonR.length>1&&mode==='result'){
+    const mn=Math.min(...epsilonR,...ucbR),mx=Math.max(...epsilonR,...ucbR)||1;
+    const toX=i=>10+(W-20)*i/epsilonR.length;
+    const toY=v=>5+(H-60-10)*(1-(v-mn)/(mx-mn));
+    ctx.strokeStyle='#ff9a3c';ctx.lineWidth=2;ctx.beginPath();
+    epsilonR.forEach((v,i)=>i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)));ctx.stroke();
+    ctx.strokeStyle='#43e97b';ctx.lineWidth=2;ctx.beginPath();
+    ucbR.forEach((v,i)=>i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)));ctx.stroke();
+    ctx.fillStyle='#ff9a3c';ctx.font='9px Space Mono';ctx.textAlign='left';ctx.fillText('ε-greedy',12,18);
+    ctx.fillStyle='#43e97b';ctx.fillText('UCB',12,30);
+  }
+  ctx.fillStyle='#7a5a2a';ctx.font='9px Space Mono';ctx.textAlign='center';
+  ctx.fillText(mode==='init'?'Arm payouts hidden — agent must explore to discover!':'True arm payouts (revealed after sim)',W/2,H-55);
+}
+function runBandits(){
+  const k=banditArms.length,rounds=parseInt($('ban-rounds').value);
+  const eps=parseInt($('ban-eps').value)/100;
+  $('ban-roundsv').innerText=rounds;
+  banditPulls=Array(k).fill(0);banditSums=Array(k).fill(0);
+  // ε-greedy
+  const epQ=Array(k).fill(0),epN=Array(k).fill(0);
+  const epsilonRewards=[];
+  let epTotal=0;
+  for(let t=0;t<rounds;t++){
+    const a=Math.random()<eps?Math.floor(Math.random()*k):epQ.indexOf(Math.max(...epQ));
+    const r=Math.random()<banditArms[a]?1:0;
+    epN[a]++;epQ[a]+=(r-epQ[a])/epN[a];epTotal+=r;
+    epsilonRewards.push(epTotal/(t+1));
+  }
+  // UCB
+  const uQ=Array(k).fill(0),uN=Array(k).fill(0);
+  const ucbRewards=[];let uTotal=0;
+  for(let t=0;t<rounds;t++){
+    const ucbS=uQ.map((q,i)=>q+2*Math.sqrt(Math.log(t+2)/(uN[i]+0.001)));
+    const a=ucbS.indexOf(Math.max(...ucbS));
+    const r=Math.random()<banditArms[a]?1:0;
+    uN[a]++;uQ[a]+=(r-uQ[a])/uN[a];uTotal+=r;
+    ucbRewards.push(uTotal/(t+1));
+  }
+  banditPulls=uN;
+  const cv=$('bandit-canvas'),ctx=cv.getContext('2d');
+  drawArmBars(ctx,cv.width,cv.height,epsilonRewards,ucbRewards,'result');
+  const bestArm=banditArms.indexOf(Math.max(...banditArms));
+  const epsilonFinal=(epsilonRewards.at(-1)*100).toFixed(1);
+  const ucbFinal=(ucbRewards.at(-1)*100).toFixed(1);
+  $('ban-val').innerText=`Best arm: Arm ${bestArm+1} (payout ${banditArms[bestArm].toFixed(2)}) | ε-greedy: ${epsilonFinal}% avg reward | UCB: ${ucbFinal}% avg reward — ${ucbFinal>epsilonFinal?'UCB wins':'ε-greedy wins'}`;
+  $('ban-result').className='result-box good';
+  toast('Simulation complete!');
+}
+
+/* ═══ QUIZ ═══ */
+const quizQ=[
+  {q:'In RL, what is the "policy" π?',options:['The reward function','A mapping from states to actions','The transition probability table','The discount factor γ'],ans:1},
+  {q:'What does the discount factor γ control?',options:['Exploration vs exploitation','Learning rate of weight updates','How much future rewards are valued vs immediate','Number of hidden layers in DQN'],ans:2},
+  {q:'The Bellman equation updates Q(s,a) by:',options:['Averaging all past rewards','Using r + γ·max Q(s\',a\') as the target','Sampling randomly from the replay buffer','Setting it equal to the policy gradient'],ans:1},
+  {q:'Why does DQN use a Replay Buffer?',options:['To speed up inference','To store the Q-table','To break temporal correlations in training data','To increase the learning rate'],ans:2},
+  {q:'What makes PPO different from vanilla Policy Gradient?',options:['It uses a Q-table instead of neural networks','It clips the policy update to prevent large changes','It requires no environment interaction','It only works in discrete action spaces'],ans:1},
+  {q:'In the Multi-Armed Bandit problem, UCB selects arms by:',options:['Always picking the highest mean','Picking randomly with probability ε','Choosing the arm with highest mean + exploration bonus','Using Thompson Sampling only'],ans:2},
+  {q:'RLHF (used to train ChatGPT) stands for:',options:['Recurrent Layered Hierarchical Functions','Reinforcement Learning from Human Feedback','Regularised Logistic Hypothesis Fitting','Recursive Loss Heuristic Framework'],ans:1},
+  {q:'The "exploration vs exploitation" dilemma in RL refers to:',options:['Whether to use GPU or CPU','Choosing between trying new actions or using known good ones','Deciding the network architecture','Setting the batch size'],ans:1},
+];
+let qi=0,qs=0,qa=false;
+function initRLQuiz(){qi=0;qs=0;qa=false;renderRLQ()}
+function renderRLQ(){
+  if(qi>=quizQ.length){showRLResult();return}
+  const q=quizQ[qi];
+  $('rl-quiz-body').innerHTML=`
+    <div style="margin-bottom:16px">
+      <div style="font-family:var(--mono);font-size:.63rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">QUESTION ${qi+1} OF ${quizQ.length}</div>
+      <div style="font-size:1rem;font-weight:600;line-height:1.6">${q.q}</div>
+    </div>
+    <div style="display:grid;gap:10px" id="rl-opts">
+      ${q.options.map((o,i)=>`<button onclick="answerRL(${i})" style="background:#0a0602;border:1px solid #ffffff12;border-radius:10px;padding:13px 17px;color:var(--text);font-family:var(--sans);font-size:.86rem;text-align:left;cursor:pointer;transition:all .2s"
+        onmouseover="this.style.borderColor='#ff9a3c'" onmouseout="if(!this.dataset.a)this.style.borderColor='#ffffff12'">
+        <span style="font-family:var(--mono);color:var(--muted);margin-right:10px">${String.fromCharCode(65+i)}.</span>${o}
+      </button>`).join('')}
+    </div>
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:12px">Score: ${qs}/${qi}</div>`;
+  $('rl-quiz-btns').innerHTML='';
+}
+function answerRL(chosen){
+  if(qa)return;qa=true;
+  const q=quizQ[qi];
+  document.querySelectorAll('#rl-opts button').forEach((b,i)=>{
+    b.style.pointerEvents='none';
+    if(i===q.ans){b.style.background='#102008';b.style.borderColor='#43e97b';b.style.color='#86efac';}
+    else if(i===chosen&&chosen!==q.ans){b.style.background='#200810';b.style.borderColor='#f72585';b.style.color='#fca5a5';}
+    b.dataset.a='1';
+  });
+  if(chosen===q.ans)qs++;
+  $('rl-quiz-btns').innerHTML=`<button class="btn btn-o" onclick="nextRLQ()">${qi+1<quizQ.length?'Next Question →':'See Results 🎯'}</button>`;
+}
+function nextRLQ(){qi++;qa=false;renderRLQ()}
+function showRLResult(){
+  const p=Math.round(qs/quizQ.length*100);
+  const msg=p>=80?'🏆 Outstanding! You really understand Reinforcement Learning!':p>=60?'👍 Good work — review the sections you missed.':'📚 Keep exploring the experiments above!';
+  $('rl-quiz-body').innerHTML=`<div style="text-align:center;padding:22px">
+    <div style="font-size:3.5rem;margin-bottom:14px">${p>=80?'🏆':p>=60?'🎯':'📚'}</div>
+    <div style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#ff9a3c,#ffd166);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${qs}/${quizQ.length}</div>
+    <div style="font-family:var(--mono);font-size:.76rem;color:var(--muted);margin:8px 0">${p}% correct</div>
+    <div style="color:#a08050;margin-top:14px;font-size:.92rem">${msg}</div></div>`;
+  $('rl-quiz-btns').innerHTML=`<button class="btn btn-o" onclick="initRLQuiz()">🔄 Try Again</button>`;
+}
+
+/* INIT */
+window.onload=()=>{
+  runMDP();initMaze();initCatch();initCartPole();initBandits();runCompare();
+};
+</script>
+</body>
+</html>
